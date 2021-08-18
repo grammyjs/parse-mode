@@ -1,6 +1,6 @@
 # Parse Mode plugin for grammY
 
-This plugin provides a transformer for setting default `parse_mode`, and a middleware for hydrating `Context` with familiar `reply` variant methods - i.e. `replyWithHtml`, `replyWithMarkdown`, etc.
+This plugin provides a transformer for setting default `parse_mode`, and a middleware for hydrating `Context` with familiar `reply` variant methods - i.e. `replyWithHTML`, `replyWithMarkdown`, etc.
 
 ## Usage
 
@@ -20,7 +20,7 @@ bot.api.config.use(parseMode('MarkdownV2'));
 
 bot.command('demo', async ctx => {
   await ctx.reply('*This* is _the_ default `formatting`');
-  await ctx.replyWithHtml('<b>This</b> is <i>withHtml</i> <code>formatting</code>');
+  await ctx.replyWithHTML('<b>This</b> is <i>withHtml</i> <code>formatting</code>');
   await ctx.replyWithMarkdown('*This* is _withMarkdown_ `formatting`');
   await ctx.replyWithMarkdownV1('*This* is _withMarkdownV1_ `formatting`');
   await ctx.replyWithMarkdownV2('*This* is _withMarkdownV2_ `formatting`');
