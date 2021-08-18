@@ -1,0 +1,41 @@
+{
+  "name": "parse-mode",
+  "version": "0.1.0",
+  "description": "Plugin for hydrating ctx with familiar reply variants and for setting default parse_mode",
+  "author": "KnightNiwrem",
+  "license": "MIT",
+  "main": "dist/mod.js",
+  "types": "dist/mod.d.ts",
+  "engines": {
+    "node": "^12.20.0 || >=14.13.1"
+  },
+  "homepage": "https://github.com/KnightNiwrem/parse-mode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KnightNiwrem/parse-mode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KnightNiwrem/parse-mode/issues"
+  },
+  "scripts": {
+    "build": "deno2node tsconfig.json"
+  },
+  "devDependencies": {
+    "@grammyjs/types": "^2.2.6",
+    "@tsconfig/node16": "^1.0.2",
+    "@types/node": "^16.6.1",
+    "deno2node": "^0.8.0",
+    "grammy": "^1.3.1",
+    "typescript": "^4.3.5"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "bot",
+    "grammy",
+    "middleware",
+    "parse",
+    "transformer"
+  ]
+}

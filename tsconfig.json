@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "deno2node": {},
+  "extends": "@tsconfig/node16/tsconfig.json"
+}
