@@ -1,5 +1,5 @@
 {
-  "name": "parse-mode",
+  "name": "@grammyjs/parse-mode",
   "version": "0.1.2",
   "description": "Plugin for hydrating ctx with familiar reply variants and for setting default parse_mode",
   "author": "KnightNiwrem",
@@ -9,13 +9,13 @@
   "engines": {
     "node": "^12.20.0 || >=14.13.1"
   },
-  "homepage": "https://github.com/KnightNiwrem/parse-mode",
+  "homepage": "https://github.com/grammyjs/parse-mode",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KnightNiwrem/parse-mode.git"
+    "url": "git+https://github.com/grammyjs/parse-mode.git"
   },
   "bugs": {
-    "url": "https://github.com/KnightNiwrem/parse-mode/issues"
+    "url": "https://github.com/grammyjs/parse-mode/issues"
   },
   "scripts": {
     "build": "deno2node tsconfig.json"
