@@ -4,7 +4,7 @@ This plugin provides a transformer for setting default `parse_mode`, and a middl
 
 ## Usage
 
-```
+```ts
 import { Bot, Composer } from 'grammy';
 import { hydrateReply, parseMode } from 'parse-mode';
 
