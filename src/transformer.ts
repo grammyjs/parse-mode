@@ -12,12 +12,12 @@ const buildTransformer = (parseMode: string) => {
     console.warn(`Could not find parse_mode: ${parseMode}. If this is a valid parse_mode, you should ignore this message.`);
   }
 
-  const transformer: Transformer = (prev, method, payload) => {
+  const transformer: Transformer = (prev, method, payload, signal) => {
     if (!payload || 'parse_mode' in payload) {
-      return prev(method, payload);
+      return prev(method, payload, signal);
     }
 
-    return prev(method, { ...payload, ...{ parse_mode: normalisedParseMode } });
+    return prev(method, { ...payload, ...{ parse_mode: normalisedParseMode } }, signal);
   };
   return transformer;
 };
