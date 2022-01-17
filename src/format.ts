@@ -1,4 +1,4 @@
-import * as GrammyTypes from '@grammyjs/types'
+import * as GrammyTypes from './deps.deno.ts'
 
 type CommonFormatType =
   | "bold"
