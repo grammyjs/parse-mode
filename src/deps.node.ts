@@ -1,2 +1,2 @@
 export type { Context, NextFunction, Transformer } from "grammy";
-export * as GrammyTypes from "@grammyjs/types";
+export type { MessageEntity, ParseMode } from "@grammyjs/types";

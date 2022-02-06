@@ -1,75 +1,82 @@
-import * as GrammyTypes from './deps.deno.ts'
+import type { MessageEntity } from './deps.deno.ts'
 
-type CommonFormatType =
-  | "bold"
-  | "italic"
-  | "underline"
-  | "strikethrough"
-  | "spoiler"
-  | "code"
+export interface Stringable {
+  toString(): string;
+};
 
-type ArgType = string | FormattedString | any
-
-const unwrap = (child: ArgType): FormattedString => {
-  if (child instanceof FormattedString) {
-    return child
-  }
-  return new FormattedString(child.toString(), [])
-}
-
-
-const commonFormat = (type: CommonFormatType) => (child: ArgType): FormattedString => {
-  const c = unwrap(child)
-  console.log(c)
-  return new FormattedString(c.text, [{type, offset: 0, length: c.text.length}, ...c.entities])
-}
-
-export const bold = commonFormat('bold')
-export const italic = commonFormat('italic')
-export const underline = commonFormat('underline')
-export const strikethrough = commonFormat('strikethrough')
-export const spoiler = commonFormat('spoiler')
-export const code = commonFormat('code')
-export function link(child: ArgType, url: string): FormattedString {
-  const c = unwrap(child)
-  return new FormattedString(c.text, [{type: 'text_link', offset: 0, length: c.text.length, url}, ...c.entities])
-}
-export function pre(child: ArgType, language?: string): FormattedString {
-  const c = unwrap(child)
-  return new FormattedString(c.text, [{type: 'pre', offset: 0, length: c.text.length, language}, ...c.entities])
-}
-// example util function
-export function mentionUser(child: ArgType, userId: number) {
-  return link(child, `tg://user?id=${userId}`)
-}
-
-type Entity = GrammyTypes.MessageEntity
 class FormattedString {
   text: string
-  entities: Entity[]
+  entities: MessageEntity[]
 
-  constructor(text: string, entities: Entity[]) {
+  constructor(text: string, entities: MessageEntity[]) {
     this.text = text
     this.entities = entities
   }
-}
 
-export function fmt(strings: TemplateStringsArray, ...formats: ArgType[]): FormattedString {
-  let text = ''
-  let entities: Entity[] = []
-
-  for (let i = 0; i < strings.length; ++i) {
-    text += strings[i]
-    if (i < formats.length) {
-      const format = formats[i]
-      console.log(format)
-      if (format instanceof FormattedString) {
-        entities = entities.concat(format.entities.map((v) => ({...v, offset: v.offset + text.length})))
-        text += format.text
-      } else {
-        text += format.toString()
-      }
-    }
+  toString() {
+    return this.text;
   }
-  return new FormattedString(text, entities)
 }
+
+const unwrap = (stringLike: Stringable): FormattedString => {
+  if (stringLike instanceof FormattedString) {
+    return stringLike;
+  }
+  return new FormattedString(stringLike.toString(), []);
+}
+
+const buildFormatter = <T extends Array<any> = never>(type: MessageEntity['type'], ...formatArgKeys: T) => {
+  return (stringLike: Stringable, ...formatArgs: T) => {
+    const formattedString = unwrap(stringLike);
+    const formatArgObj = Object.fromEntries(formatArgKeys.map((formatArgKey, i) => [formatArgKey, formatArgs[i]]));
+    return new FormattedString(
+      formattedString.text,
+      [{ type, offset: 0, length: formattedString.text.length, ...formatArgObj }, ...formattedString.entities],
+    );
+  };
+};
+
+// Native entity functions
+const bold = buildFormatter('bold');
+const code = buildFormatter('code');
+const italic = buildFormatter('italic');
+const link = buildFormatter<[string]>('text_link', 'url');
+const pre = buildFormatter<[string]>('pre', 'language');
+const spoiler = buildFormatter('spoiler');
+const strikethrough = buildFormatter('strikethrough');
+const underline = buildFormatter('underline');
+
+// Utility functions
+const mentionUser = (stringLike: Stringable, userId: number) => {
+  return link(stringLike, `tg://user?id=${userId}`);
+};
+
+// Root format function
+const fmt = (rawStringParts: TemplateStringsArray, ...stringLikes: Stringable[]): FormattedString => {
+  let text = rawStringParts[0];
+  let entities: MessageEntity[] = [];
+
+  for (let i = 0; i < stringLikes.length; i++) {
+    const stringLike = stringLikes[i];
+    if (stringLike instanceof FormattedString) {
+      entities = entities.concat(stringLike.entities.map(e => ({ ...e, offset: e.offset + text.length })));
+    }
+    text += stringLike.toString();
+    text += rawStringParts[i + 1];
+  }
+  return new FormattedString(text, entities);
+};
+
+export {
+  bold,
+  code,
+  fmt,
+  FormattedString,
+  italic,
+  link,
+  mentionUser,
+  pre,
+  spoiler,
+  strikethrough,
+  underline,
+};
