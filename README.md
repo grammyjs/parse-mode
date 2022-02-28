@@ -48,4 +48,4 @@ bot.command('demo', async ctx => {
 });
 
 bot.start();
-````
+```
