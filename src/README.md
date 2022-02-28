@@ -2,7 +2,28 @@
 
 This plugin provides a transformer for setting default `parse_mode`, and a middleware for hydrating `Context` with familiar `reply` variant methods - i.e. `replyWithHTML`, `replyWithMarkdown`, etc.
 
-## Usage
+## Usage (Using format)
+
+```ts
+import { Bot, Composer } from 'grammy';
+import { bold, fmt, hydrateReply, italic } from '@grammyjs/parse-mode';
+import type { ParseModeContext } from '@grammyjs/parse-mode';
+
+const bot = new Bot<ParseModeContext>('');
+
+// Install format reply variant to ctx
+bot.use(hydrateReply);
+
+bot.command('demo', async ctx => {
+  await ctx.replyFmt(fmt`${bold('bold!')}
+${bold(italic('bitalic!'))}
+${bold(fmt`bold ${link('blink', 'example.com')} bold`)}`);
+});
+
+bot.start();
+```
+
+## Usage (Using default parse mode and utility reply methods)
 
 ```ts
 import { Bot, Composer } from 'grammy';
@@ -27,4 +48,4 @@ bot.command('demo', async ctx => {
 });
 
 bot.start();
-```
+````
