@@ -1,2 +1,9 @@
-export type { Context, NextFunction, Transformer } from "https://dsr.edjopato.de/grammy/^1.0.0/mod.ts";
-export * as GrammyTypes from "https://esm.sh/@grammyjs/types@2";
+export type {
+  Context,
+  NextFunction,
+  Transformer,
+} from "https://lib.deno.dev/grammy/^1.0/mod.ts";
+export type {
+  MessageEntity,
+  ParseMode,
+} from "https://esm.sh/@grammyjs/types@2";
