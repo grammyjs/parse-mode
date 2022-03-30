@@ -2,7 +2,7 @@ export type {
   Context,
   NextFunction,
   Transformer,
-} from "https://lib.deno.dev/grammy/^1.0/mod.ts";
+} from "https://lib.deno.dev/x/grammy@^1.0/mod.ts";
 export type {
   MessageEntity,
   ParseMode,
