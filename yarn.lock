@@ -119,9 +119,9 @@ core-js-pure@^3.20.2:
   integrity sha512-12VZfFIu+wyVbBebyHmRTuEE/tZrB4tJToWcwAMcsp3h4+sHR+fMJWbKpYiCRWlhFBq+KNyO8rIV9rTkeVmznQ==
 
 debug@^4.3.3:
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.3.tgz#04266e0b70a98d4462e6e288e38259213332b664"
-  integrity sha512-/zxw5+vh1Tfv+4Qn7a5nsbcJKPaSvCDhojn6FEl9vupwK2VCSDtEiEtqr8DFtzYFOdz63LBkxec7DYuc2jon6Q==
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
+  integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
   dependencies:
     ms "2.1.2"
 
@@ -172,10 +172,10 @@ glob-parent@^5.1.2:
   dependencies:
     is-glob "^4.0.1"
 
-grammy@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.7.0.tgz#68998ee9e3ddfad8e9b580c96be1bffc6084758f"
-  integrity sha512-Xs4vRzCkSO+8CrFP8BXXOo4BGfBGWTPoDcbj8V3kz/c01XLNXI738HWv6/qjQ+IuPLnd/Qegjy7MBogbymogUg==
+grammy@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.7.1.tgz#6c408bc2c9758f5ea2966b089b3ea8b14462ce88"
+  integrity sha512-7a4mFIGpFZgjk1G+CbFudOX8y8J5HzHkP19eYuEcv1Dif5IITYVDoQxa5GTORL6dsmmQ/sdZQ3QXuT1DMq6gbg==
   dependencies:
     "@grammyjs/types" "^2.6.0"
     abort-controller "^3.0.0"
