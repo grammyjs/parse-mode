@@ -27,9 +27,9 @@ bot.start();
 
 ```ts
 import { Bot, Composer } from 'grammy';
-import { hydrateReply, parseMode } from 'parse-mode';
+import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 
-import type { ParseModeContext } from 'parse-mode';
+import type { ParseModeContext } from '@grammyjs/parse-mode';
 
 const bot = new Bot<ParseModeContext>('');
 
