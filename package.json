@@ -1,6 +1,6 @@
 {
   "name": "@grammyjs/parse-mode",
-  "version": "1.2.1",
+  "version": "1.3.1",
   "description": "Plugin for hydrating ctx with familiar reply variants and for setting default parse_mode",
   "author": "KnightNiwrem",
   "license": "MIT",
