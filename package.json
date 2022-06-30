@@ -1,6 +1,6 @@
 {
   "name": "@grammyjs/parse-mode",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "description": "Plugin for hydrating ctx with familiar reply variants and for setting default parse_mode",
   "author": "KnightNiwrem",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "@grammyjs/types": "^2.2.6",
     "@tsconfig/node16": "^1.0.2",
     "@types/node": "^16.6.1",
-    "deno2node": "^1.2.1",
+    "deno2node": "^1.4.0",
     "grammy": "^1.7.1",
     "typescript": "^4.5.5"
   },

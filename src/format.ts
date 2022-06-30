@@ -63,7 +63,7 @@ const mentionUser = (stringLike: Stringable, userId: number) => {
 
 // Root format function
 const fmt = (
-  rawStringParts: TemplateStringsArray,
+  rawStringParts: TemplateStringsArray | string[],
   ...stringLikes: Stringable[]
 ): FormattedString => {
   let text = rawStringParts[0];
