@@ -61,6 +61,10 @@ const mentionUser = (stringLike: Stringable, userId: number) => {
   return link(stringLike, `tg://user?id=${userId}`);
 };
 
+const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) => {
+  return link(stringLike, `https://t.me/c/${(chatId+ 1000000000000) * -1}/${messageId}`)
+}
+
 // Root format function
 const fmt = (
   rawStringParts: TemplateStringsArray | string[],
@@ -92,6 +96,7 @@ export {
   FormattedString,
   italic,
   link,
+  linkMessage,
   mentionUser,
   pre,
   spoiler,
