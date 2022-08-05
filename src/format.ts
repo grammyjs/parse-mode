@@ -62,8 +62,16 @@ const mentionUser = (stringLike: Stringable, userId: number) => {
 };
 
 const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) => {
-  return link(stringLike, `https://t.me/c/${(chatId+ 1000000000000) * -1}/${messageId}`)
-}
+  if (chatId > 0) {
+    console.warn("linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.");
+    return stringLike;
+  } else if (chatId < -1002147483647 || chatId > -1000000000000) {
+    console.warn("linkMessage is not able to link messages whose chatIds are greater than -1000000000000 or less than -1002147483647 at this moment. Refusing to transform into link.");
+    return stringLike;
+  } else {
+    return link(stringLike, `https://t.me/c/${(chatId + 1000000000000) * -1}/${messageId}`);
+  }
+};
 
 // Root format function
 const fmt = (
