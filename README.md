@@ -5,11 +5,11 @@ This plugin provides a transformer for setting default `parse_mode`, and a middl
 ## Usage (Using format)
 
 ```ts
-import { Bot, Composer } from 'grammy';
+import { Bot, Composer, Context } from 'grammy';
 import { bold, fmt, hydrateReply, italic } from '@grammyjs/parse-mode';
-import type { ParseModeContext } from '@grammyjs/parse-mode';
+import type { ParseModeFlavor } from '@grammyjs/parse-mode';
 
-const bot = new Bot<ParseModeContext>('');
+const bot = new Bot<ParseModeFlavor<Context>>('');
 
 // Install format reply variant to ctx
 bot.use(hydrateReply);
@@ -29,12 +29,12 @@ bot.start();
 ## Usage (Using default parse mode and utility reply methods)
 
 ```ts
-import { Bot, Composer } from 'grammy';
+import { Bot, Composer, Context } from 'grammy';
 import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 
-import type { ParseModeContext } from '@grammyjs/parse-mode';
+import type { ParseModeFlavor } from '@grammyjs/parse-mode';
 
-const bot = new Bot<ParseModeContext>('');
+const bot = new Bot<ParseModeFlavor<Context>>('');
 
 // Install familiar reply variants to ctx
 bot.use(hydrateReply);
