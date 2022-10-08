@@ -10,7 +10,7 @@ type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
   ? E2
   : [];
 
-type ParseModeContext<C extends Context = Context> = C & {
+type ParseModeFlavor<C extends Context> = C & {
   replyFmt: (
     stringLike: Stringable,
     ...args: Tail<Parameters<C["reply"]>>
@@ -21,9 +21,14 @@ type ParseModeContext<C extends Context = Context> = C & {
   replyWithMarkdownV2: C["reply"];
 };
 
-const buildReplyWithParseMode = <C extends ParseModeContext>(
+/**
+ * @deprecated Use ParseModeFlavor instead of ParseModeContext
+ */
+type ParseModeContext<C extends Context = Context> = ParseModeFlavor<C>;
+
+const buildReplyWithParseMode = <C extends Context>(
   parseMode: ParseMode,
-  ctx: C,
+  ctx: ParseModeFlavor<C>,
 ) => {
   return (...args: Parameters<C["reply"]>) => {
     const [text, payload, ...rest] = args;
@@ -35,8 +40,8 @@ const buildReplyWithParseMode = <C extends ParseModeContext>(
   };
 };
 
-const middleware = async <C extends ParseModeContext>(
-  ctx: C,
+const middleware = async <C extends Context>(
+  ctx: ParseModeFlavor<C>,
   next: NextFunction,
 ) => {
   ctx.replyFmt = (stringLike, ...args) => {
@@ -48,7 +53,7 @@ const middleware = async <C extends ParseModeContext>(
       stringLike.toString(),
       { ...payload, ...entities },
       ...rest as any,
-    );
+    ) as ReturnType<C['reply']>;
   };
 
   ctx.replyWithHTML = buildReplyWithParseMode("HTML", ctx);
@@ -58,4 +63,4 @@ const middleware = async <C extends ParseModeContext>(
   return next();
 };
 
-export { middleware as hydrateReply, type ParseModeContext };
+export { middleware as hydrateReply, type ParseModeFlavor, type ParseModeContext };
