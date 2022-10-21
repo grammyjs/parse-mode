@@ -6,6 +6,12 @@ const wellKnownParseModesMap = new Map([
   ["markdownv2", "MarkdownV2"],
 ]);
 
+/**
+ * Creates a new transformer for the givem parse mode.
+ * @param parseMode {string} The parse mode to use. If the parse mode is not in the well known parse modes map, it will be used as is.
+ * @see https://core.telegram.org/bots/api#formatting-options for well known parse modes.
+ * @returns {Transformer} The transformer.
+ */
 const buildTransformer = (parseMode: string) => {
   const normalisedParseMode =
     wellKnownParseModesMap.get(parseMode.toLowerCase()) ?? parseMode;
