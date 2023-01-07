@@ -2,7 +2,7 @@ import type { MessageEntity } from "./deps.deno.ts";
 
 /**
  * Objects that implement this interface implement a `.toString()` 
- * method that returns a `string` value that represents the object.
+ * method that returns a `string` value representing the object.
  */
 export interface Stringable {
   toString(): string;
