@@ -7,7 +7,7 @@ const wellKnownParseModesMap = new Map([
 ]);
 
 /**
- * Creates a new transformer for the givem parse mode.
+ * Creates a new transformer for the given parse mode.
  * @param parseMode {string} The parse mode to use. If the parse mode is not in the well known parse modes map, it will be used as is.
  * @see https://core.telegram.org/bots/api#formatting-options for well known parse modes.
  * @returns {Transformer} The transformer.

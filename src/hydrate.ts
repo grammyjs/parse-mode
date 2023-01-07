@@ -11,8 +11,8 @@ type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
   : [];
 
 /**
- * Represents a context that has been hydrated with a set of methods to reply
- * @param C The context type
+ * Context flavor for `Context` that will be hydrated with 
+ * an additional set of reply methods from `hydrateReply`
  */
 type ParseModeFlavor<C extends Context> = C & {
   replyFmt: (
@@ -45,9 +45,9 @@ const buildReplyWithParseMode = <C extends Context>(
 };
 
 /**
- * Hydrates a context with a set of methods to reply with a given parse mode.
+ * Hydrates a context with an additional set of reply methods
  * @param ctx The context to hydrate
- * @param next The next function to middleware
+ * @param next The next middleware function
  */
 const middleware = async <C extends Context>(
   ctx: ParseModeFlavor<C>,
