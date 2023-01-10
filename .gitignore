@@ -2,3 +2,6 @@ dist
 node_modules
 
 yarn-error.log
+
+# For libs
+yarn.lock
