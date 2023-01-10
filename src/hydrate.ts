@@ -10,6 +10,10 @@ type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
   ? E2
   : [];
 
+/**
+ * Context flavor for `Context` that will be hydrated with 
+ * an additional set of reply methods from `hydrateReply`
+ */
 type ParseModeFlavor<C extends Context> = C & {
   replyFmt: (
     stringLike: Stringable,
@@ -40,6 +44,11 @@ const buildReplyWithParseMode = <C extends Context>(
   };
 };
 
+/**
+ * Hydrates a context with an additional set of reply methods
+ * @param ctx The context to hydrate
+ * @param next The next middleware function
+ */
 const middleware = async <C extends Context>(
   ctx: ParseModeFlavor<C>,
   next: NextFunction,

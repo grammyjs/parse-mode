@@ -1,18 +1,49 @@
 import type { MessageEntity } from "./deps.deno.ts";
 
+/**
+ * Objects that implement this interface implement a `.toString()` 
+ * method that returns a `string` value representing the object.
+ */
 export interface Stringable {
+  /**
+   * Returns the string representation of this object
+   */
   toString(): string;
 }
 
+/**
+ * Represents the formatted string after the parsing.
+ */
 class FormattedString implements Stringable {
+  /**
+   * Plain text value for this `FormattedString`
+   */
   text: string;
+
+  /**
+   * Format entities for this `FormattedString`
+   */
   entities: MessageEntity[];
 
+  /**
+   * Creates a new `FormattedString`. Useful for constructing a 
+   * `FormattedString` from user's formatted message
+   * @param text Plain text value
+   * @param entities Format entities
+   * 
+   * ```ts
+   * // Constructing a new `FormattedString` from user's message
+   * const userMsg = new FormattedString(ctx.message.text, ctx.entities());
+   * ```
+   */
   constructor(text: string, entities: MessageEntity[]) {
     this.text = text;
     this.entities = entities;
   }
 
+  /**
+   * Returns the string representation of this object
+   */
   toString() {
     return this.text;
   }
@@ -46,21 +77,67 @@ const buildFormatter = <T extends Array<any> = never>(
   };
 };
 
-// Native entity functions
+// === Native entity functions
+/**
+ * Formats the `Stringable` as bold. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ */
 const bold = buildFormatter("bold");
+/**
+ * Formats the `Stringable` as inline code. Cannot be combined with any other formats.
+ * @param stringLike The `Stringable` to format.
+ */
 const code = buildFormatter("code");
+/**
+ * Formats the `Stringable` as italic. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ */
 const italic = buildFormatter("italic");
-const link = buildFormatter<[string]>("text_link", "url");
-const pre = buildFormatter<[string]>("pre", "language");
+/**
+ * Formats the `Stringable` as a link. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ * @param url The URL to link to.
+ */
+const link = buildFormatter<[url: string]>("text_link", "url");
+/**
+ * Formats the `Stringable` as a code block. Cannot be combined with any other formats.
+ * @param stringLike The `Stringable` to format.
+ * @param language The language of the code block.
+ */
+const pre = buildFormatter<[language: string]>("pre", "language");
+/**
+ * Formats the `Stringable` as a spoiler. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ */
 const spoiler = buildFormatter("spoiler");
+/**
+ * Formats the `Stringable` as a strikethrough. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ */
 const strikethrough = buildFormatter("strikethrough");
+/**
+ * Formats the `Stringable` as a underline. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ */
 const underline = buildFormatter("underline");
 
 // Utility functions
+
+/**
+ * Formats the `Stringable` as an internal Telegram link to a user. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ * @param userId The user ID to link to.
+ */
 const mentionUser = (stringLike: Stringable, userId: number) => {
   return link(stringLike, `tg://user?id=${userId}`);
 };
 
+/**
+ * Formats the `Stringable`` as a Telegram link to a chat message. Incompatible with `code` and `pre`.
+ * @param stringLike The `Stringable` to format.
+ * @param chatId The chat ID to link to.
+ * @param messageId The message ID to link to.
+ */
 const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) => {
   if (chatId > 0) {
     console.warn("linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.");
@@ -73,7 +150,26 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
   }
 };
 
-// Root format function
+// ===  Format tagged template function
+
+/**
+ * This is the format tagged template function. It accepts a template literal 
+ * containing any mix of `Stringable` and `string` values, and constructs a 
+ * `FormattedString` that represents the combination of all the given values.
+ * The constructed `FormattedString` also implements Stringable, and can be used 
+ * in further `fmt` tagged templates.
+ * @param rawStringParts An array of `string` parts found in the tagged template
+ * @param stringLikes An array of `Stringable`s found in the tagged template
+ * 
+ * ```ts
+ * // Using return values of fmt in fmt
+ * const left = fmt`${bold('>>>')} >>>`;
+ * const right = fmt`<<< ${bold('<<<')}`;
+ * 
+ * const final = fmt`${left} ${ctx.msg.text} ${right}`;
+ * await ctx.replyFmt(final);
+ * ```
+ */
 const fmt = (
   rawStringParts: TemplateStringsArray | string[],
   ...stringLikes: Stringable[]
