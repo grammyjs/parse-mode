@@ -5,6 +5,9 @@ import type { MessageEntity } from "./deps.deno.ts";
  * method that returns a `string` value representing the object.
  */
 export interface Stringable {
+  /**
+   * Returns the string representation of this object
+   */
   toString(): string;
 }
 
@@ -12,7 +15,14 @@ export interface Stringable {
  * Represents the formatted string after the parsing.
  */
 class FormattedString implements Stringable {
+  /**
+   * Plain text value for this `FormattedString`
+   */
   text: string;
+
+  /**
+   * Format entities for this `FormattedString`
+   */
   entities: MessageEntity[];
 
   /**
@@ -31,6 +41,9 @@ class FormattedString implements Stringable {
     this.entities = entities;
   }
 
+  /**
+   * Returns the string representation of this object
+   */
   toString() {
     return this.text;
   }
