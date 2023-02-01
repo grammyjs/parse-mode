@@ -26,9 +26,39 @@ const buildTransformer = (parseMode: string) => {
       return prev(method, payload, signal);
     }
 
+    switch (method) {
+      case "editMessageMedia":
+        if (
+          "media" in payload &&
+          !("parse_mode" in payload.media)
+        ) {
+          payload.media.parse_mode = normalisedParseMode;
+        }
+      break;
+
+      case "answerInlineQuery":
+        if ("results" in payload) {
+          for (let result of payload.results) {
+            if (
+              "input_message_content" in result &&
+              !("parse_mode" in result.input_message_content)
+            ) {
+              result.input_message_content.parse_mode = normalisedParseMode;
+            }
+            else if (!("parse_mode" in result)) {
+              result.parse_mode = normalisedParseMode;
+            }
+          }
+        }
+      break;
+
+      default:
+        payload = { ...payload, ...{ parse_mode: normalisedParseMode } };
+    }
+
     return prev(
       method,
-      { ...payload, ...{ parse_mode: normalisedParseMode } },
+      payload,
       signal,
     );
   };
