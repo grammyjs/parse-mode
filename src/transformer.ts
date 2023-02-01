@@ -26,42 +26,39 @@ const buildTransformer = (parseMode: string) => {
       return prev(method, payload, signal);
     }
 
-    let newPayload = payload;
-
     switch (method) {
       case "editMessageMedia":
         if (
           "media" in payload &&
           !("parse_mode" in payload.media)
         ) {
-          newPayload.media.parse_mode = normalisedParseMode;
+          payload.media.parse_mode = normalisedParseMode;
         }
       break;
 
       case "answerInlineQuery":
         if ("results" in payload) {
-          for (let resulto in payload.results) {
-            let result = payload.results[resulto];
+          for (let result of payload.results) {
             if (
               "input_message_content" in result &&
               !("parse_mode" in result.input_message_content)
             ) {
-              newPayload.results[resulto].input_message_content.parse_mode = normalisedParseMode;
+              result.input_message_content.parse_mode = normalisedParseMode;
             }
             else if (!("parse_mode" in result)) {
-              newPayload.results[resulto].parse_mode = normalisedParseMode;
+              result.parse_mode = normalisedParseMode;
             }
           }
         }
       break;
 
       default:
-        newPayload = { ...payload, ...{ parse_mode: normalisedParseMode } };
+        payload = { ...payload, ...{ parse_mode: normalisedParseMode } };
     }
 
     return prev(
       method,
-      newPayload,
+      payload,
       signal,
     );
   };
