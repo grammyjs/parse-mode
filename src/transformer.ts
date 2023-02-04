@@ -2,9 +2,8 @@ import type { ParseMode, Transformer } from "./deps.deno.ts";
 
 /**
  * Creates a new transformer for the given parse mode.
- * @param parseMode {string} The parse mode to use.
- * @see https://core.telegram.org/bots/api#formatting-options
- *   for more information about formatting.
+ * @param parseMode {ParseMode} The parse mode to use.
+ * @see https://core.telegram.org/bots/api#formatting-options for more information about formatting.
  * @returns {Transformer} The transformer.
  */
 const buildTransformer = (parseMode: ParseMode): Transformer => (
