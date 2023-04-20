@@ -133,6 +133,15 @@ const mentionUser = (stringLike: Stringable, userId: number) => {
 };
 
 /**
+ * Inserts a custom emoji.
+ * @param placeholder A placeholder emoji
+ * @param emoji The custom emoji identifier
+ */
+const customEmoji = (placeholder: Stringable, emoji: number) => {
+  return link(placeholder, `tg://emoji?id=${emoji}`);
+};
+
+/**
  * Formats the `Stringable`` as a Telegram link to a chat message. Incompatible with `code` and `pre`.
  * @param stringLike The `Stringable` to format.
  * @param chatId The chat ID to link to.
@@ -175,7 +184,7 @@ const fmt = (
   ...stringLikes: Stringable[]
 ): FormattedString => {
   let text = rawStringParts[0];
-  let entities: MessageEntity[] = [];
+  const entities: MessageEntity[] = [];
 
   for (let i = 0; i < stringLikes.length; i++) {
     const stringLike = stringLikes[i];
