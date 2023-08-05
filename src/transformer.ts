@@ -1,70 +1,41 @@
 import type { Transformer } from "./deps.deno.ts";
 
-const wellKnownParseModesMap = new Map([
-  ["html", "HTML"],
-  ["markdown", "Markdown"],
-  ["markdownv2", "MarkdownV2"],
-]);
+import { FormattedString } from './format.ts';
+import { isCaptionEntitiesPayload, isMediaEntitiesPayload, isTextEntitiesPayload } from "./utils.ts";
 
 /**
- * Creates a new transformer for the given parse mode.
- * @param parseMode {string} The parse mode to use. If the parse mode is not in the well known parse modes map, it will be used as is.
- * @see https://core.telegram.org/bots/api#formatting-options for well known parse modes.
+ * Creates a new transformer that extracts entities from FormattedString text element.
+ * @see Usage https://grammy.dev/plugins/parse-mode#usage-improving-formatting-experience
  * @returns {Transformer} The transformer.
  */
-const buildTransformer = (parseMode: string) => {
-  const normalisedParseMode =
-    wellKnownParseModesMap.get(parseMode.toLowerCase()) ?? parseMode;
-  if (!wellKnownParseModesMap.has(parseMode.toLowerCase())) {
-    console.warn(
-      `Could not find parse_mode: ${parseMode}. If this is a valid parse_mode, you should ignore this message.`,
-    );
-  }
-
+const buildTransformer = () => {
   const transformer: Transformer = (prev, method, payload, signal) => {
     if (!payload || "parse_mode" in payload) {
       return prev(method, payload, signal);
     }
 
-    switch (method) {
-      case "editMessageMedia":
-        if (
-          "media" in payload &&
-          !("parse_mode" in payload.media)
-        ) {
-          // @ts-ignore
-          payload.media.parse_mode = normalisedParseMode;
+    if (isCaptionEntitiesPayload(method, payload) && payload.caption instanceof FormattedString) {
+      const caption = payload.caption;
+      const entities = payload.caption_entities;
+      payload.caption = caption.toString();
+      payload.caption_entities = [...(entities ? entities : []), ...caption.entities]
+    } else if (isMediaEntitiesPayload(method, payload)) {
+      const iterableMedia = payload.media instanceof Array ? payload.media : [payload.media];
+      for (const media of iterableMedia) {
+        if (media.caption instanceof FormattedString) {
+          const caption = media.caption;
+          const entities = media.caption_entities;
+          media.caption = caption.toString();
+          media.caption_entities = [...(entities ? entities : []), ...caption.entities];
         }
-      break;
-
-      case "answerInlineQuery":
-        if ("results" in payload) {
-          for (const result of payload.results) {
-            if (
-              "input_message_content" in result &&
-              // @ts-ignore
-              !("parse_mode" in result.input_message_content)
-            ) {
-              // @ts-ignore
-              result.input_message_content.parse_mode = normalisedParseMode;
-            }
-            else if (!("parse_mode" in result)) {
-              // @ts-ignore
-              result.parse_mode = normalisedParseMode;
-            }
-          }
-        }
-      break;
-
-      default:
-        payload = { ...payload, ...{ parse_mode: normalisedParseMode } };
+      }
+    } else if (isTextEntitiesPayload(method, payload) && payload.text instanceof FormattedString) {
+      const text = payload.text;
+      const entities = payload.entities;
+      payload.text = text.toString();
+      payload.entities = [...(entities ? entities : []), ...text.entities];
     }
-
-    return prev(
-      method,
-      payload,
-      signal,
-    );
+    return prev(method, payload, signal);
   };
   return transformer;
 };

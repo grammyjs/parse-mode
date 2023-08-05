@@ -1,12 +1,16 @@
 import type {
   Context,
-  MessageEntity,
   NextFunction,
-  ParseMode,
 } from "./deps.deno.ts";
-import { FormattedString, type Stringable } from "./format.ts";
 
-type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
+import { FormattedString } from "./format.ts";
+import { parseMode } from './transformer.ts';
+
+type Head<T extends Array<unknown>> = T extends [head: infer E1, ...tail: infer E2]
+  ? E1
+  : never;
+
+type Tail<T extends Array<unknown>> = T extends [head: infer E1, ...tail: infer E2]
   ? E2
   : [];
 
@@ -15,61 +19,65 @@ type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
  * an additional set of reply methods from `hydrateReply`
  */
 type ParseModeFlavor<C extends Context> = C & {
-  replyFmt: (
-    stringLike: Stringable,
+  editMessageCaption: (
+    other?: Head<Parameters<C["editMessageCaption"]>> & { caption?: FormattedString },
+    ...args: Tail<Parameters<C["editMessageText"]>>
+  ) => ReturnType<C["editMessageCaption"]>;
+  editMessageMedia: (
+    media: { caption?: FormattedString },
+    ...args: Tail<Parameters<C["editMessageMedia"]>>
+  ) => ReturnType<C["editMessageMedia"]>;
+  editMessageText: (
+    text: FormattedString,
+    ...args: Tail<Parameters<C["editMessageText"]>>
+  ) => ReturnType<C["editMessageText"]>;
+  reply: (
+    text: FormattedString,
     ...args: Tail<Parameters<C["reply"]>>
   ) => ReturnType<C["reply"]>;
-  replyWithHTML: C["reply"];
-  replyWithMarkdown: C["reply"];
-  replyWithMarkdownV1: C["reply"];
-  replyWithMarkdownV2: C["reply"];
+  replyWithAnimation: (
+    animation: Head<Parameters<C["replyWithAnimation"]>>,
+    other?: Head<Tail<Parameters<C["replyWithAnimation"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithAnimation"]>>>
+  ) => ReturnType<C["replyWithAnimation"]>;
+  replyWithAudio: (
+    audio: Head<Parameters<C["replyWithAudio"]>>,
+    other?: Head<Tail<Parameters<C["replyWithAudio"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithAudio"]>>>
+  ) => ReturnType<C["replyWithAudio"]>;
+  replyWithDocument: (
+    document: Head<Parameters<C["replyWithDocument"]>>,
+    other?: Head<Tail<Parameters<C["replyWithDocument"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithDocument"]>>>
+  ) => ReturnType<C["replyWithDocument"]>;
+  replyWithPhoto: (
+    photo: Head<Parameters<C["replyWithPhoto"]>>,
+    other?: Head<Tail<Parameters<C["replyWithPhoto"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithPhoto"]>>>
+  ) => ReturnType<C["replyWithPhoto"]>;
+  replyWithVideo: (
+    photo: Head<Parameters<C["replyWithVideo"]>>,
+    other?: Head<Tail<Parameters<C["replyWithVideo"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithVideo"]>>>
+  ) => ReturnType<C["replyWithVideo"]>;
+  replyWithVoice: (
+    photo: Head<Parameters<C["replyWithVoice"]>>,
+    other?: Head<Tail<Parameters<C["replyWithVoice"]>>> & { caption?: FormattedString },
+    ...args: Tail<Tail<Parameters<C["replyWithVoice"]>>>
+  ) => ReturnType<C["replyWithVoice"]>;
 };
 
 /**
- * @deprecated Use ParseModeFlavor instead of ParseModeContext
- */
-type ParseModeContext<C extends Context = Context> = ParseModeFlavor<C>;
-
-const buildReplyWithParseMode = <C extends Context>(
-  parseMode: ParseMode,
-  ctx: ParseModeFlavor<C>,
-) => {
-  return (...args: Parameters<C["reply"]>) => {
-    const [text, payload, ...rest] = args;
-    return ctx.reply(
-      text,
-      { ...payload, parse_mode: parseMode },
-      ...rest as any,
-    );
-  };
-};
-
-/**
- * Hydrates a context with an additional set of reply methods
+ * Hydrates a context with new reply method overloads
  * @param ctx The context to hydrate
  * @param next The next middleware function
  */
-const middleware = async <C extends Context>(
+const middleware = () => async <C extends Context>(
   ctx: ParseModeFlavor<C>,
   next: NextFunction,
 ) => {
-  ctx.replyFmt = (stringLike, ...args) => {
-    const [payload, ...rest] = args;
-    const entities = stringLike instanceof FormattedString
-      ? { entities: stringLike.entities }
-      : undefined;
-    return ctx.reply(
-      stringLike.toString(),
-      { ...payload, ...entities },
-      ...rest as any,
-    ) as ReturnType<C['reply']>;
-  };
-
-  ctx.replyWithHTML = buildReplyWithParseMode("HTML", ctx);
-  ctx.replyWithMarkdown = buildReplyWithParseMode("MarkdownV2", ctx);
-  ctx.replyWithMarkdownV1 = buildReplyWithParseMode("Markdown", ctx);
-  ctx.replyWithMarkdownV2 = buildReplyWithParseMode("MarkdownV2", ctx);
-  return next();
+  ctx.api.config.use(parseMode());
+  await next();
 };
 
-export { middleware as hydrateReply, type ParseModeFlavor, type ParseModeContext };
+export { middleware as hydrateReply, type ParseModeFlavor };
