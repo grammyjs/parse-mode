@@ -1,6 +1,8 @@
 # Parse Mode plugin for grammY
 
-This plugin provides transformer that injects `entities` or `caption_entities` if `text` or `caption` are FormattedString. It also provides a middleware that installs this transformer on the `ctx.api` object.
+This plugin provides transformer that injects `entities` or `caption_entities`
+if `text` or `caption` are FormattedString. It also provides a middleware that
+installs this transformer on the `ctx.api` object.
 
 ## Usage (Using format)
 

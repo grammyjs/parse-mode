@@ -1,7 +1,7 @@
 import type { MessageEntity } from "./deps.deno.ts";
 
 /**
- * Objects that implement this interface implement a `.toString()` 
+ * Objects that implement this interface implement a `.toString()`
  * method that returns a `string` value representing the object.
  */
 export interface Stringable {
@@ -26,11 +26,11 @@ class FormattedString implements Stringable {
   entities: MessageEntity[];
 
   /**
-   * Creates a new `FormattedString`. Useful for constructing a 
+   * Creates a new `FormattedString`. Useful for constructing a
    * `FormattedString` from user's formatted message
    * @param text Plain text value
    * @param entities Format entities
-   * 
+   *
    * ```ts
    * // Constructing a new `FormattedString` from user's message
    * const userMsg = new FormattedString(ctx.message.text, ctx.entities());
@@ -147,34 +147,45 @@ const customEmoji = (placeholder: Stringable, emoji: number) => {
  * @param chatId The chat ID to link to.
  * @param messageId The message ID to link to.
  */
-const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) => {
+const linkMessage = (
+  stringLike: Stringable,
+  chatId: number,
+  messageId: number,
+) => {
   if (chatId > 0) {
-    console.warn("linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.");
+    console.warn(
+      "linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.",
+    );
     return stringLike;
   } else if (chatId < -1002147483647 || chatId > -1000000000000) {
-    console.warn("linkMessage is not able to link messages whose chatIds are greater than -1000000000000 or less than -1002147483647 at this moment. Refusing to transform into link.");
+    console.warn(
+      "linkMessage is not able to link messages whose chatIds are greater than -1000000000000 or less than -1002147483647 at this moment. Refusing to transform into link.",
+    );
     return stringLike;
   } else {
-    return link(stringLike, `https://t.me/c/${(chatId + 1000000000000) * -1}/${messageId}`);
+    return link(
+      stringLike,
+      `https://t.me/c/${(chatId + 1000000000000) * -1}/${messageId}`,
+    );
   }
 };
 
 // ===  Format tagged template function
 
 /**
- * This is the format tagged template function. It accepts a template literal 
- * containing any mix of `Stringable` and `string` values, and constructs a 
+ * This is the format tagged template function. It accepts a template literal
+ * containing any mix of `Stringable` and `string` values, and constructs a
  * `FormattedString` that represents the combination of all the given values.
- * The constructed `FormattedString` also implements Stringable, and can be used 
+ * The constructed `FormattedString` also implements Stringable, and can be used
  * in further `fmt` tagged templates.
  * @param rawStringParts An array of `string` parts found in the tagged template
  * @param stringLikes An array of `Stringable`s found in the tagged template
- * 
+ *
  * ```ts
  * // Using return values of fmt in fmt
  * const left = fmt`${bold('>>>')} >>>`;
  * const right = fmt`<<< ${bold('<<<')}`;
- * 
+ *
  * const final = fmt`${left} ${ctx.msg.text} ${right}`;
  * await ctx.replyFmt(final);
  * ```
