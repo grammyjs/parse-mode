@@ -1,4 +1,5 @@
 export type {
+  Api,
   Context,
   NextFunction,
   Transformer,

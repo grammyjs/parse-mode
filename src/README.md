@@ -1,31 +1,32 @@
 # Parse Mode plugin for grammY
 
 This plugin provides transformer that injects `entities` or `caption_entities`
-if `text` or `caption` are FormattedString. It also provides a middleware that
-installs this transformer on the `ctx.api` object.
+if `text` or `caption` are FormattedString.
 
 ## Usage (Using format)
 
 ```ts
-import { Bot, Context } from 'grammy';
-import { bold, fmt, hydrateReply, italic } from '@grammyjs/parse-mode';
-import type { ParseModeFlavor } from '@grammyjs/parse-mode';
+import { Api, Bot, Context } from "grammy";
+import { bold, fmt, hydrateFmt, underline } from "@grammyjs/parse-mode";
+import type { ParseModeApiFlavor, ParseModeFlavor } from "@grammyjs/parse-mode";
 
-const bot = new Bot<ParseModeFlavor<Context>>('');
+type MyApi = ParseModeApiFlavor<Api>;
+type MyContext = ParseModeFlavor<Context & { api: MyApi }>;
+const bot = new Bot<MyContext, MyApi>("");
 
 // Install automatic entities inject from FormattedString transformer
-bot.use(hydrateReply());
+bot.api.config.use(hydrateFmt());
 
-bot.command('demo', async ctx => {
-  const boldText = fmt`This is a ${bold('bolded')} string`;
+bot.command("demo", async (ctx) => {
+  const boldText = fmt`This is a ${bold("bolded")} string`;
   await ctx.reply(boldText);
 
-  const underlineText = fmt`This is an ${underline('underlined')}`;
-  await ctx.reply(underlineText);
+  const underlineText = fmt`This is an ${underline("underlined")}`;
+  await ctx.api.sendMessage(ctx.chat.id, underlineText);
 
   // fmt can also be use to concat FormattedStrings
-  cosnt combinedText = fmt`${boldText}\n${underlineText}`
-  await ctx.reply(combinedText);
+  const combinedText = fmt`${boldText}\n${underlineText}`;
+  await bot.api.sendMessage(ctx.chat.id, combinedText);
 });
 
 bot.start();

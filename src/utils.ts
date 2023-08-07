@@ -2,21 +2,32 @@ import type { MessageEntity } from "./deps.deno.ts";
 
 import { FormattedString } from "./format.ts";
 
-interface CaptionEntitiesPayload {
-  caption: FormattedString | string | undefined;
-  caption_entities: MessageEntity[];
+interface CaptionEntities {
+  caption?: FormattedString | string;
+  caption_entities?: MessageEntity[];
 }
 
-interface MediaEntitiesPayload {
-  media: CaptionEntitiesPayload | CaptionEntitiesPayload[];
+interface ExplanationEntities {
+  explanation?: FormattedString | string;
+  explanation_entities?: MessageEntity[];
 }
 
-interface TextEntitiesPayload {
-  text: FormattedString | string | undefined;
-  entities: MessageEntity[];
+interface MediaEntities {
+  media: CaptionEntities | CaptionEntities[];
+}
+
+interface MessageTextEntities {
+  message_text: FormattedString | string;
+  entities?: MessageEntity[];
+}
+
+interface TextEntities {
+  text: FormattedString | string;
+  entities?: MessageEntity[];
 }
 
 const captionEntitiesMethod = new Set([
+  "copyMessage",
   "editMessageCaption",
   "sendAnimation",
   "sendAudio",
@@ -24,6 +35,10 @@ const captionEntitiesMethod = new Set([
   "sendPhoto",
   "sendVideo",
   "sendVoice",
+]);
+
+const explanationEntitiesMethod = new Set([
+  "sendPoll",
 ]);
 
 const mediaEntitiesMethod = new Set([
@@ -39,26 +54,48 @@ const textEntitiesMethod = new Set([
 function isCaptionEntitiesPayload(
   method: string,
   _payload: unknown,
-): _payload is CaptionEntitiesPayload {
+): _payload is CaptionEntities {
   return captionEntitiesMethod.has(method);
+}
+
+function isExplanationEntitiesPayload(
+  method: string,
+  _payload: unknown,
+): _payload is ExplanationEntities {
+  return explanationEntitiesMethod.has(method);
 }
 
 function isMediaEntitiesPayload(
   method: string,
   _payload: unknown,
-): _payload is MediaEntitiesPayload {
+): _payload is MediaEntities {
   return mediaEntitiesMethod.has(method);
 }
 
 function isTextEntitiesPayload(
   method: string,
   _payload: unknown,
-): _payload is TextEntitiesPayload {
+): _payload is TextEntities {
   return textEntitiesMethod.has(method);
+}
+
+function isCaptionEntitiesResult(
+  result: {},
+): result is CaptionEntities {
+  return result instanceof Object && "caption" in result;
+}
+
+function isMessageTextEntitiesContent(
+  content: {},
+): content is MessageTextEntities {
+  return content instanceof Object && "message_text" in content;
 }
 
 export {
   isCaptionEntitiesPayload,
+  isCaptionEntitiesResult,
+  isExplanationEntitiesPayload,
   isMediaEntitiesPayload,
+  isMessageTextEntitiesContent,
   isTextEntitiesPayload,
 };

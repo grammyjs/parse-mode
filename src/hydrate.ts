@@ -1,7 +1,7 @@
-import type { Context, NextFunction } from "./deps.deno.ts";
+import type { Api, Context } from "./deps.deno.ts";
 
 import { FormattedString } from "./format.ts";
-import { parseMode } from "./transformer.ts";
+import { buildTransformer } from "./transformer.ts";
 
 type Head<T extends Array<unknown>> = T extends
   [head: infer E1, ...tail: infer E2] ? E1
@@ -12,10 +12,24 @@ type Tail<T extends Array<unknown>> = T extends
   : [];
 
 /**
- * Context flavor for `Context` that will be hydrated with
- * an additional set of reply methods from `hydrateReply`
+ * Context flavor that will hydrate methods to accept FormattedString
  */
 type ParseModeFlavor<C extends Context> = C & {
+  /*
+   * No type support for answerInlineQuery yet
+   *
+  answerInlineQuery: (
+    results: Head<Parameters<C["answerInlineQuery"]>>,
+    ...args: Tail<Parameters<C["answerInlineQuery"]>>
+  ) => ReturnType<C["answerInlineQuery"]>;
+   */
+  copyMessage: (
+    chat_id: Head<Parameters<C["copyMessage"]>>,
+    other?: Head<Tail<Parameters<C["copyMessage"]>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Parameters<C["copyMessage"]>>>
+  ) => ReturnType<C["copyMessage"]>;
   editMessageCaption: (
     other?: Head<Parameters<C["editMessageCaption"]>> & {
       caption?: FormattedString;
@@ -23,7 +37,9 @@ type ParseModeFlavor<C extends Context> = C & {
     ...args: Tail<Parameters<C["editMessageText"]>>
   ) => ReturnType<C["editMessageCaption"]>;
   editMessageMedia: (
-    media: { caption?: FormattedString },
+    media: Head<Parameters<C["editMessageMedia"]>> & {
+      caption?: FormattedString;
+    },
     ...args: Tail<Parameters<C["editMessageMedia"]>>
   ) => ReturnType<C["editMessageMedia"]>;
   editMessageText: (
@@ -62,6 +78,14 @@ type ParseModeFlavor<C extends Context> = C & {
     },
     ...args: Tail<Tail<Parameters<C["replyWithPhoto"]>>>
   ) => ReturnType<C["replyWithPhoto"]>;
+  replyWithPoll: (
+    question: Head<Parameters<C["replyWithPoll"]>>,
+    options: Head<Tail<Parameters<C["replyWithPoll"]>>>,
+    other?: Head<Tail<Tail<Parameters<C["replyWithPoll"]>>>> & {
+      explanation?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<C["replyWithPoll"]>>>>
+  ) => ReturnType<C["replyWithPoll"]>;
   replyWithVideo: (
     photo: Head<Parameters<C["replyWithVideo"]>>,
     other?: Head<Tail<Parameters<C["replyWithVideo"]>>> & {
@@ -79,17 +103,122 @@ type ParseModeFlavor<C extends Context> = C & {
 };
 
 /**
- * Hydrates a context with new reply method overloads
- * @param ctx The context to hydrate
- * @param next The next middleware function
+ * Api flavor that will hydrate methods to accept FormattedString
  */
-const middleware = () =>
-async <C extends Context>(
-  ctx: ParseModeFlavor<C>,
-  next: NextFunction,
-) => {
-  ctx.api.config.use(parseMode());
-  await next();
+type ParseModeApiFlavor<A extends Api> = A & {
+  /*
+   * No type support for answerInlineQuery yet
+   *
+  answerInlineQuery: (
+    inline_query_id: Head<Parameters<A["answerInlineQuery"]>>,
+    results: Head<Tail<Parameters<A["answerInlineQuery"]>>>,
+    ...args: Tail<Tail<Parameters<A["answerInlineQuery"]>>>
+  ) => ReturnType<A["answerInlineQuery"]>;
+   */
+  copyMessage: (
+    chat_id: Head<Parameters<A["copyMessage"]>>,
+    from_chat_id: Head<Tail<Parameters<A["copyMessage"]>>>,
+    message_id: Head<Tail<Tail<Parameters<A["copyMessage"]>>>>,
+    other?: Tail<Tail<Tail<Parameters<A["copyMessage"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Tail<Parameters<A["copyMessage"]>>>>>
+  ) => ReturnType<A["copyMessage"]>;
+  editMessageCaption: (
+    chat_id: Head<Parameters<A["editMessageCaption"]>>,
+    message_id: Head<Tail<Parameters<A["editMessageCaption"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["editMessageCaption"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["editMessageCaption"]>>>>
+  ) => ReturnType<A["editMessageCaption"]>;
+  editMessageCaptionInline: (
+    inline_message_id: Head<Parameters<A["editMessageCaptionInline"]>>,
+    other?: Head<Tail<Parameters<A["editMessageCaptionInline"]>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Parameters<A["editMessageCaptionInline"]>>>
+  ) => ReturnType<A["editMessageCaptionInline"]>;
+  editMessageMedia: (
+    chat_id: Head<Parameters<A["editMessageMedia"]>>,
+    message_id: Head<Tail<Parameters<A["editMessageMedia"]>>>,
+    media: Head<Tail<Tail<Parameters<A["editMessageMedia"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["editMessageMedia"]>>>>
+  ) => ReturnType<A["editMessageMedia"]>;
+  editMessageText: (
+    chat_id: Head<Parameters<A["editMessageText"]>>,
+    message_id: Head<Tail<Parameters<A["editMessageText"]>>>,
+    text: FormattedString,
+    ...args: Tail<Tail<Tail<Parameters<A["editMessageText"]>>>>
+  ) => ReturnType<A["editMessageText"]>;
+  sendMessage: (
+    chat_id: Head<Parameters<A["sendMessage"]>>,
+    text: FormattedString,
+    ...args: Tail<Tail<Parameters<A["sendMessage"]>>>
+  ) => ReturnType<A["sendMessage"]>;
+  sendAnimation: (
+    chat_id: Head<Parameters<A["sendAnimation"]>>,
+    animation: Head<Tail<Parameters<A["sendAnimation"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendAnimation"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendAnimation"]>>>>
+  ) => ReturnType<A["sendAnimation"]>;
+  sendAudio: (
+    chat_id: Head<Parameters<A["sendAudio"]>>,
+    audio: Head<Tail<Parameters<A["sendAudio"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendAudio"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendAudio"]>>>>
+  ) => ReturnType<A["sendAudio"]>;
+  sendDocument: (
+    chat_id: Head<Parameters<A["sendDocument"]>>,
+    document: Head<Tail<Parameters<A["sendDocument"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendDocument"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendDocument"]>>>>
+  ) => ReturnType<A["sendDocument"]>;
+  sendPhoto: (
+    chat_id: Head<Parameters<A["sendPhoto"]>>,
+    photo: Head<Tail<Parameters<A["sendPhoto"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendPhoto"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendPhoto"]>>>>
+  ) => ReturnType<A["sendPhoto"]>;
+  sendPoll: (
+    chat_id: Head<Parameters<A["sendPoll"]>>,
+    question: Head<Tail<Parameters<A["sendPoll"]>>>,
+    options: Head<Tail<Tail<Parameters<A["sendPoll"]>>>>,
+    other?: Head<Tail<Tail<Tail<Parameters<A["sendPoll"]>>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Tail<Parameters<A["sendPoll"]>>>>>
+  ) => ReturnType<A["sendPoll"]>;
+  sendVideo: (
+    chat_id: Head<Parameters<A["sendVideo"]>>,
+    video: Head<Tail<Parameters<A["sendVideo"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendVideo"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendVideo"]>>>>
+  ) => ReturnType<A["sendVideo"]>;
+  sendVoice: (
+    chat_id: Head<Parameters<A["sendVoice"]>>,
+    voice: Head<Tail<Parameters<A["sendVoice"]>>>,
+    other?: Head<Tail<Tail<Parameters<A["sendVoice"]>>>> & {
+      caption?: FormattedString;
+    },
+    ...args: Tail<Tail<Tail<Parameters<A["sendVoice"]>>>>
+  ) => ReturnType<A["sendVoice"]>;
 };
 
-export { middleware as hydrateReply, type ParseModeFlavor };
+export {
+  buildTransformer as hydrateFmt,
+  type ParseModeApiFlavor,
+  type ParseModeFlavor,
+};
