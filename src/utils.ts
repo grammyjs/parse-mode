@@ -36,26 +36,23 @@ const textEntitiesMethod = new Set([
   "sendMessage",
 ]);
 
-// deno-lint-ignore no-explicit-any
 function isCaptionEntitiesPayload(
-  method: any,
-  _payload: any,
+  method: string,
+  _payload: unknown,
 ): _payload is CaptionEntitiesPayload {
   return captionEntitiesMethod.has(method);
 }
 
-// deno-lint-ignore no-explicit-any
 function isMediaEntitiesPayload(
-  method: any,
-  _payload: any,
+  method: string,
+  _payload: unknown,
 ): _payload is MediaEntitiesPayload {
   return mediaEntitiesMethod.has(method);
 }
 
-// deno-lint-ignore no-explicit-any
 function isTextEntitiesPayload(
-  method: any,
-  _payload: any,
+  method: string,
+  _payload: unknown,
 ): _payload is TextEntitiesPayload {
   return textEntitiesMethod.has(method);
 }
