@@ -1,7 +1,7 @@
 # Parse Mode plugin for grammY
 
-This plugin provides transformer that injects `entities` or `caption_entities`
-if `text` or `caption` are FormattedString.
+This plugin lets you format your messages and captions with **bold**, __italic__, etc in a much more reliable and efficient way than with Markdown or HTML.
+It does this by providing a transformer that injects `entities` or `caption_entities` if `text` or `caption` are FormattedString.
 
 ## Usage (Using format)
 
