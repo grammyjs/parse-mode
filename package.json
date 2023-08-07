@@ -21,7 +21,6 @@
     "build": "deno2node tsconfig.json"
   },
   "devDependencies": {
-    "@grammyjs/types": "^3.1.2",
     "@tsconfig/node16": "^1.0.2",
     "@types/node": "^20.4.7",
     "deno2node": "^1.9.0",
