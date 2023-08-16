@@ -1,2 +1,2 @@
 export type { Api, Context, NextFunction, Transformer } from "grammy";
-export type { MessageEntity } from "grammy/types";
+export type { InputTextMessageContent, MessageEntity } from "grammy/types";

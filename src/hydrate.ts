@@ -1,4 +1,4 @@
-import type { Api, Context } from "./deps.deno.ts";
+import type { Api, Context, InputTextMessageContent } from "./deps.deno.ts";
 
 import { FormattedString } from "./format.ts";
 import { buildTransformer } from "./transformer.ts";
@@ -11,18 +11,37 @@ type Tail<T extends Array<unknown>> = T extends
   [head: infer E1, ...tail: infer E2] ? E2
   : [];
 
+type InputTextMessageContentX =
+  & Omit<InputTextMessageContent, "message_text">
+  & {
+    message_text: string | FormattedString;
+  };
+
 /**
  * Context flavor that will hydrate methods to accept FormattedString
  */
-type ParseModeFlavor<C extends Context> = C & {
-  /*
-   * No type support for answerInlineQuery yet
-   *
+type ParseModeFlavor<C extends Context> = Omit<C, "answerInlineQuery"> & {
   answerInlineQuery: (
-    results: Head<Parameters<C["answerInlineQuery"]>>,
+    results: Parameters<C["answerInlineQuery"]>[0] extends readonly (infer Q)[]
+      ? readonly (
+        Q extends { type: "article"; input_message_content: infer R1 }
+          ? Omit<Q, "input_message_content"> & {
+            input_message_content: R1 | InputTextMessageContentX;
+          }
+          : Q extends { caption?: string; input_message_content?: infer R2 }
+            ? Omit<Q, "caption" | "input_message_content"> & {
+              caption?: string | FormattedString;
+              input_message_content?: R2 | InputTextMessageContentX;
+            }
+          : Q extends { input_message_content?: infer R3 }
+            ? Omit<Q, "input_message_content"> & {
+              input_message_content?: R3 | InputTextMessageContentX;
+            }
+          : Q
+      )[]
+      : never,
     ...args: Tail<Parameters<C["answerInlineQuery"]>>
   ) => ReturnType<C["answerInlineQuery"]>;
-   */
   copyMessage: (
     chat_id: Head<Parameters<C["copyMessage"]>>,
     other?: Head<Tail<Parameters<C["copyMessage"]>>> & {
@@ -105,16 +124,29 @@ type ParseModeFlavor<C extends Context> = C & {
 /**
  * Api flavor that will hydrate methods to accept FormattedString
  */
-type ParseModeApiFlavor<A extends Api> = A & {
-  /*
-   * No type support for answerInlineQuery yet
-   *
+type ParseModeApiFlavor<A extends Api> = Omit<A, "answerInlineQuery"> & {
   answerInlineQuery: (
     inline_query_id: Head<Parameters<A["answerInlineQuery"]>>,
-    results: Head<Tail<Parameters<A["answerInlineQuery"]>>>,
+    results: Tail<Parameters<A["answerInlineQuery"]>>[0] extends
+      readonly (infer Q)[] ? readonly (
+        Q extends { type: "article"; input_message_content: infer R1 }
+          ? Omit<Q, "input_message_content"> & {
+            input_message_content: R1 | InputTextMessageContentX;
+          }
+          : Q extends { caption?: string; input_message_content?: infer R2 }
+            ? Omit<Q, "caption" | "input_message_content"> & {
+              caption?: string | FormattedString;
+              input_message_content?: R2 | InputTextMessageContentX;
+            }
+          : Q extends { input_message_content?: infer R3 }
+            ? Omit<Q, "input_message_content"> & {
+              input_message_content?: R3 | InputTextMessageContentX;
+            }
+          : Q
+      )[]
+      : never,
     ...args: Tail<Tail<Parameters<A["answerInlineQuery"]>>>
   ) => ReturnType<A["answerInlineQuery"]>;
-   */
   copyMessage: (
     chat_id: Head<Parameters<A["copyMessage"]>>,
     from_chat_id: Head<Tail<Parameters<A["copyMessage"]>>>,
