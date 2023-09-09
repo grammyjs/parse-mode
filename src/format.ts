@@ -213,7 +213,7 @@ const fmt = (
           })),
         );
       }
-      text += stringLike.toString();
+      if (stringLike != null) text += stringLike.toString();
     }
   }
   return new FormattedString(text, entities);
