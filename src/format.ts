@@ -161,8 +161,6 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
 
 // ===  Format tagged template function
 
-type DeepArray<T> = Array<T | DeepArray<T>>;
-
 /**
  * This is the format tagged template function. It accepts a template literal 
  * containing any mix of `Stringable` and `string` values, and constructs a 
@@ -193,18 +191,15 @@ type DeepArray<T> = Array<T | DeepArray<T>>;
  * ```
  */
 const fmt = (
-  rawStringParts: TemplateStringsArray | DeepArray<Stringable>,
-  ...stringLikes: DeepArray<Stringable>
+  rawStringParts: TemplateStringsArray | Stringable[],
+  ...stringLikes: Stringable[]
 ): FormattedString => {
   let text = "";
   const entities: MessageEntity[] = [];
 
   const length = Math.max(rawStringParts.length, stringLikes.length);
   for (let i = 0; i < length; i++) {
-    for (let stringLike of [rawStringParts[i], stringLikes[i]]) {
-      if (Array.isArray(stringLike)) {
-        stringLike = fmt(stringLike);
-      }
+    for (const stringLike of [rawStringParts[i], stringLikes[i]]) {
       if (stringLike instanceof FormattedString) {
         entities.push(
           ...stringLike.entities.map((e) => ({
