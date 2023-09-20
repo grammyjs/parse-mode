@@ -167,7 +167,10 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
  * `FormattedString` that represents the combination of all the given values.
  * The constructed `FormattedString` also implements Stringable, and can be used 
  * in further `fmt` tagged templates.
- * @param rawStringParts An array of `string` parts found in the tagged template
+ * 
+ * Can also be called like regular function and passed an array of `Stringable`s.
+ * 
+ * @param rawStringParts An array of `string` parts found in the tagged template (can also be `Stringable`s)
  * @param stringLikes An array of `Stringable`s found in the tagged template
  * 
  * ```ts
@@ -177,27 +180,36 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
  * 
  * const final = fmt`${left} ${ctx.msg.text} ${right}`;
  * await ctx.replyFmt(final);
+ * 
+ * // Using regular function form
+ * const cart = fmt([
+ *   "Your shopping cart:\n",
+ *   ...items.map((item) => fmt`- ${bold(item.name)} (${item.price})\n`),
+ * ]);
+ * // Using result in editMessageText
+ * await ctx.editMessageText(cart.text, { entities: cart.entities });
  * ```
  */
 const fmt = (
-  rawStringParts: TemplateStringsArray | string[],
+  rawStringParts: TemplateStringsArray | Stringable[],
   ...stringLikes: Stringable[]
 ): FormattedString => {
-  let text = rawStringParts[0];
+  let text = "";
   const entities: MessageEntity[] = [];
 
-  for (let i = 0; i < stringLikes.length; i++) {
-    const stringLike = stringLikes[i];
-    if (stringLike instanceof FormattedString) {
-      entities.push(
-        ...stringLike.entities.map((e) => ({
-          ...e,
-          offset: e.offset + text.length,
-        })),
-      );
+  const length = Math.max(rawStringParts.length, stringLikes.length);
+  for (let i = 0; i < length; i++) {
+    for (const stringLike of [rawStringParts[i], stringLikes[i]]) {
+      if (stringLike instanceof FormattedString) {
+        entities.push(
+          ...stringLike.entities.map((e) => ({
+            ...e,
+            offset: e.offset + text.length,
+          })),
+        );
+      }
+      if (stringLike != null) text += stringLike.toString();
     }
-    text += stringLike.toString();
-    text += rawStringParts[i + 1];
   }
   return new FormattedString(text, entities);
 };
