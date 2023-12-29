@@ -35,7 +35,7 @@ const buildTransformer = (parseMode: string) => {
           // @ts-ignore
           payload.media.parse_mode = normalisedParseMode;
         }
-      break;
+        break;
 
       case "answerInlineQuery":
         if ("results" in payload) {
@@ -47,14 +47,13 @@ const buildTransformer = (parseMode: string) => {
             ) {
               // @ts-ignore
               result.input_message_content.parse_mode = normalisedParseMode;
-            }
-            else if (!("parse_mode" in result)) {
+            } else if (!("parse_mode" in result)) {
               // @ts-ignore
               result.parse_mode = normalisedParseMode;
             }
           }
         }
-      break;
+        break;
 
       default:
         payload = { ...payload, ...{ parse_mode: normalisedParseMode } };
