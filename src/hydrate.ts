@@ -1,9 +1,4 @@
-import type {
-  Context,
-  MessageEntity,
-  NextFunction,
-  ParseMode,
-} from "./deps.deno.ts";
+import type { Context, NextFunction, ParseMode } from "./deps.deno.ts";
 import { FormattedString, type Stringable } from "./format.ts";
 
 type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
@@ -11,7 +6,7 @@ type Tail<T extends Array<any>> = T extends [head: infer E1, ...tail: infer E2]
   : [];
 
 /**
- * Context flavor for `Context` that will be hydrated with 
+ * Context flavor for `Context` that will be hydrated with
  * an additional set of reply methods from `hydrateReply`
  */
 type ParseModeFlavor<C extends Context> = C & {
@@ -62,14 +57,18 @@ const middleware = async <C extends Context>(
       stringLike.toString(),
       { ...payload, ...entities },
       ...rest as any,
-    ) as ReturnType<C['reply']>;
+    ) as ReturnType<C["reply"]>;
   };
 
   ctx.replyWithHTML = buildReplyWithParseMode("HTML", ctx);
   ctx.replyWithMarkdown = buildReplyWithParseMode("MarkdownV2", ctx);
   ctx.replyWithMarkdownV1 = buildReplyWithParseMode("Markdown", ctx);
   ctx.replyWithMarkdownV2 = buildReplyWithParseMode("MarkdownV2", ctx);
-  return next();
+  await next();
 };
 
-export { middleware as hydrateReply, type ParseModeFlavor, type ParseModeContext };
+export {
+  middleware as hydrateReply,
+  type ParseModeContext,
+  type ParseModeFlavor,
+};
