@@ -1,7 +1,7 @@
 import type { MessageEntity } from "./deps.deno.ts";
 
 /**
- * Objects that implement this interface implement a `.toString()` 
+ * Objects that implement this interface implement a `.toString()`
  * method that returns a `string` value representing the object.
  */
 export interface Stringable {
@@ -26,15 +26,16 @@ class FormattedString implements Stringable {
   entities: MessageEntity[];
 
   /**
-   * Creates a new `FormattedString`. Useful for constructing a 
+   * Creates a new `FormattedString`. Useful for constructing a
    * `FormattedString` from user's formatted message
-   * @param text Plain text value
-   * @param entities Format entities
-   * 
+   *
    * ```ts
    * // Constructing a new `FormattedString` from user's message
    * const userMsg = new FormattedString(ctx.message.text, ctx.entities());
    * ```
+   *
+   * @param text Plain text value
+   * @param entities Format entities
    */
   constructor(text: string, entities: MessageEntity[]) {
     this.text = text;
@@ -111,6 +112,11 @@ const pre = buildFormatter<[language: string]>("pre", "language");
  */
 const spoiler = buildFormatter("spoiler");
 /**
+ * Formats the `Stringable` as a blockquote. Cannot be nested.
+ * @param stringLike The `Stringable` to format.
+ */
+const blockquote = buildFormatter("blockquote");
+/**
  * Formats the `Stringable` as a strikethrough. Incompatible with `code` and `pre`.
  * @param stringLike The `Stringable` to format.
  */
@@ -170,9 +176,6 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
  * 
  * Can also be called like regular function and passed an array of `Stringable`s.
  * 
- * @param rawStringParts An array of `string` parts found in the tagged template (can also be `Stringable`s)
- * @param stringLikes An array of `Stringable`s found in the tagged template
- * 
  * ```ts
  * // Using return values of fmt in fmt
  * const left = fmt`${bold('>>>')} >>>`;
@@ -189,6 +192,9 @@ const linkMessage = (stringLike: Stringable, chatId: number, messageId: number) 
  * // Using result in editMessageText
  * await ctx.editMessageText(cart.text, { entities: cart.entities });
  * ```
+ * 
+ * @param rawStringParts An array of `string` parts found in the tagged template (can also be `Stringable`s)
+ * @param stringLikes An array of `Stringable`s found in the tagged template
  */
 const fmt = (
   rawStringParts: TemplateStringsArray | Stringable[],
@@ -215,6 +221,7 @@ const fmt = (
 };
 
 export {
+  blockquote,
   bold,
   code,
   fmt,
