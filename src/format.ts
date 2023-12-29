@@ -235,6 +235,7 @@ export {
   blockquote,
   bold,
   code,
+  customEmoji,
   fmt,
   FormattedString,
   italic,
