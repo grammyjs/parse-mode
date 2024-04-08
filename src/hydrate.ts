@@ -25,31 +25,23 @@ type ParseModeFlavor<C extends Context> = C & {
   replyWithMarkdown: C["reply"];
   replyWithMarkdownV1: C["reply"];
   replyWithMarkdownV2: C["reply"];
-
   replyFmtWithPhoto: (
-    photo: string,
+    photo: Parameters<C["replyWithPhoto"]>[0],
     options: {
       caption: Stringable;
-      reply_markup?: Parameters<C["replyWithPhoto"]>[1]["reply_markup"];
-    }
+    } & Omit<Parameters<C["replyWithPhoto"]>[1], "caption">,
+    ...args: Tail<Parameters<C["replyWithPhoto"]>>
   ) => ReturnType<C["replyWithPhoto"]>;
-
   replyFmtWithMediaGroup: (
-    media: (InputMediaPhoto | InputMediaVideo | InputMediaAnimation | InputMediaAudio | InputMediaDocument & { caption: Stringable })[]
+    media: (Parameters<C["replyWithMediaGroup"]>[0][number] & { caption?: Stringable })[]
   ) => ReturnType<C["replyWithMediaGroup"]>;
-
   editFmtMessageMedia: (
-    media: (InputMediaPhoto | InputMediaVideo | InputMediaAnimation | InputMediaAudio | InputMediaDocument) & { caption: Stringable },
-    options?: {
-      reply_markup?: Parameters<C["editMessageMedia"]>[1]["reply_markup"];
-    }
+    media: Parameters<C["editMessageMedia"]>[0] & { caption?: Stringable },
+    options?: Omit<Parameters<C["editMessageMedia"]>[1], "caption">
   ) => ReturnType<C["editMessageMedia"]>;
-
   editFmtMessageText: (
     text: Stringable,
-    options?: {
-      reply_markup?: Parameters<C["editMessageText"]>[1]["reply_markup"];
-    }
+    options?: Parameters<C["editMessageText"]>[1]
   ) => ReturnType<C["editMessageText"]>;
 };
 
@@ -77,7 +69,7 @@ const buildReplyWithParseMode = <C extends Context>(
  * @param ctx The context to hydrate
  * @param next The next middleware function
  */
-const middleware = async <C extends Context>(
+const hydrateReply = async <C extends Context>(
   ctx: ParseModeFlavor<C>,
   next: NextFunction,
 ) => {
@@ -97,37 +89,30 @@ const middleware = async <C extends Context>(
   ctx.replyWithMarkdown = buildReplyWithParseMode("MarkdownV2", ctx);
   ctx.replyWithMarkdownV1 = buildReplyWithParseMode("Markdown", ctx);
   ctx.replyWithMarkdownV2 = buildReplyWithParseMode("MarkdownV2", ctx);
-  await next();
-};
 
-const hydrateReplyFmt = async <C extends Context>(
-  ctx: ParseModeFlavor<C>,
-  next: NextFunction,
-) => {
-  ctx.replyFmtWithPhoto = (photo, options) => {
+  ctx.replyFmtWithPhoto = (photo, options, ...args) => {
     const entities = options.caption instanceof FormattedString
       ? { caption_entities: options.caption.entities }
       : undefined;
-
     return ctx.replyWithPhoto(
       photo,
       {
         caption: options.caption.toString(),
         ...entities,
-        reply_markup: options.reply_markup
-      }
+        ...options,
+      },
+      ...args
     );
   };
 
   ctx.replyFmtWithMediaGroup = (media) => {
     const inputMedia = media.map(item => ({
       ...item,
-      caption: item.caption.toString(),
+      caption: item.caption?.toString(),
       caption_entities: item.caption instanceof FormattedString
         ? item.caption.entities
-        : undefined
+        : undefined,
     }));
-
     return ctx.replyWithMediaGroup(inputMedia);
   };
 
@@ -135,11 +120,10 @@ const hydrateReplyFmt = async <C extends Context>(
     const caption_entities = media.caption instanceof FormattedString
       ? media.caption.entities
       : undefined;
-
     return ctx.editMessageMedia(
       {
         ...media,
-        caption: media.caption.toString(),
+        caption: media.caption?.toString(),
         caption_entities,
       },
       options
@@ -150,12 +134,11 @@ const hydrateReplyFmt = async <C extends Context>(
     const entities = text instanceof FormattedString
       ? text.entities
       : undefined;
-
     return ctx.editMessageText(
       text.toString(),
       {
-        entities,
         ...options,
+        entities,
       }
     );
   };
@@ -164,8 +147,7 @@ const hydrateReplyFmt = async <C extends Context>(
 };
 
 export {
-  middleware as hydrateReply,
-  hydrateReplyFmt,
+  hydrateReply,
   type ParseModeContext,
   type ParseModeFlavor,
 };
