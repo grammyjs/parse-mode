@@ -61,3 +61,49 @@ bot.command("demo", async (ctx) => {
 
 bot.start();
 ```
+
+## Using fmt in media captions
+
+In addition to the existing `replyFmt` method, you can now use the following new methods to apply fmt formatting to media captions:
+
+- `replyFmtWithPhoto(photo, options)`: Send a photo with a formatted caption 
+- `replyFmtWithMediaGroup(media)`: Send a media group with formatted captions
+- `editFmtMessageMedia(media, options)`: Edit media and formatted caption in a message
+- `editFmtMessageText(text, options)`: Edit formatted text in a message
+
+All of these functions are used in the same way as the official functions that do not have Fmt.
+
+```ts
+bot.use(hydrateReplyFmt);
+
+await ctx.replyFmtWithPhoto("photo_url", {
+  caption: fmt`This is a ${bold("formatted")} caption`,
+});
+
+await ctx.replyFmtWithMediaGroup([
+  {
+    type: "photo",
+    media: "photo1_url", 
+    caption: fmt`First photo with ${italic("italic")} text`
+  },
+  {
+    type: "photo",
+    media: "photo2_url",
+    caption: fmt`Second photo with ${code("code")} text` 
+  }
+]);
+
+await ctx.editFmtMessageMedia(
+  {
+    type: "photo",
+    media: "new_photo_url",  
+    caption: fmt`Updated ${bold("caption")}`,  
+  },
+  { reply_markup: { inline_keyboard: [...] } }
+);
+
+await ctx.editFmtMessageText(
+  fmt`Edited ${underline("message")} text`,
+  { reply_markup: { inline_keyboard: [...] } }  
+);
+```
