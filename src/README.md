@@ -66,7 +66,7 @@ bot.start();
 
 In addition to the existing `replyFmt` method, you can now use the following new methods to apply fmt formatting to media captions:
 
-- `replyFmtWithPhoto(photo, options)`: Send a photo with a formatted caption 
+- `replyFmtWithPhoto(photo, options)`: Send a photo with a formatted caption
 - `replyFmtWithMediaGroup(media)`: Send a media group with formatted captions
 - `editFmtMessageMedia(media, options)`: Edit media and formatted caption in a message
 - `editFmtMessageText(text, options)`: Edit formatted text in a message

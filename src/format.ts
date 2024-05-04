@@ -57,7 +57,7 @@ const unwrap = (stringLike: Stringable): FormattedString => {
   return new FormattedString(stringLike.toString(), []);
 };
 
-const buildFormatter = <T extends Array<any> = never>(
+const buildFormatter = <T extends Array<unknown> = never>(
   type: MessageEntity["type"],
   ...formatArgKeys: T
 ) => {
