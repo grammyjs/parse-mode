@@ -117,6 +117,11 @@ const spoiler = buildFormatter("spoiler");
  */
 const blockquote = buildFormatter("blockquote");
 /**
+ * Formats the `Stringable` as an expandable blockquote. Cannot be nested.
+ * @param stringLike The `Stringable` to format.
+ */
+const expandableBlockquote = buildFormatter("expandable_blockquote");
+/**
  * Formats the `Stringable` as a strikethrough. Incompatible with `code` and `pre`.
  * @param stringLike The `Stringable` to format.
  */
@@ -236,6 +241,7 @@ export {
   bold,
   code,
   customEmoji,
+  expandableBlockquote
   fmt,
   FormattedString,
   italic,
