@@ -148,7 +148,7 @@ const mentionUser = (stringLike: Stringable, userId: number) => {
  * @param placeholder A placeholder emoji
  * @param emoji The custom emoji identifier
  */
-const customEmoji = (placeholder: Stringable, emoji: number) => {
+const customEmoji = (placeholder: Stringable, emoji: string) => {
   return link(placeholder, `tg://emoji?id=${emoji}`);
 };
 
