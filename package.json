@@ -18,6 +18,7 @@
     "url": "https://github.com/grammyjs/parse-mode/issues"
   },
   "scripts": {
+    "prepare": "npm run build",
     "build": "deno2node tsconfig.json"
   },
   "devDependencies": {
