@@ -241,7 +241,7 @@ export {
   bold,
   code,
   customEmoji,
-  expandableBlockquote
+  expandableBlockquote,
   fmt,
   FormattedString,
   italic,
