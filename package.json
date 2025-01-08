@@ -5,6 +5,7 @@
   "author": "KnightNiwrem",
   "license": "MIT",
   "main": "dist/mod.js",
+  "type": "module",
   "types": "dist/mod.d.ts",
   "engines": {
     "node": ">=14.13.1"
