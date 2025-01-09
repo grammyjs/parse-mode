@@ -43,6 +43,42 @@ class FormattedString implements Stringable {
   }
 
   /**
+   * Replaces matches of a pattern with a replacement string
+   *
+   * @param searchValue The pattern to search for
+   * @param replaceValue The string to replace the pattern with
+   * @returns A new `FormattedString` with replacements
+   */
+  replace(searchValue: string | RegExp, replaceValue: string): FormattedString {
+    const newText = this.text.replace(searchValue, replaceValue);
+
+    const newEntities = this.entities.map(entity => {
+      const newEntity = { ...entity };
+
+      if (typeof searchValue === 'string') {
+        const index = this.text.indexOf(searchValue);
+
+        if (index !== -1 && index < newEntity.offset + newEntity.length) {
+          newEntity.offset = newEntity.offset + replaceValue.length - searchValue.length;
+        }
+      } else {
+        const match = this.text.match(searchValue);
+
+        if (match) {
+          const index = match.index!;
+          if (index !== -1 && index < newEntity.offset + newEntity.length) {
+            newEntity.offset = newEntity.offset + replaceValue.length - match[0].length;
+          }
+        }
+      }
+
+      return newEntity;
+    });
+
+    return new FormattedString(newText, newEntities);
+  }
+
+  /**
    * Returns the string representation of this object
    */
   toString() {
