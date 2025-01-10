@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "moduleResolution": "Node16",
     "outDir": "dist"
   },
   "deno2node": {},

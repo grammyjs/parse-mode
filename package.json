@@ -22,7 +22,7 @@
     "build": "deno2node tsconfig.json"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.2",
+    "@tsconfig/node16": "1.0.2",
     "@types/node": "^16.6.1",
     "deno2node": "^1.8.1",
     "grammy": "^1.20.1"
