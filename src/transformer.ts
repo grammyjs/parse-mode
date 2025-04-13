@@ -27,6 +27,7 @@ const buildTransformer = (parseMode: string) => {
     }
 
     switch (method) {
+      case "sendMediaGroup":
       case "editMessageMedia":
         if (
           "media" in payload &&
