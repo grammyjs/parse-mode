@@ -82,6 +82,11 @@ export interface CaptionWithEntities {
 export class FormattedString
   implements TextWithEntities, CaptionWithEntities, Stringable {
   /**
+   * The entities backing this FormattedString.
+   */
+  rawEntities: MessageEntity[];
+
+  /**
    * Creates a new `FormattedString` instance.
    *
    * @param rawText The plain text content
@@ -95,7 +100,9 @@ export class FormattedString
    * ]);
    * ```
    */
-  constructor(public rawText: string, public rawEntities: MessageEntity[]) {}
+  constructor(public rawText: string, rawEntities?: MessageEntity[]) {
+    this.rawEntities = rawEntities ?? [];
+  }
 
   /**
    * Gets the caption text. This is an alias for the raw text content.
