@@ -1,10 +1,21 @@
 {
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "newLine": "lf",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "rootDir": "./src/",
+    "strict": true,
     "declaration": true,
-    "esModuleInterop": true,
-    "moduleResolution": "Node16",
-    "outDir": "dist"
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "outDir": "./dist/",
+    "skipLibCheck": true,
+    "target": "es2019"
   },
-  "deno2node": {},
-  "extends": "@tsconfig/node16/tsconfig.json"
+  "exclude": [
+    "test"
+  ],
+  "deno2node": {}
 }

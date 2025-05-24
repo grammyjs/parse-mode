@@ -1,7 +1,4 @@
-import {
-  assertEquals,
-  assertInstanceOf,
-} from "https://deno.land/std@0.220.0/assert/mod.ts";
+import { assertEquals, assertInstanceOf } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 import type { MessageEntity } from "../src/deps.deno.ts";
 
