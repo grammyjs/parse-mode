@@ -507,13 +507,13 @@ function buildFormatter<T extends Array<unknown> = never>(
 
 // === Native entity functions
 /**
- * Alias for `bold`` entity tag. Incompatible with `code` and `pre`.
+ * Alias for `bold` entity tag. Incompatible with `code` and `pre`.
  */
 export function b() {
   return buildFormatter("bold")();
 }
 /**
- * `bold`` entity tag. Incompatible with `code` and `pre`.
+ * `bold` entity tag. Incompatible with `code` and `pre`.
  */
 export function bold() {
   return buildFormatter("bold")();
@@ -623,7 +623,8 @@ export function expandableBlockquote() {
  *
  * const combined = fmt`${left} ${ctx.msg.text} ${right}`;
  * await ctx.reply(combined.text { entities: combined.entities });
- *
+ * ```
+ * 
  * @param rawStringParts An array of `string` parts found in the tagged template
  * @param entityTagsOrFormattedTextObjects An array of `EntityTag`s, `FormattedString`s,
  * `TextWithEntities`, `CaptionWithEntities`, `Stringable` objects, or nullary functions
@@ -739,7 +740,7 @@ export function customEmoji(placeholder: Stringable, emoji: string) {
 }
 
 /**
- * Formats the `Stringable`` as a Telegram link to a chat message. Incompatible with `code` and `pre`.
+ * Formats the `Stringable` as a Telegram link to a chat message. Incompatible with `code` and `pre`.
  * @param stringLike The `Stringable` to format.
  * @param chatId The chat ID to link to.
  * @param messageId The message ID to link to.
