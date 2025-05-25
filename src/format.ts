@@ -624,7 +624,7 @@ export function expandableBlockquote() {
  * const combined = fmt`${left} ${ctx.msg.text} ${right}`;
  * await ctx.reply(combined.text { entities: combined.entities });
  * ```
- * 
+ *
  * @param rawStringParts An array of `string` parts found in the tagged template
  * @param entityTagsOrFormattedTextObjects An array of `EntityTag`s, `FormattedString`s,
  * `TextWithEntities`, `CaptionWithEntities`, `Stringable` objects, or nullary functions
