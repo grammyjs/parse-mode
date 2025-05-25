@@ -610,7 +610,7 @@ export function expandableBlockquote() {
  * This is the format tagged template function. It accepts a template literal
  * containing any mix of `Stringable`, `string`, `FormattedString`,
  * `TextWithEntities`, `CaptionWithEntities`, and `EntityTag` values, and constructs
- * a FormattedString` that represents the combination of all the given values.
+ * a `FormattedString` that represents the combination of all the given values.
  * The constructed `FormattedString` also implements Stringable, TextWithEntities,
  * and CaptionWithEntities, and can be used in further `fmt` tagged templates.
  *
