@@ -1,6 +1,6 @@
 {
   "name": "@grammyjs/parse-mode",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Plugin for constructing Formatted Texts in Telegram",
   "author": "KnightNiwrem",
   "license": "MIT",
