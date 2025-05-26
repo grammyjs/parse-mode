@@ -320,12 +320,12 @@ export class FormattedString
    */
   static join(items: (Stringable | TextWithEntities | CaptionWithEntities | string)[]) {
     if (items.length === 0) {
-      return new FormattedString("", []);
+      return new FormattedString("");
     }
     
     return items.reduce((acc, item) => {
       return fmt`${acc}${item}`;
-    }, new FormattedString("", []));
+    }, new FormattedString(""));
   }
 
   // Instance formatting methods
