@@ -312,6 +312,21 @@ export class FormattedString
   static linkMessage(text: Stringable, chatId: number, messageId: number) {
     return linkMessage(text, chatId, messageId);
   }
+  
+  /**
+   * Joins an array of formatted strings or plain text into a single FormattedString
+   * @param items Array of text items to join (can be TextWithEntities, CaptionWithEntities, or string)
+   * @returns A new FormattedString combining all items
+   */
+  static join(items: (Stringable | TextWithEntities | CaptionWithEntities | string)[]) {
+    if (items.length === 0) {
+      return new FormattedString("");
+    }
+    
+    return items.reduce((acc, item) => {
+      return fmt`${acc}${item}`;
+    }, new FormattedString(""));
+  }
 
   // Instance formatting methods
   /**
