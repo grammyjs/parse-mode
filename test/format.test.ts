@@ -763,7 +763,7 @@ Deno.test("FormattedString - Static join method", () => {
   // Test first entity from TextWithEntities
   assertEquals(combinedResult.rawEntities[0]?.type, "bold");
   assertEquals(combinedResult.rawEntities[0]?.offset, 7); // After "Start: "
-  assertEquals(combinedResult.rawEntities[0]?.length, 4); // "Text"
+  assertEquals(combinedResult.rawEntities[0]?.length, 4); // "Text" part of "TextWithEntities"
   
   // Test second entity from CaptionWithEntities
   assertEquals(combinedResult.rawEntities[1]?.type, "italic");
