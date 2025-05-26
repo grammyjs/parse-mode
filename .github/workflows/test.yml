@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        testType: ["lint", "fmt", "test"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run linter
+        run: deno lint
+        if: matrix.testType == 'lint'
+
+      - name: Check formatting
+        run: deno fmt --check
+        if: matrix.testType == 'fmt'
+
+      - name: Run tests
+        run: deno test --allow-import test
+        if: matrix.testType == 'test'
