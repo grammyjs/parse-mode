@@ -692,3 +692,81 @@ Deno.test("FormattedString - Multiple entities", () => {
   assertEquals(formatted.entities[0]?.type, "bold");
   assertEquals(formatted.entities[1]?.type, "italic");
 });
+
+Deno.test("FormattedString - Static join method", () => {
+  // Test empty array
+  const emptyResult = FormattedString.join([]);
+  assertInstanceOf(emptyResult, FormattedString);
+  assertEquals(emptyResult.rawText, "");
+  assertEquals(emptyResult.rawEntities.length, 0);
+  
+  // Test array of strings
+  const stringsResult = FormattedString.join(["Hello", " ", "World"]);
+  assertInstanceOf(stringsResult, FormattedString);
+  assertEquals(stringsResult.rawText, "Hello World");
+  assertEquals(stringsResult.rawEntities.length, 0);
+  
+  // Test mixed array
+  const boldText = FormattedString.bold("Bold");
+  const italicText = FormattedString.italic("Italic");
+  const plainText = " and ";
+  
+  const mixedResult = FormattedString.join([
+    "Start: ", 
+    boldText, 
+    " then ", 
+    italicText, 
+    plainText, 
+    "plain"
+  ]);
+  
+  assertInstanceOf(mixedResult, FormattedString);
+  assertEquals(mixedResult.rawText, "Start: Bold then Italic and plain");
+  
+  // Test exact entity count and properties
+  assertEquals(mixedResult.rawEntities.length, 2);
+  
+  // Test bold entity
+  assertEquals(mixedResult.rawEntities[0]?.type, "bold");
+  assertEquals(mixedResult.rawEntities[0]?.offset, 7); // After "Start: "
+  assertEquals(mixedResult.rawEntities[0]?.length, 4); // "Bold"
+  
+  // Test italic entity
+  assertEquals(mixedResult.rawEntities[1]?.type, "italic");
+  assertEquals(mixedResult.rawEntities[1]?.offset, 17); // After "Start: Bold then "
+  assertEquals(mixedResult.rawEntities[1]?.length, 6); // "Italic"
+  
+  // Test TextWithEntities and CaptionWithEntities
+  const textWithEntities = {
+    text: "TextWithEntities",
+    entities: [{ type: "bold", offset: 0, length: 4 }]
+  };
+  
+  const captionWithEntities = {
+    caption: "CaptionWithEntities",
+    caption_entities: [{ type: "italic", offset: 0, length: 7 }]
+  };
+  
+  const combinedResult = FormattedString.join([
+    "Start: ",
+    textWithEntities,
+    " and ",
+    captionWithEntities
+  ]);
+  
+  assertInstanceOf(combinedResult, FormattedString);
+  assertEquals(combinedResult.rawText, "Start: TextWithEntities and CaptionWithEntities");
+  
+  // Test entity count
+  assertEquals(combinedResult.rawEntities.length, 2);
+  
+  // Test first entity from TextWithEntities
+  assertEquals(combinedResult.rawEntities[0]?.type, "bold");
+  assertEquals(combinedResult.rawEntities[0]?.offset, 7); // After "Start: "
+  assertEquals(combinedResult.rawEntities[0]?.length, 4); // "Text"
+  
+  // Test second entity from CaptionWithEntities
+  assertEquals(combinedResult.rawEntities[1]?.type, "italic");
+  assertEquals(combinedResult.rawEntities[1]?.offset, 28); // After "Start: TextWithEntities and "
+  assertEquals(combinedResult.rawEntities[1]?.length, 7); // "Caption"
+});
