@@ -519,34 +519,34 @@ export class FormattedString
     const textLength = this.rawText.length;
     const sliceStart = start ?? 0;
     const sliceEnd = end ?? textLength;
-    
+
     // Get the sliced text
     const slicedText = this.rawText.slice(sliceStart, sliceEnd);
-    
+
     // Filter and adjust entities that intersect with the slice range
     const slicedEntities: MessageEntity[] = [];
-    
+
     for (const entity of this.rawEntities) {
       const entityStart = entity.offset;
       const entityEnd = entity.offset + entity.length;
-      
+
       // Check if entity intersects with slice range
       if (entityEnd > sliceStart && entityStart < sliceEnd) {
         // Calculate the intersection
         const intersectionStart = Math.max(entityStart, sliceStart);
         const intersectionEnd = Math.min(entityEnd, sliceEnd);
-        
+
         // Create new entity with adjusted offset and length
         const newEntity: MessageEntity = {
           ...entity,
           offset: intersectionStart - sliceStart,
           length: intersectionEnd - intersectionStart,
         };
-        
+
         slicedEntities.push(newEntity);
       }
     }
-    
+
     return new FormattedString(slicedText, slicedEntities);
   }
 }
