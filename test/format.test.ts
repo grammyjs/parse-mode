@@ -887,3 +887,24 @@ Deno.test("FormattedString - slice method boundary conditions", () => {
   assertEquals(negativeStart.rawEntities[0]?.offset, 1);
   assertEquals(negativeStart.rawEntities[0]?.length, 2); // "bc"
 });
+
+Deno.test("FormattedString - slice method creates deep copy", () => {
+  const original = new FormattedString("hello world", [
+    { type: "bold", offset: 0, length: 5 },
+  ]);
+  
+  const sliced = original.slice(0, 7);
+  
+  // Verify it's a different object
+  assertInstanceOf(sliced, FormattedString);
+  assertEquals(sliced !== original, true);
+  assertEquals(sliced.rawEntities !== original.rawEntities, true);
+  assertEquals(sliced.rawEntities[0] !== original.rawEntities[0], true);
+  
+  // Verify the sliced result has the correct content
+  assertEquals(sliced.rawText, "hello w");
+  assertEquals(sliced.rawEntities.length, 1);
+  assertEquals(sliced.rawEntities[0]?.type, "bold");
+  assertEquals(sliced.rawEntities[0]?.offset, 0);
+  assertEquals(sliced.rawEntities[0]?.length, 5);
+});
