@@ -517,7 +517,9 @@ export class FormattedString
    */
   slice(start?: number, end?: number): FormattedString {
     const textLength = this.rawText.length;
-    const sliceStart = start ?? 0;
+
+    // Normalize start: negative values should be treated as 0
+    const sliceStart = Math.max(0, start ?? 0);
     const sliceEnd = end ?? textLength;
 
     // Get the sliced text
