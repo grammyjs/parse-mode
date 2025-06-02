@@ -773,3 +773,117 @@ Deno.test("FormattedString - Static join method", () => {
   assertEquals(combinedResult.rawEntities[1]?.offset, 28); // After "Start: TextWithEntities and "
   assertEquals(combinedResult.rawEntities[1]?.length, 7); // "Caption"
 });
+
+Deno.test("FormattedString - Instance slice method", () => {
+  // Test the example from the problem statement
+  const originalText = "hello bold and italic world";
+  const entities: MessageEntity[] = [
+    { type: "bold", offset: 6, length: 4 },
+    { type: "italic", offset: 15, length: 6 },
+  ];
+  const original = new FormattedString(originalText, entities);
+  
+  const sliced = original.slice(6, 20);
+  
+  assertInstanceOf(sliced, FormattedString);
+  assertEquals(sliced.rawText, "bold and itali");
+  assertEquals(sliced.rawEntities.length, 2);
+  
+  // Test bold entity adjustment
+  assertEquals(sliced.rawEntities[0]?.type, "bold");
+  assertEquals(sliced.rawEntities[0]?.offset, 0);
+  assertEquals(sliced.rawEntities[0]?.length, 4);
+  
+  // Test italic entity adjustment
+  assertEquals(sliced.rawEntities[1]?.type, "italic");
+  assertEquals(sliced.rawEntities[1]?.offset, 9);
+  assertEquals(sliced.rawEntities[1]?.length, 5);
+});
+
+Deno.test("FormattedString - slice method edge cases", () => {
+  const text = "Hello World Test";
+  const entities: MessageEntity[] = [
+    { type: "bold", offset: 0, length: 5 },    // "Hello"
+    { type: "italic", offset: 6, length: 5 },  // "World"
+    { type: "code", offset: 12, length: 4 },   // "Test"
+  ];
+  const original = new FormattedString(text, entities);
+  
+  // Test slice without parameters (should return full copy)
+  const fullSlice = original.slice();
+  assertInstanceOf(fullSlice, FormattedString);
+  assertEquals(fullSlice.rawText, text);
+  assertEquals(fullSlice.rawEntities.length, 3);
+  assertEquals(fullSlice.rawEntities[0]?.type, "bold");
+  assertEquals(fullSlice.rawEntities[1]?.type, "italic");
+  assertEquals(fullSlice.rawEntities[2]?.type, "code");
+  
+  // Test slice with only start parameter
+  const partialSlice = original.slice(6);
+  assertEquals(partialSlice.rawText, "World Test");
+  assertEquals(partialSlice.rawEntities.length, 2);
+  assertEquals(partialSlice.rawEntities[0]?.type, "italic");
+  assertEquals(partialSlice.rawEntities[0]?.offset, 0);
+  assertEquals(partialSlice.rawEntities[0]?.length, 5);
+  
+  // Test slice that partially overlaps entities
+  const overlappingSlice = original.slice(3, 9);
+  assertEquals(overlappingSlice.rawText, "lo Wor");
+  assertEquals(overlappingSlice.rawEntities.length, 2);
+  
+  // Bold entity should be partially included
+  assertEquals(overlappingSlice.rawEntities[0]?.type, "bold");
+  assertEquals(overlappingSlice.rawEntities[0]?.offset, 0);
+  assertEquals(overlappingSlice.rawEntities[0]?.length, 2); // "lo"
+  
+  // Italic entity should be partially included
+  assertEquals(overlappingSlice.rawEntities[1]?.type, "italic");
+  assertEquals(overlappingSlice.rawEntities[1]?.offset, 3);
+  assertEquals(overlappingSlice.rawEntities[1]?.length, 3); // "Wor"
+  
+  // Test slice that excludes all entities
+  const noEntitiesSlice = original.slice(1, 2);
+  assertEquals(noEntitiesSlice.rawText, "e");
+  assertEquals(noEntitiesSlice.rawEntities.length, 1);
+  assertEquals(noEntitiesSlice.rawEntities[0]?.type, "bold");
+  assertEquals(noEntitiesSlice.rawEntities[0]?.offset, 0);
+  assertEquals(noEntitiesSlice.rawEntities[0]?.length, 1);
+});
+
+Deno.test("FormattedString - slice method with empty string", () => {
+  const empty = new FormattedString("", []);
+  const sliced = empty.slice(0, 0);
+  
+  assertInstanceOf(sliced, FormattedString);
+  assertEquals(sliced.rawText, "");
+  assertEquals(sliced.rawEntities.length, 0);
+});
+
+Deno.test("FormattedString - slice method boundary conditions", () => {
+  const text = "abcdef";
+  const entities: MessageEntity[] = [
+    { type: "bold", offset: 1, length: 4 }, // "bcde"
+  ];
+  const original = new FormattedString(text, entities);
+  
+  // Test slice at entity boundaries
+  const exactSlice = original.slice(1, 5);
+  assertEquals(exactSlice.rawText, "bcde");
+  assertEquals(exactSlice.rawEntities.length, 1);
+  assertEquals(exactSlice.rawEntities[0]?.type, "bold");
+  assertEquals(exactSlice.rawEntities[0]?.offset, 0);
+  assertEquals(exactSlice.rawEntities[0]?.length, 4);
+  
+  // Test slice that goes beyond text length
+  const beyondSlice = original.slice(0, 100);
+  assertEquals(beyondSlice.rawText, text);
+  assertEquals(beyondSlice.rawEntities.length, 1);
+  
+  // Test slice with negative start (should be treated as 0)
+  const negativeStart = original.slice(-5, 3);
+  assertEquals(negativeStart.rawText, "abc");
+  assertEquals(negativeStart.rawEntities.length, 1);
+  assertEquals(negativeStart.rawEntities[0]?.type, "bold");
+  assertEquals(negativeStart.rawEntities[0]?.offset, 1);
+  assertEquals(negativeStart.rawEntities[0]?.length, 2); // "bc"
+});

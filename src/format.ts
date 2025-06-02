@@ -508,6 +508,47 @@ export class FormattedString
   plain(text: string) {
     return fmt`${this}${text}`;
   }
+
+  /**
+   * Returns a deep copy of a portion of this FormattedString
+   * @param start The start index (inclusive), defaults to 0
+   * @param end The end index (exclusive), defaults to text length
+   * @returns A new FormattedString containing the sliced text and properly adjusted entities
+   */
+  slice(start?: number, end?: number): FormattedString {
+    const textLength = this.rawText.length;
+    const sliceStart = start ?? 0;
+    const sliceEnd = end ?? textLength;
+    
+    // Get the sliced text
+    const slicedText = this.rawText.slice(sliceStart, sliceEnd);
+    
+    // Filter and adjust entities that intersect with the slice range
+    const slicedEntities: MessageEntity[] = [];
+    
+    for (const entity of this.rawEntities) {
+      const entityStart = entity.offset;
+      const entityEnd = entity.offset + entity.length;
+      
+      // Check if entity intersects with slice range
+      if (entityEnd > sliceStart && entityStart < sliceEnd) {
+        // Calculate the intersection
+        const intersectionStart = Math.max(entityStart, sliceStart);
+        const intersectionEnd = Math.min(entityEnd, sliceEnd);
+        
+        // Create new entity with adjusted offset and length
+        const newEntity: MessageEntity = {
+          ...entity,
+          offset: intersectionStart - sliceStart,
+          length: intersectionEnd - intersectionStart,
+        };
+        
+        slicedEntities.push(newEntity);
+      }
+    }
+    
+    return new FormattedString(slicedText, slicedEntities);
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(
