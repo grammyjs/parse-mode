@@ -881,6 +881,30 @@ Deno.test("FormattedString - Static join method consolidates entities", () => {
   assertEquals(mixedResult.rawEntities.length, 2); // Should remain separate
   assertEquals(mixedResult.rawEntities[0]?.type, "bold");
   assertEquals(mixedResult.rawEntities[1]?.type, "italic");
+
+  // Test with FormattedString separator between same entity types
+  const boldSeparator = FormattedString.bold(" | ");
+  const resultWithBoldSep = FormattedString.join([boldText1, boldText2], boldSeparator);
+  
+  assertInstanceOf(resultWithBoldSep, FormattedString);
+  assertEquals(resultWithBoldSep.rawText, "Hello | World");
+  assertEquals(resultWithBoldSep.rawEntities.length, 1); // All bold parts should be consolidated
+  assertEquals(resultWithBoldSep.rawEntities[0]?.type, "bold");
+  assertEquals(resultWithBoldSep.rawEntities[0]?.offset, 0);
+  assertEquals(resultWithBoldSep.rawEntities[0]?.length, 13); // "Hello | World"
+
+  // Test that single item doesn't go through consolidation path
+  const singleResult = FormattedString.join([boldText1]);
+  assertInstanceOf(singleResult, FormattedString);
+  assertEquals(singleResult.rawText, "Hello");
+  assertEquals(singleResult.rawEntities.length, 1);
+  assertEquals(singleResult.rawEntities[0]?.type, "bold");
+
+  // Test empty array
+  const emptyResult = FormattedString.join([]);
+  assertInstanceOf(emptyResult, FormattedString);
+  assertEquals(emptyResult.rawText, "");
+  assertEquals(emptyResult.rawEntities.length, 0);
 });
 
 Deno.test("FormattedString - Instance slice method", () => {
