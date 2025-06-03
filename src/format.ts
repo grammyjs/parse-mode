@@ -630,22 +630,30 @@ export class FormattedString
         return false;
       }
 
-      // Compare optional properties
-      if (entity1.url !== entity2.url) {
-        return false;
+      // Compare type-specific properties based on entity type
+      if (entity1.type === "text_link" && entity2.type === "text_link") {
+        if (entity1.url !== entity2.url) {
+          return false;
+        }
       }
 
-      if (entity1.language !== entity2.language) {
-        return false;
+      if (entity1.type === "pre" && entity2.type === "pre") {
+        if (entity1.language !== entity2.language) {
+          return false;
+        }
       }
 
-      if (entity1.custom_emoji_id !== entity2.custom_emoji_id) {
-        return false;
+      if (entity1.type === "custom_emoji" && entity2.type === "custom_emoji") {
+        if (entity1.custom_emoji_id !== entity2.custom_emoji_id) {
+          return false;
+        }
       }
 
-      // Compare user property (basic equality check)
-      if (entity1.user !== entity2.user) {
-        return false;
+      if (entity1.type === "text_mention" && entity2.type === "text_mention") {
+        // Compare user property (basic equality check)
+        if (entity1.user !== entity2.user) {
+          return false;
+        }
       }
     }
 
