@@ -1,1 +1,1 @@
-export type { MessageEntity } from "grammy/types";
+export type { MessageEntity, User } from "grammy/types";
