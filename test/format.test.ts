@@ -1192,7 +1192,9 @@ Deno.test("FormattedString - consolidateEntities method", () => {
     { type: "bold" as const, offset: 3, length: 7 },
   ];
 
-  const consolidatedBold = testInstance.testConsolidateEntities(overlappingBoldEntities);
+  const consolidatedBold = testInstance.testConsolidateEntities(
+    overlappingBoldEntities,
+  );
   assertEquals(consolidatedBold.length, 1);
   assertEquals(consolidatedBold[0]?.type, "bold");
   assertEquals(consolidatedBold[0]?.offset, 0);
@@ -1204,7 +1206,9 @@ Deno.test("FormattedString - consolidateEntities method", () => {
     { type: "italic" as const, offset: 5, length: 3 },
   ];
 
-  const consolidatedAdjacent = testInstance.testConsolidateEntities(adjacentEntities);
+  const consolidatedAdjacent = testInstance.testConsolidateEntities(
+    adjacentEntities,
+  );
   assertEquals(consolidatedAdjacent.length, 1);
   assertEquals(consolidatedAdjacent[0]?.type, "italic");
   assertEquals(consolidatedAdjacent[0]?.offset, 0);
@@ -1216,7 +1220,9 @@ Deno.test("FormattedString - consolidateEntities method", () => {
     { type: "bold" as const, offset: 5, length: 3 },
   ];
 
-  const nonOverlappingResult = testInstance.testConsolidateEntities(nonOverlappingEntities);
+  const nonOverlappingResult = testInstance.testConsolidateEntities(
+    nonOverlappingEntities,
+  );
   assertEquals(nonOverlappingResult.length, 2);
   assertEquals(nonOverlappingResult[0]?.offset, 0);
   assertEquals(nonOverlappingResult[0]?.length, 3);
@@ -1229,24 +1235,48 @@ Deno.test("FormattedString - consolidateEntities method", () => {
     { type: "italic" as const, offset: 3, length: 7 },
   ];
 
-  const differentTypesResult = testInstance.testConsolidateEntities(differentTypeEntities);
+  const differentTypesResult = testInstance.testConsolidateEntities(
+    differentTypeEntities,
+  );
   assertEquals(differentTypesResult.length, 2);
   assertEquals(differentTypesResult[0]?.type, "bold");
   assertEquals(differentTypesResult[1]?.type, "italic");
 
   // Test entities with different URLs (text_link type)
   const differentUrlEntities: MessageEntity[] = [
-    { type: "text_link" as const, offset: 0, length: 5, url: "https://example.com" },
-    { type: "text_link" as const, offset: 3, length: 7, url: "https://different.com" },
+    {
+      type: "text_link" as const,
+      offset: 0,
+      length: 5,
+      url: "https://example.com",
+    },
+    {
+      type: "text_link" as const,
+      offset: 3,
+      length: 7,
+      url: "https://different.com",
+    },
   ];
 
-  const differentUrlResult = testInstance.testConsolidateEntities(differentUrlEntities);
+  const differentUrlResult = testInstance.testConsolidateEntities(
+    differentUrlEntities,
+  );
   assertEquals(differentUrlResult.length, 2); // Should not consolidate different URLs
 
   // Test entities with same URLs (text_link type)
   const sameUrlEntities: MessageEntity[] = [
-    { type: "text_link" as const, offset: 0, length: 5, url: "https://example.com" },
-    { type: "text_link" as const, offset: 3, length: 7, url: "https://example.com" },
+    {
+      type: "text_link" as const,
+      offset: 0,
+      length: 5,
+      url: "https://example.com",
+    },
+    {
+      type: "text_link" as const,
+      offset: 3,
+      length: 7,
+      url: "https://example.com",
+    },
   ];
 
   const sameUrlResult = testInstance.testConsolidateEntities(sameUrlEntities);
@@ -1297,7 +1327,9 @@ Deno.test("FormattedString - consolidateEntities with complex overlapping", () =
     { type: "bold" as const, offset: 5, length: 2 },
   ];
 
-  const multipleResult = testInstance.testConsolidateEntities(multipleOverlapping);
+  const multipleResult = testInstance.testConsolidateEntities(
+    multipleOverlapping,
+  );
   assertEquals(multipleResult.length, 1);
   assertEquals(multipleResult[0]?.offset, 0);
   assertEquals(multipleResult[0]?.length, 7); // Should span from 0 to 7
@@ -1309,7 +1341,9 @@ Deno.test("FormattedString - consolidateEntities with complex overlapping", () =
     { type: "italic" as const, offset: 7, length: 2 },
   ];
 
-  const containedResult = testInstance.testConsolidateEntities(containedEntities);
+  const containedResult = testInstance.testConsolidateEntities(
+    containedEntities,
+  );
   assertEquals(containedResult.length, 1);
   assertEquals(containedResult[0]?.offset, 0);
   assertEquals(containedResult[0]?.length, 10); // Should keep the largest span
