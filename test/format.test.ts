@@ -844,8 +844,8 @@ Deno.test("FormattedString - Static join method with separator", () => {
   assertEquals(result9.rawEntities[0]?.length, 2); // "->"
 });
 
-Deno.test("FormattedString - Static join method consolidates entities", () => {
-  // Test that joining two entirely bolded FormattedStrings results in one consolidated bold entity
+Deno.test("FormattedString - Static join method entity behavior", () => {
+  // Test entity behavior when joining FormattedStrings
   const boldText1 = FormattedString.bold("Hello");
   const boldText2 = FormattedString.bold("World");
   
@@ -854,11 +854,14 @@ Deno.test("FormattedString - Static join method consolidates entities", () => {
   assertInstanceOf(result, FormattedString);
   assertEquals(result.rawText, "Hello World");
   
-  // Should have only one bold entity covering the entire text
-  assertEquals(result.rawEntities.length, 1);
+  // Should have two separate bold entities because the space separator is not bold
+  assertEquals(result.rawEntities.length, 2);
   assertEquals(result.rawEntities[0]?.type, "bold");
   assertEquals(result.rawEntities[0]?.offset, 0);
-  assertEquals(result.rawEntities[0]?.length, 11); // "Hello World"
+  assertEquals(result.rawEntities[0]?.length, 5); // "Hello"
+  assertEquals(result.rawEntities[1]?.type, "bold");
+  assertEquals(result.rawEntities[1]?.offset, 6);
+  assertEquals(result.rawEntities[1]?.length, 5); // "World"
   
   // Test without separator - should also consolidate
   const resultNoSep = FormattedString.join([boldText1, boldText2]);
