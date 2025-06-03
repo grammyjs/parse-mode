@@ -994,7 +994,7 @@ Deno.test("FormattedString - find method with entities", () => {
   const sourceText = "Hello world test";
   const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // "world"
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Create pattern for bold "world"
   const patternText = "world";
   const patternEntities = [{ type: "bold" as const, offset: 0, length: 5 }];
@@ -1009,7 +1009,7 @@ Deno.test("FormattedString - find method entities must match exactly", () => {
   const sourceText = "Hello world test world end";
   const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Create pattern for italic "world" (different formatting)
   const patternText = "world";
   const patternEntities = [{ type: "italic" as const, offset: 0, length: 5 }];
@@ -1024,7 +1024,7 @@ Deno.test("FormattedString - find method text without entities", () => {
   const sourceText = "Hello world test world end";
   const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Create pattern for plain "world" (no entities)
   const pattern = new FormattedString("world", []);
 
@@ -1040,7 +1040,7 @@ Deno.test("FormattedString - find method multiple entities", () => {
     { type: "italic" as const, offset: 11, length: 6 }, // "italic"
   ];
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Create pattern matching the "bold italic" part
   const patternText = "bold italic";
   const patternEntities = [
@@ -1090,21 +1090,21 @@ Deno.test("FormattedString - find method exact match", () => {
 Deno.test("FormattedString - find method with special entity properties", () => {
   // Test with entities that have additional properties like URL
   const sourceText = "Click here to visit example.com";
-  const sourceEntities = [{ 
-    type: "text_link" as const, 
-    offset: 6, 
-    length: 4, 
-    url: "https://example.com" 
+  const sourceEntities = [{
+    type: "text_link" as const,
+    offset: 6,
+    length: 4,
+    url: "https://example.com",
   }]; // "here"
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Pattern that matches the link with same URL
   const patternText = "here";
-  const patternEntities = [{ 
-    type: "text_link" as const, 
-    offset: 0, 
-    length: 4, 
-    url: "https://example.com" 
+  const patternEntities = [{
+    type: "text_link" as const,
+    offset: 0,
+    length: 4,
+    url: "https://example.com",
   }];
   const pattern = new FormattedString(patternText, patternEntities);
 
@@ -1115,21 +1115,21 @@ Deno.test("FormattedString - find method with special entity properties", () => 
 Deno.test("FormattedString - find method different URL should not match", () => {
   // Test with entities that have different URLs
   const sourceText = "Click here to visit example.com";
-  const sourceEntities = [{ 
-    type: "text_link" as const, 
-    offset: 6, 
-    length: 4, 
-    url: "https://example.com" 
+  const sourceEntities = [{
+    type: "text_link" as const,
+    offset: 6,
+    length: 4,
+    url: "https://example.com",
   }]; // "here"
   const source = new FormattedString(sourceText, sourceEntities);
-  
+
   // Pattern with different URL
   const patternText = "here";
-  const patternEntities = [{ 
-    type: "text_link" as const, 
-    offset: 0, 
-    length: 4, 
-    url: "https://different.com" 
+  const patternEntities = [{
+    type: "text_link" as const,
+    offset: 0,
+    length: 4,
+    url: "https://different.com",
   }];
   const pattern = new FormattedString(patternText, patternEntities);
 

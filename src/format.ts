@@ -582,16 +582,19 @@ export class FormattedString
     // Use indexOf to find text matches efficiently
     let searchStart = 0;
     let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
-    
+
     while (textIndex !== -1) {
       // Use slice to extract candidate and compare entities
-      const candidate = this.slice(textIndex, textIndex + pattern.rawText.length);
-      
+      const candidate = this.slice(
+        textIndex,
+        textIndex + pattern.rawText.length,
+      );
+
       // Compare entities for exact match
       if (this.entitiesEqual(candidate.rawEntities, pattern.rawEntities)) {
         return textIndex;
       }
-      
+
       // Continue searching from the next position
       searchStart = textIndex + 1;
       textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
@@ -606,7 +609,10 @@ export class FormattedString
    * @param entities2 Second array of entities
    * @returns true if the entities are exactly equal, false otherwise
    */
-  private entitiesEqual(entities1: MessageEntity[], entities2: MessageEntity[]): boolean {
+  private entitiesEqual(
+    entities1: MessageEntity[],
+    entities2: MessageEntity[],
+  ): boolean {
     if (entities1.length !== entities2.length) {
       return false;
     }
