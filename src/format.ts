@@ -579,18 +579,22 @@ export class FormattedString
       return -1;
     }
 
-    // Search for all occurrences of pattern text in source text
-    for (let i = 0; i <= this.rawText.length - pattern.rawText.length; i++) {
-      // Check if text matches at this position
-      if (this.rawText.substring(i, i + pattern.rawText.length) === pattern.rawText) {
-        // Use slice to extract candidate and compare entities
-        const candidate = this.slice(i, i + pattern.rawText.length);
-        
-        // Compare entities for exact match
-        if (this.entitiesEqual(candidate.rawEntities, pattern.rawEntities)) {
-          return i;
-        }
+    // Use indexOf to find text matches efficiently
+    let searchStart = 0;
+    let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+    
+    while (textIndex !== -1) {
+      // Use slice to extract candidate and compare entities
+      const candidate = this.slice(textIndex, textIndex + pattern.rawText.length);
+      
+      // Compare entities for exact match
+      if (this.entitiesEqual(candidate.rawEntities, pattern.rawEntities)) {
+        return textIndex;
       }
+      
+      // Continue searching from the next position
+      searchStart = textIndex + 1;
+      textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
     }
 
     return -1;
