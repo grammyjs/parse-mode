@@ -316,17 +316,27 @@ export class FormattedString
   /**
    * Joins an array of formatted strings or plain text into a single FormattedString
    * @param items Array of text items to join (can be TextWithEntities, CaptionWithEntities, or string)
+   * @param separator Optional separator to insert between items (defaults to empty string)
    * @returns A new FormattedString combining all items
    */
   static join(
     items: (Stringable | TextWithEntities | CaptionWithEntities | string)[],
+    separator?: Stringable | TextWithEntities | CaptionWithEntities | string,
   ) {
     if (items.length === 0) {
       return new FormattedString("");
     }
 
-    return items.reduce((acc, item) => {
-      return fmt`${acc}${item}`;
+    if (items.length === 1) {
+      return fmt`${items[0]}`;
+    }
+
+    const sep = separator ?? "";
+    return items.reduce<FormattedString>((acc, item, index) => {
+      if (index === 0) {
+        return fmt`${item}`;
+      }
+      return fmt`${acc}${sep}${item}`;
     }, new FormattedString(""));
   }
 

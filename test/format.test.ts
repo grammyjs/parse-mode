@@ -774,6 +774,76 @@ Deno.test("FormattedString - Static join method", () => {
   assertEquals(combinedResult.rawEntities[1]?.length, 7); // "Caption"
 });
 
+Deno.test("FormattedString - Static join method with separator", () => {
+  // Test basic string separator
+  const result1 = FormattedString.join(["a", "b", "c"], " ");
+  assertInstanceOf(result1, FormattedString);
+  assertEquals(result1.rawText, "a b c");
+  assertEquals(result1.rawEntities.length, 0);
+
+  // Test different separator
+  const result2 = FormattedString.join(["Hello", "World"], " - ");
+  assertInstanceOf(result2, FormattedString);
+  assertEquals(result2.rawText, "Hello - World");
+  assertEquals(result2.rawEntities.length, 0);
+
+  // Test with empty separator (should be same as no separator)
+  const result3 = FormattedString.join(["a", "b", "c"], "");
+  const result4 = FormattedString.join(["a", "b", "c"]);
+  assertEquals(result3.rawText, result4.rawText);
+
+  // Test with single item and separator
+  const result5 = FormattedString.join(["single"], " - ");
+  assertEquals(result5.rawText, "single");
+
+  // Test with empty array and separator
+  const result6 = FormattedString.join([], " - ");
+  assertEquals(result6.rawText, "");
+
+  // Test with formatted strings and separator
+  const boldText = FormattedString.bold("Bold");
+  const italicText = FormattedString.italic("Italic");
+  const result7 = FormattedString.join([boldText, italicText], " | ");
+
+  assertInstanceOf(result7, FormattedString);
+  assertEquals(result7.rawText, "Bold | Italic");
+  assertEquals(result7.rawEntities.length, 2);
+
+  // Test entity positions with separator
+  assertEquals(result7.rawEntities[0]?.type, "bold");
+  assertEquals(result7.rawEntities[0]?.offset, 0);
+  assertEquals(result7.rawEntities[0]?.length, 4); // "Bold"
+
+  assertEquals(result7.rawEntities[1]?.type, "italic");
+  assertEquals(result7.rawEntities[1]?.offset, 7); // After "Bold | "
+  assertEquals(result7.rawEntities[1]?.length, 6); // "Italic"
+
+  // Test with FormattedString as separator
+  const separatorFormatted = FormattedString.underline(" - ");
+  const result8 = FormattedString.join(["Hello", "World"], separatorFormatted);
+
+  assertInstanceOf(result8, FormattedString);
+  assertEquals(result8.rawText, "Hello - World");
+  assertEquals(result8.rawEntities.length, 1);
+  assertEquals(result8.rawEntities[0]?.type, "underline");
+  assertEquals(result8.rawEntities[0]?.offset, 5); // After "Hello"
+  assertEquals(result8.rawEntities[0]?.length, 3); // " - "
+
+  // Test with TextWithEntities as separator
+  const textSeparator = {
+    text: " -> ",
+    entities: [{ type: "code", offset: 1, length: 2 }], // "->"
+  };
+  const result9 = FormattedString.join(["A", "B"], textSeparator);
+
+  assertInstanceOf(result9, FormattedString);
+  assertEquals(result9.rawText, "A -> B");
+  assertEquals(result9.rawEntities.length, 1);
+  assertEquals(result9.rawEntities[0]?.type, "code");
+  assertEquals(result9.rawEntities[0]?.offset, 2); // After "A "
+  assertEquals(result9.rawEntities[0]?.length, 2); // "->"
+});
+
 Deno.test("FormattedString - Instance slice method", () => {
   // Test the example from the problem statement
   const originalText = "hello bold and italic world";
