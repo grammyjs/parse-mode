@@ -568,4 +568,25 @@ Deno.test("consolidateEntities with complex overlapping", () => {
   assertEquals(containedResult.length, 1);
   assertEquals(containedResult[0]?.offset, 0);
   assertEquals(containedResult[0]?.length, 10); // Should keep the largest span
+
+  // Test 3 overlapping bold entities with 1 italic entity positioned between them
+  const mixedOverlapping: MessageEntity[] = [
+    { type: "bold" as const, offset: 0, length: 9 }, // bold: 0-9
+    { type: "bold" as const, offset: 8, length: 4 }, // bold: 8-12
+    { type: "bold" as const, offset: 10, length: 6 }, // bold: 10-16
+    { type: "italic" as const, offset: 3, length: 4 }, // italic: 3-7
+    { type: "italic" as const, offset: 7, length: 4 }, // italic: 7-11
+  ];
+
+  const mixedResult = consolidateEntities(mixedOverlapping);
+  assertEquals(mixedResult.length, 2); // Should have 2 entities: 1 bold, 1 italic
+
+  // Find the bold and italic entities in the result
+  const boldEntity = mixedResult.find((e) => e.type === "bold");
+  const italicEntity = mixedResult.find((e) => e.type === "italic");
+
+  assertEquals(boldEntity?.offset, 0);
+  assertEquals(boldEntity?.length, 16); // Should span from 0 to 16 (consolidating all bold entities)
+  assertEquals(italicEntity?.offset, 3);
+  assertEquals(italicEntity?.length, 8); // Should remain unchanged as it's a different type
 });

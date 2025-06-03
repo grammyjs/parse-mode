@@ -150,30 +150,67 @@ export function consolidateEntities(
     return entities;
   }
 
-  // Sort entities by offset to process them in order
-  const sortedEntities = [...entities].sort((a, b) => a.offset - b.offset);
-  const consolidated: MessageEntity[] = [];
+  // Group entities by type and type-specific properties
+  const entityGroups = new Map<string, MessageEntity[]>();
 
-  let current = { ...sortedEntities[0] };
+  for (const entity of entities) {
+    // Create a key that includes type and type-specific properties
+    let key = entity.type;
 
-  for (let i = 1; i < sortedEntities.length; i++) {
-    const next = sortedEntities[i];
-
-    // Check if entities can be consolidated
-    if (canConsolidateEntities(current, next)) {
-      // Merge the entities by extending the current entity
-      const currentEnd = current.offset + current.length;
-      const nextEnd = next.offset + next.length;
-      current.length = Math.max(currentEnd, nextEnd) - current.offset;
-    } else {
-      // Cannot consolidate, add current to result and move to next
-      consolidated.push(current);
-      current = { ...next };
+    if (entity.type === "text_link") {
+      key += `|${entity.url}`;
+    } else if (entity.type === "pre") {
+      key += `|${entity.language || ""}`;
+    } else if (entity.type === "custom_emoji") {
+      key += `|${entity.custom_emoji_id}`;
+    } else if (entity.type === "text_mention") {
+      // Create a unique key for the user object
+      const userKey = JSON.stringify(entity.user);
+      key += `|${userKey}`;
     }
+
+    if (!entityGroups.has(key)) {
+      entityGroups.set(key, []);
+    }
+    entityGroups.get(key)!.push({ ...entity });
   }
 
-  // Add the last entity
-  consolidated.push(current);
+  const consolidated: MessageEntity[] = [];
 
-  return consolidated;
+  // Process each group separately
+  for (const group of entityGroups.values()) {
+    if (group.length === 1) {
+      consolidated.push(group[0]);
+      continue;
+    }
+
+    // Sort entities in the group by offset
+    group.sort((a, b) => a.offset - b.offset);
+
+    let current = group[0];
+
+    for (let i = 1; i < group.length; i++) {
+      const next = group[i];
+
+      // Check if entities overlap or are adjacent
+      const currentEnd = current.offset + current.length;
+      const nextStart = next.offset;
+
+      if (nextStart <= currentEnd) {
+        // Merge the entities by extending the current entity
+        const nextEnd = next.offset + next.length;
+        current.length = Math.max(currentEnd, nextEnd) - current.offset;
+      } else {
+        // Gap between entities, add current to result and start new consolidation
+        consolidated.push(current);
+        current = next;
+      }
+    }
+
+    // Add the last entity from this group
+    consolidated.push(current);
+  }
+
+  // Sort the final result by offset
+  return consolidated.sort((a, b) => a.offset - b.offset);
 }
