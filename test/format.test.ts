@@ -844,6 +844,45 @@ Deno.test("FormattedString - Static join method with separator", () => {
   assertEquals(result9.rawEntities[0]?.length, 2); // "->"
 });
 
+Deno.test("FormattedString - Static join method consolidates entities", () => {
+  // Test that joining two entirely bolded FormattedStrings results in one consolidated bold entity
+  const boldText1 = FormattedString.bold("Hello");
+  const boldText2 = FormattedString.bold("World");
+  
+  const result = FormattedString.join([boldText1, boldText2], " ");
+  
+  assertInstanceOf(result, FormattedString);
+  assertEquals(result.rawText, "Hello World");
+  
+  // Should have only one bold entity covering the entire text
+  assertEquals(result.rawEntities.length, 1);
+  assertEquals(result.rawEntities[0]?.type, "bold");
+  assertEquals(result.rawEntities[0]?.offset, 0);
+  assertEquals(result.rawEntities[0]?.length, 11); // "Hello World"
+  
+  // Test without separator - should also consolidate
+  const resultNoSep = FormattedString.join([boldText1, boldText2]);
+  
+  assertInstanceOf(resultNoSep, FormattedString);
+  assertEquals(resultNoSep.rawText, "HelloWorld");
+  assertEquals(resultNoSep.rawEntities.length, 1);
+  assertEquals(resultNoSep.rawEntities[0]?.type, "bold");
+  assertEquals(resultNoSep.rawEntities[0]?.offset, 0);
+  assertEquals(resultNoSep.rawEntities[0]?.length, 10); // "HelloWorld"
+
+  // Test with different entity types - should NOT consolidate
+  const boldText = FormattedString.bold("Hello");
+  const italicText = FormattedString.italic("World");
+  
+  const mixedResult = FormattedString.join([boldText, italicText], " ");
+  
+  assertInstanceOf(mixedResult, FormattedString);
+  assertEquals(mixedResult.rawText, "Hello World");
+  assertEquals(mixedResult.rawEntities.length, 2); // Should remain separate
+  assertEquals(mixedResult.rawEntities[0]?.type, "bold");
+  assertEquals(mixedResult.rawEntities[1]?.type, "italic");
+});
+
 Deno.test("FormattedString - Instance slice method", () => {
   // Test the example from the problem statement
   const originalText = "hello bold and italic world";

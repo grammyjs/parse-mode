@@ -332,12 +332,15 @@ export class FormattedString
     }
 
     const sep = separator ?? "";
-    return items.reduce<FormattedString>((acc, item, index) => {
+    const result = items.reduce<FormattedString>((acc, item, index) => {
       if (index === 0) {
         return fmt`${item}`;
       }
       return fmt`${acc}${sep}${item}`;
     }, new FormattedString(""));
+    
+    // Consolidate adjacent/overlapping entities of the same type
+    return new FormattedString(result.rawText, result.consolidateEntities(result.rawEntities));
   }
 
   // Instance formatting methods
