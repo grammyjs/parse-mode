@@ -5,7 +5,7 @@ import type { MessageEntity } from "../src/deps.deno.ts";
 Deno.test("FormattedString - Constructor", () => {
   const text = "Hello World";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 0, length: 5 },
+    { type: "bold" as const, offset: 0, length: 5 },
   ];
 
   const formatted = new FormattedString(text, entities);
@@ -17,7 +17,7 @@ Deno.test("FormattedString - Constructor", () => {
 Deno.test("FormattedString - Text and caption getters", () => {
   const text = "Hello World";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 0, length: 5 },
+    { type: "bold" as const, offset: 0, length: 5 },
   ];
 
   const formatted = new FormattedString(text, entities);
@@ -31,7 +31,7 @@ Deno.test("FormattedString - Text and caption getters", () => {
 Deno.test("FormattedString - toString method", () => {
   const text = "Hello World";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 0, length: 5 },
+    { type: "bold" as const, offset: 0, length: 5 },
   ];
 
   const formatted = new FormattedString(text, entities);
@@ -682,8 +682,8 @@ Deno.test("FormattedString - Empty entities array", () => {
 Deno.test("FormattedString - Multiple entities", () => {
   const text = "Hello World";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 0, length: 5 },
-    { type: "italic", offset: 6, length: 5 },
+    { type: "bold" as const, offset: 0, length: 5 },
+    { type: "italic" as const, offset: 6, length: 5 },
   ];
 
   const formatted = new FormattedString(text, entities);
@@ -739,12 +739,12 @@ Deno.test("FormattedString - Static join method", () => {
   // Test TextWithEntities and CaptionWithEntities
   const textWithEntities = {
     text: "TextWithEntities",
-    entities: [{ type: "bold", offset: 0, length: 4 }],
+    entities: [{ type: "bold" as const, offset: 0, length: 4 }],
   };
 
   const captionWithEntities = {
     caption: "CaptionWithEntities",
-    caption_entities: [{ type: "italic", offset: 0, length: 7 }],
+    caption_entities: [{ type: "italic" as const, offset: 0, length: 7 }],
   };
 
   const combinedResult = FormattedString.join([
@@ -832,7 +832,7 @@ Deno.test("FormattedString - Static join method with separator", () => {
   // Test with TextWithEntities as separator
   const textSeparator = {
     text: " -> ",
-    entities: [{ type: "code", offset: 1, length: 2 }], // "->"
+    entities: [{ type: "code" as const, offset: 1, length: 2 }], // "->"
   };
   const result9 = FormattedString.join(["A", "B"], textSeparator);
 
@@ -848,8 +848,8 @@ Deno.test("FormattedString - Instance slice method", () => {
   // Test the example from the problem statement
   const originalText = "hello bold and italic world";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 6, length: 4 },
-    { type: "italic", offset: 15, length: 6 },
+    { type: "bold" as const, offset: 6, length: 4 },
+    { type: "italic" as const, offset: 15, length: 6 },
   ];
   const original = new FormattedString(originalText, entities);
 
@@ -873,9 +873,9 @@ Deno.test("FormattedString - Instance slice method", () => {
 Deno.test("FormattedString - slice method edge cases", () => {
   const text = "Hello World Test";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 0, length: 5 }, // "Hello"
-    { type: "italic", offset: 6, length: 5 }, // "World"
-    { type: "code", offset: 12, length: 4 }, // "Test"
+    { type: "bold" as const, offset: 0, length: 5 }, // "Hello"
+    { type: "italic" as const, offset: 6, length: 5 }, // "World"
+    { type: "code" as const, offset: 12, length: 4 }, // "Test"
   ];
   const original = new FormattedString(text, entities);
 
@@ -932,7 +932,7 @@ Deno.test("FormattedString - slice method with empty string", () => {
 Deno.test("FormattedString - slice method boundary conditions", () => {
   const text = "abcdef";
   const entities: MessageEntity[] = [
-    { type: "bold", offset: 1, length: 4 }, // "bcde"
+    { type: "bold" as const, offset: 1, length: 4 }, // "bcde"
   ];
   const original = new FormattedString(text, entities);
 
@@ -960,7 +960,7 @@ Deno.test("FormattedString - slice method boundary conditions", () => {
 
 Deno.test("FormattedString - slice method creates deep copy", () => {
   const original = new FormattedString("hello world", [
-    { type: "bold", offset: 0, length: 5 },
+    { type: "bold" as const, offset: 0, length: 5 },
   ]);
 
   const sliced = original.slice(0, 7);
@@ -992,12 +992,12 @@ Deno.test("FormattedString - find method basic functionality", () => {
 Deno.test("FormattedString - find method with entities", () => {
   // Create a source with bold "world" at position 6
   const sourceText = "Hello world test";
-  const sourceEntities = [{ type: "bold", offset: 6, length: 5 }]; // "world"
+  const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // "world"
   const source = new FormattedString(sourceText, sourceEntities);
   
   // Create pattern for bold "world"
   const patternText = "world";
-  const patternEntities = [{ type: "bold", offset: 0, length: 5 }];
+  const patternEntities = [{ type: "bold" as const, offset: 0, length: 5 }];
   const pattern = new FormattedString(patternText, patternEntities);
 
   const result = source.find(pattern);
@@ -1007,12 +1007,12 @@ Deno.test("FormattedString - find method with entities", () => {
 Deno.test("FormattedString - find method entities must match exactly", () => {
   // Create source with bold "world"
   const sourceText = "Hello world test world end";
-  const sourceEntities = [{ type: "bold", offset: 6, length: 5 }]; // first "world"
+  const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
   const source = new FormattedString(sourceText, sourceEntities);
   
   // Create pattern for italic "world" (different formatting)
   const patternText = "world";
-  const patternEntities = [{ type: "italic", offset: 0, length: 5 }];
+  const patternEntities = [{ type: "italic" as const, offset: 0, length: 5 }];
   const pattern = new FormattedString(patternText, patternEntities);
 
   const result = source.find(pattern);
@@ -1022,7 +1022,7 @@ Deno.test("FormattedString - find method entities must match exactly", () => {
 Deno.test("FormattedString - find method text without entities", () => {
   // Create source with bold "world"
   const sourceText = "Hello world test world end";
-  const sourceEntities = [{ type: "bold", offset: 6, length: 5 }]; // first "world"
+  const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
   const source = new FormattedString(sourceText, sourceEntities);
   
   // Create pattern for plain "world" (no entities)
@@ -1036,16 +1036,16 @@ Deno.test("FormattedString - find method multiple entities", () => {
   // Create source with multiple formatting
   const sourceText = "Hello bold italic world";
   const sourceEntities = [
-    { type: "bold", offset: 6, length: 4 }, // "bold"
-    { type: "italic", offset: 11, length: 6 }, // "italic"
+    { type: "bold" as const, offset: 6, length: 4 }, // "bold"
+    { type: "italic" as const, offset: 11, length: 6 }, // "italic"
   ];
   const source = new FormattedString(sourceText, sourceEntities);
   
   // Create pattern matching the "bold italic" part
   const patternText = "bold italic";
   const patternEntities = [
-    { type: "bold", offset: 0, length: 4 }, // "bold"
-    { type: "italic", offset: 5, length: 6 }, // "italic"
+    { type: "bold" as const, offset: 0, length: 4 }, // "bold"
+    { type: "italic" as const, offset: 5, length: 6 }, // "italic"
   ];
   const pattern = new FormattedString(patternText, patternEntities);
 
@@ -1079,7 +1079,7 @@ Deno.test("FormattedString - find method pattern longer than source", () => {
 
 Deno.test("FormattedString - find method exact match", () => {
   const text = "Hello world";
-  const entities = [{ type: "bold", offset: 0, length: 5 }];
+  const entities = [{ type: "bold" as const, offset: 0, length: 5 }];
   const source = new FormattedString(text, entities);
   const pattern = new FormattedString(text, entities);
 
@@ -1091,7 +1091,7 @@ Deno.test("FormattedString - find method with special entity properties", () => 
   // Test with entities that have additional properties like URL
   const sourceText = "Click here to visit example.com";
   const sourceEntities = [{ 
-    type: "text_link", 
+    type: "text_link" as const, 
     offset: 6, 
     length: 4, 
     url: "https://example.com" 
@@ -1101,7 +1101,7 @@ Deno.test("FormattedString - find method with special entity properties", () => 
   // Pattern that matches the link with same URL
   const patternText = "here";
   const patternEntities = [{ 
-    type: "text_link", 
+    type: "text_link" as const, 
     offset: 0, 
     length: 4, 
     url: "https://example.com" 
@@ -1116,7 +1116,7 @@ Deno.test("FormattedString - find method different URL should not match", () => 
   // Test with entities that have different URLs
   const sourceText = "Click here to visit example.com";
   const sourceEntities = [{ 
-    type: "text_link", 
+    type: "text_link" as const, 
     offset: 6, 
     length: 4, 
     url: "https://example.com" 
@@ -1126,7 +1126,7 @@ Deno.test("FormattedString - find method different URL should not match", () => 
   // Pattern with different URL
   const patternText = "here";
   const patternEntities = [{ 
-    type: "text_link", 
+    type: "text_link" as const, 
     offset: 0, 
     length: 4, 
     url: "https://different.com" 
@@ -1159,16 +1159,16 @@ Deno.test("FormattedString - find method complex entity overlap", () => {
   // Test with entities that span across the search pattern boundaries
   const sourceText = "prefix bold and italic suffix";
   const sourceEntities = [
-    { type: "bold", offset: 7, length: 15 }, // "bold and italic"
-    { type: "italic", offset: 16, length: 6 }, // "italic"
+    { type: "bold" as const, offset: 7, length: 15 }, // "bold and italic"
+    { type: "italic" as const, offset: 16, length: 6 }, // "italic"
   ];
   const source = new FormattedString(sourceText, sourceEntities);
 
   // Look for "and italic" with both bold on entire text and italic on "italic" part
   const patternText = "and italic";
   const patternEntities = [
-    { type: "bold", offset: 0, length: 10 }, // bold on entire "and italic"
-    { type: "italic", offset: 4, length: 6 }, // italic on "italic" part
+    { type: "bold" as const, offset: 0, length: 10 }, // bold on entire "and italic"
+    { type: "italic" as const, offset: 4, length: 6 }, // italic on "italic" part
   ];
   const pattern = new FormattedString(patternText, patternEntities);
 
