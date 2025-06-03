@@ -848,12 +848,12 @@ Deno.test("FormattedString - Static join method entity behavior", () => {
   // Test entity behavior when joining FormattedStrings
   const boldText1 = FormattedString.bold("Hello");
   const boldText2 = FormattedString.bold("World");
-  
+
   const result = FormattedString.join([boldText1, boldText2], " ");
-  
+
   assertInstanceOf(result, FormattedString);
   assertEquals(result.rawText, "Hello World");
-  
+
   // Should have two separate bold entities because the space separator is not bold
   assertEquals(result.rawEntities.length, 2);
   assertEquals(result.rawEntities[0]?.type, "bold");
@@ -862,10 +862,10 @@ Deno.test("FormattedString - Static join method entity behavior", () => {
   assertEquals(result.rawEntities[1]?.type, "bold");
   assertEquals(result.rawEntities[1]?.offset, 6);
   assertEquals(result.rawEntities[1]?.length, 5); // "World"
-  
+
   // Test without separator - should also consolidate
   const resultNoSep = FormattedString.join([boldText1, boldText2]);
-  
+
   assertInstanceOf(resultNoSep, FormattedString);
   assertEquals(resultNoSep.rawText, "HelloWorld");
   assertEquals(resultNoSep.rawEntities.length, 1);
@@ -876,9 +876,9 @@ Deno.test("FormattedString - Static join method entity behavior", () => {
   // Test with different entity types - should NOT consolidate
   const boldText = FormattedString.bold("Hello");
   const italicText = FormattedString.italic("World");
-  
+
   const mixedResult = FormattedString.join([boldText, italicText], " ");
-  
+
   assertInstanceOf(mixedResult, FormattedString);
   assertEquals(mixedResult.rawText, "Hello World");
   assertEquals(mixedResult.rawEntities.length, 2); // Should remain separate
@@ -887,8 +887,11 @@ Deno.test("FormattedString - Static join method entity behavior", () => {
 
   // Test with FormattedString separator between same entity types
   const boldSeparator = FormattedString.bold(" | ");
-  const resultWithBoldSep = FormattedString.join([boldText1, boldText2], boldSeparator);
-  
+  const resultWithBoldSep = FormattedString.join(
+    [boldText1, boldText2],
+    boldSeparator,
+  );
+
   assertInstanceOf(resultWithBoldSep, FormattedString);
   assertEquals(resultWithBoldSep.rawText, "Hello | World");
   assertEquals(resultWithBoldSep.rawEntities.length, 1); // All bold parts should be consolidated

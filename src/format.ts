@@ -338,9 +338,12 @@ export class FormattedString
       }
       return fmt`${acc}${sep}${item}`;
     }, new FormattedString(""));
-    
+
     // Consolidate adjacent/overlapping entities of the same type
-    return new FormattedString(result.rawText, result.consolidateEntities(result.rawEntities));
+    return new FormattedString(
+      result.rawText,
+      result.consolidateEntities(result.rawEntities),
+    );
   }
 
   // Instance formatting methods
