@@ -332,12 +332,18 @@ export class FormattedString
     }
 
     const sep = separator ?? "";
-    return items.reduce<FormattedString>((acc, item, index) => {
+    const result = items.reduce<FormattedString>((acc, item, index) => {
       if (index === 0) {
         return fmt`${item}`;
       }
       return fmt`${acc}${sep}${item}`;
     }, new FormattedString(""));
+
+    // Consolidate adjacent/overlapping entities of the same type
+    return new FormattedString(
+      result.rawText,
+      result.consolidateEntities(result.rawEntities),
+    );
   }
 
   // Instance formatting methods
@@ -560,6 +566,190 @@ export class FormattedString
     }
 
     return new FormattedString(slicedText, slicedEntities);
+  }
+
+  /**
+   * Finds the first occurrence of a FormattedString pattern within this FormattedString
+   * that matches both the raw text and raw entities exactly.
+   * @param pattern The FormattedString pattern to search for
+   * @returns The offset where the pattern is found, or -1 if not found
+   */
+  find(pattern: FormattedString): number {
+    // Handle empty pattern - matches at the beginning
+    if (pattern.rawText.length === 0) {
+      return 0;
+    }
+
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > this.rawText.length) {
+      return -1;
+    }
+
+    // Use indexOf to find text matches efficiently
+    let searchStart = 0;
+    let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+
+    while (textIndex !== -1) {
+      // Use slice to extract candidate and compare entities
+      const candidate = this.slice(
+        textIndex,
+        textIndex + pattern.rawText.length,
+      );
+
+      // Compare entities for exact match
+      if (this.entitiesEqual(candidate.rawEntities, pattern.rawEntities)) {
+        return textIndex;
+      }
+
+      // Continue searching from the next position
+      searchStart = textIndex + 1;
+      textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+    }
+
+    return -1;
+  }
+
+  /**
+   * Consolidates overlapping or adjacent entities of the same type
+   * @param entities Array of entities to consolidate
+   * @returns New array with consolidated entities
+   */
+  protected consolidateEntities(entities: MessageEntity[]): MessageEntity[] {
+    if (entities.length <= 1) {
+      return [...entities];
+    }
+
+    // Sort entities by offset to process them in order
+    const sortedEntities = [...entities].sort((a, b) => a.offset - b.offset);
+    const consolidated: MessageEntity[] = [];
+
+    let current = { ...sortedEntities[0] };
+
+    for (let i = 1; i < sortedEntities.length; i++) {
+      const next = sortedEntities[i];
+
+      // Check if entities can be consolidated
+      if (this.canConsolidateEntities(current, next)) {
+        // Merge the entities by extending the current entity
+        const currentEnd = current.offset + current.length;
+        const nextEnd = next.offset + next.length;
+        current.length = Math.max(currentEnd, nextEnd) - current.offset;
+      } else {
+        // Cannot consolidate, add current to result and move to next
+        consolidated.push(current);
+        current = { ...next };
+      }
+    }
+
+    // Add the last entity
+    consolidated.push(current);
+
+    return consolidated;
+  }
+
+  /**
+   * Helper method to check if two entities can be consolidated
+   * @param entity1 First entity
+   * @param entity2 Second entity (should have offset >= entity1.offset)
+   * @returns true if entities can be consolidated, false otherwise
+   */
+  private canConsolidateEntities(
+    entity1: MessageEntity,
+    entity2: MessageEntity,
+  ): boolean {
+    // Must have the same type
+    if (entity1.type !== entity2.type) {
+      return false;
+    }
+
+    // Check type-specific properties for compatibility
+    if (entity1.type === "text_link" && entity2.type === "text_link") {
+      if (entity1.url !== entity2.url) {
+        return false;
+      }
+    }
+
+    if (entity1.type === "pre" && entity2.type === "pre") {
+      if (entity1.language !== entity2.language) {
+        return false;
+      }
+    }
+
+    if (entity1.type === "custom_emoji" && entity2.type === "custom_emoji") {
+      if (entity1.custom_emoji_id !== entity2.custom_emoji_id) {
+        return false;
+      }
+    }
+
+    if (entity1.type === "text_mention" && entity2.type === "text_mention") {
+      if (entity1.user !== entity2.user) {
+        return false;
+      }
+    }
+
+    // Check if entities overlap or are adjacent
+    const entity1End = entity1.offset + entity1.length;
+    const entity2Start = entity2.offset;
+
+    // Adjacent (touching) or overlapping entities can be consolidated
+    return entity2Start <= entity1End;
+  }
+
+  /**
+   * Helper method to compare two arrays of message entities for exact equality
+   * @param entities1 First array of entities
+   * @param entities2 Second array of entities
+   * @returns true if the entities are exactly equal, false otherwise
+   */
+  private entitiesEqual(
+    entities1: MessageEntity[],
+    entities2: MessageEntity[],
+  ): boolean {
+    if (entities1.length !== entities2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < entities1.length; i++) {
+      const entity1 = entities1[i];
+      const entity2 = entities2[i];
+
+      // Compare all properties of the entities
+      if (
+        entity1.type !== entity2.type ||
+        entity1.offset !== entity2.offset ||
+        entity1.length !== entity2.length
+      ) {
+        return false;
+      }
+
+      // Compare type-specific properties based on entity type
+      if (entity1.type === "text_link" && entity2.type === "text_link") {
+        if (entity1.url !== entity2.url) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "pre" && entity2.type === "pre") {
+        if (entity1.language !== entity2.language) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "custom_emoji" && entity2.type === "custom_emoji") {
+        if (entity1.custom_emoji_id !== entity2.custom_emoji_id) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "text_mention" && entity2.type === "text_mention") {
+        // Compare user property (basic equality check)
+        if (entity1.user !== entity2.user) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
 
