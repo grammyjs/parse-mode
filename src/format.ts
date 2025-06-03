@@ -332,7 +332,7 @@ export class FormattedString
     }
 
     const sep = separator ?? "";
-    return items.reduce((acc, item, index) => {
+    return items.reduce<FormattedString>((acc, item, index) => {
       if (index === 0) {
         return fmt`${item}`;
       }
