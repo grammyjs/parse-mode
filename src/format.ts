@@ -561,6 +561,104 @@ export class FormattedString
 
     return new FormattedString(slicedText, slicedEntities);
   }
+
+  /**
+   * Finds the first occurrence of a FormattedString pattern within this FormattedString
+   * that matches both the raw text and raw entities exactly.
+   * @param pattern The FormattedString pattern to search for
+   * @returns The offset where the pattern is found, or -1 if not found
+   */
+  find(pattern: FormattedString): number {
+    // Handle empty pattern - matches at the beginning
+    if (pattern.rawText.length === 0) {
+      return 0;
+    }
+
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > this.rawText.length) {
+      return -1;
+    }
+
+    // Use indexOf to find text matches efficiently
+    let searchStart = 0;
+    let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+
+    while (textIndex !== -1) {
+      // Use slice to extract candidate and compare entities
+      const candidate = this.slice(
+        textIndex,
+        textIndex + pattern.rawText.length,
+      );
+
+      // Compare entities for exact match
+      if (this.entitiesEqual(candidate.rawEntities, pattern.rawEntities)) {
+        return textIndex;
+      }
+
+      // Continue searching from the next position
+      searchStart = textIndex + 1;
+      textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+    }
+
+    return -1;
+  }
+
+  /**
+   * Helper method to compare two arrays of message entities for exact equality
+   * @param entities1 First array of entities
+   * @param entities2 Second array of entities
+   * @returns true if the entities are exactly equal, false otherwise
+   */
+  private entitiesEqual(
+    entities1: MessageEntity[],
+    entities2: MessageEntity[],
+  ): boolean {
+    if (entities1.length !== entities2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < entities1.length; i++) {
+      const entity1 = entities1[i];
+      const entity2 = entities2[i];
+
+      // Compare all properties of the entities
+      if (
+        entity1.type !== entity2.type ||
+        entity1.offset !== entity2.offset ||
+        entity1.length !== entity2.length
+      ) {
+        return false;
+      }
+
+      // Compare type-specific properties based on entity type
+      if (entity1.type === "text_link" && entity2.type === "text_link") {
+        if (entity1.url !== entity2.url) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "pre" && entity2.type === "pre") {
+        if (entity1.language !== entity2.language) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "custom_emoji" && entity2.type === "custom_emoji") {
+        if (entity1.custom_emoji_id !== entity2.custom_emoji_id) {
+          return false;
+        }
+      }
+
+      if (entity1.type === "text_mention" && entity2.type === "text_mention") {
+        // Compare user property (basic equality check)
+        if (entity1.user !== entity2.user) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(
