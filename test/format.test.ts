@@ -844,6 +844,75 @@ Deno.test("FormattedString - Static join method with separator", () => {
   assertEquals(result9.rawEntities[0]?.length, 2); // "->"
 });
 
+Deno.test("FormattedString - Static join method entity behavior", () => {
+  // Test entity behavior when joining FormattedStrings
+  const boldText1 = FormattedString.bold("Hello");
+  const boldText2 = FormattedString.bold("World");
+
+  const result = FormattedString.join([boldText1, boldText2], " ");
+
+  assertInstanceOf(result, FormattedString);
+  assertEquals(result.rawText, "Hello World");
+
+  // Should have two separate bold entities because the space separator is not bold
+  assertEquals(result.rawEntities.length, 2);
+  assertEquals(result.rawEntities[0]?.type, "bold");
+  assertEquals(result.rawEntities[0]?.offset, 0);
+  assertEquals(result.rawEntities[0]?.length, 5); // "Hello"
+  assertEquals(result.rawEntities[1]?.type, "bold");
+  assertEquals(result.rawEntities[1]?.offset, 6);
+  assertEquals(result.rawEntities[1]?.length, 5); // "World"
+
+  // Test without separator - should also consolidate
+  const resultNoSep = FormattedString.join([boldText1, boldText2]);
+
+  assertInstanceOf(resultNoSep, FormattedString);
+  assertEquals(resultNoSep.rawText, "HelloWorld");
+  assertEquals(resultNoSep.rawEntities.length, 1);
+  assertEquals(resultNoSep.rawEntities[0]?.type, "bold");
+  assertEquals(resultNoSep.rawEntities[0]?.offset, 0);
+  assertEquals(resultNoSep.rawEntities[0]?.length, 10); // "HelloWorld"
+
+  // Test with different entity types - should NOT consolidate
+  const boldText = FormattedString.bold("Hello");
+  const italicText = FormattedString.italic("World");
+
+  const mixedResult = FormattedString.join([boldText, italicText], " ");
+
+  assertInstanceOf(mixedResult, FormattedString);
+  assertEquals(mixedResult.rawText, "Hello World");
+  assertEquals(mixedResult.rawEntities.length, 2); // Should remain separate
+  assertEquals(mixedResult.rawEntities[0]?.type, "bold");
+  assertEquals(mixedResult.rawEntities[1]?.type, "italic");
+
+  // Test with FormattedString separator between same entity types
+  const boldSeparator = FormattedString.bold(" | ");
+  const resultWithBoldSep = FormattedString.join(
+    [boldText1, boldText2],
+    boldSeparator,
+  );
+
+  assertInstanceOf(resultWithBoldSep, FormattedString);
+  assertEquals(resultWithBoldSep.rawText, "Hello | World");
+  assertEquals(resultWithBoldSep.rawEntities.length, 1); // All bold parts should be consolidated
+  assertEquals(resultWithBoldSep.rawEntities[0]?.type, "bold");
+  assertEquals(resultWithBoldSep.rawEntities[0]?.offset, 0);
+  assertEquals(resultWithBoldSep.rawEntities[0]?.length, 13); // "Hello | World"
+
+  // Test that single item doesn't go through consolidation path
+  const singleResult = FormattedString.join([boldText1]);
+  assertInstanceOf(singleResult, FormattedString);
+  assertEquals(singleResult.rawText, "Hello");
+  assertEquals(singleResult.rawEntities.length, 1);
+  assertEquals(singleResult.rawEntities[0]?.type, "bold");
+
+  // Test empty array
+  const emptyResult = FormattedString.join([]);
+  assertInstanceOf(emptyResult, FormattedString);
+  assertEquals(emptyResult.rawText, "");
+  assertEquals(emptyResult.rawEntities.length, 0);
+});
+
 Deno.test("FormattedString - Instance slice method", () => {
   // Test the example from the problem statement
   const originalText = "hello bold and italic world";
