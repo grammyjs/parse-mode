@@ -641,6 +641,87 @@ export class FormattedString
   findAll(pattern: FormattedString): number[] {
     return this._findMatches(pattern, true);
   }
+
+  /**
+   * Returns a new FormattedString with the first occurrence of pattern replaced by replacement.
+   * Both the raw text and raw entities must match exactly for replacement to occur.
+   * @param pattern The FormattedString pattern to search for and replace
+   * @param replacement The FormattedString to replace the pattern with
+   * @returns A new FormattedString with the first match replaced, or a copy if no match found
+   */
+  replace(pattern: FormattedString, replacement: FormattedString): FormattedString {
+    const matchOffset = this.find(pattern);
+    
+    if (matchOffset === -1) {
+      // No match found, return a copy of the original
+      return new FormattedString(this.rawText, [...this.rawEntities]);
+    }
+
+    // Split the string into three parts: before, match, after
+    const before = this.slice(0, matchOffset);
+    const after = this.slice(matchOffset + pattern.rawText.length);
+
+    // Join the parts with the replacement
+    return FormattedString.join([before, replacement, after]);
+  }
+
+  /**
+   * Returns a new FormattedString with all occurrences of pattern replaced by replacement.
+   * Both the raw text and raw entities must match exactly for replacement to occur.
+   * @param pattern The FormattedString pattern to search for and replace
+   * @param replacement The FormattedString to replace the pattern with
+   * @returns A new FormattedString with all matches replaced, or a copy if no matches found
+   */
+  replaceAll(pattern: FormattedString, replacement: FormattedString): FormattedString {
+    const allMatches = this.findAll(pattern);
+    
+    if (allMatches.length === 0) {
+      // No matches found, return a copy of the original
+      return new FormattedString(this.rawText, [...this.rawEntities]);
+    }
+
+    // Filter out overlapping matches - keep only non-overlapping ones
+    const nonOverlappingMatches: number[] = [];
+    let lastEnd = -1;
+
+    for (const matchOffset of allMatches) {
+      const matchEnd = matchOffset + pattern.rawText.length;
+      
+      if (matchOffset >= lastEnd) {
+        nonOverlappingMatches.push(matchOffset);
+        lastEnd = matchEnd;
+      }
+    }
+
+    // Process matches from right to left to avoid offset shifts
+    const segments: FormattedString[] = [];
+    let currentOffset = this.rawText.length;
+
+    // Work backwards through the non-overlapping matches
+    for (let i = nonOverlappingMatches.length - 1; i >= 0; i--) {
+      const matchOffset = nonOverlappingMatches[i];
+      const matchEnd = matchOffset + pattern.rawText.length;
+
+      // Add the text after this match (if any)
+      if (currentOffset > matchEnd) {
+        segments.unshift(this.slice(matchEnd, currentOffset));
+      }
+
+      // Add the replacement
+      segments.unshift(replacement);
+
+      // Update current offset to the start of this match
+      currentOffset = matchOffset;
+    }
+
+    // Add any remaining text before the first match
+    if (currentOffset > 0) {
+      segments.unshift(this.slice(0, currentOffset));
+    }
+
+    // Join all segments
+    return FormattedString.join(segments);
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(

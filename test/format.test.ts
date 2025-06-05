@@ -1398,3 +1398,242 @@ describe("FormattedString", () => {
     assertEquals(results[1], 27); // Third "world" at position 27
   });
 });
+
+describe("FormattedString - Replace methods", () => {
+  it("replace method basic functionality", () => {
+    // Test replacing a simple text match
+    const text = "Hello world, hello universe";
+    const source = new FormattedString(text, []);
+    const pattern = new FormattedString("hello", []);
+    const replacement = new FormattedString("hi", []);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Hello world, hi universe");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replace method with entities", () => {
+    // Test replacing text with matching entities
+    const sourceText = "Hello bold world and normal text";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 6, length: 10 }, // "bold world"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    const pattern = new FormattedString("bold world", [
+      { type: "bold" as const, offset: 0, length: 10 },
+    ]);
+    const replacement = new FormattedString("italic text", [
+      { type: "italic" as const, offset: 0, length: 11 },
+    ]);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Hello italic text and normal text");
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "italic");
+    assertEquals(result.rawEntities[0]?.offset, 6);
+    assertEquals(result.rawEntities[0]?.length, 11);
+  });
+
+  it("replace method entities must match exactly", () => {
+    // Test that entities must match exactly for replacement
+    const sourceText = "Hello bold world";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 6, length: 10 }, // "bold world"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    // Pattern with different entities (italic instead of bold)
+    const pattern = new FormattedString("bold world", [
+      { type: "italic" as const, offset: 0, length: 10 },
+    ]);
+    const replacement = new FormattedString("new text", []);
+
+    const result = source.replace(pattern, replacement);
+    // Should not replace because entities don't match
+    assertEquals(result.rawText, "Hello bold world");
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+  });
+
+  it("replace method not found", () => {
+    // Test replacement when pattern is not found
+    const source = new FormattedString("Hello world", []);
+    const pattern = new FormattedString("goodbye", []);
+    const replacement = new FormattedString("hi", []);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Hello world");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replace method preserves surrounding entities", () => {
+    // Test that entities before and after replacement are preserved
+    const sourceText = "Hello bold world and italic text";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 6, length: 4 }, // "bold"
+      { type: "italic" as const, offset: 21, length: 11 }, // "italic text"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    const pattern = new FormattedString("world", []);
+    const replacement = new FormattedString("universe", []);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Hello bold universe and italic text");
+    assertEquals(result.rawEntities.length, 2);
+    
+    // Check that "bold" entity is preserved
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 6);
+    assertEquals(result.rawEntities[0]?.length, 4);
+    
+    // Check that "italic text" entity is preserved and offset adjusted
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 24); // offset shifted by +3 ("universe" vs "world")
+    assertEquals(result.rawEntities[1]?.length, 11);
+  });
+
+  it("replace method complex entity replacement", () => {
+    // Test replacing a complex pattern with multiple entities
+    const sourceText = "Start bold and italic end";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 6, length: 4 }, // "bold"
+      { type: "italic" as const, offset: 15, length: 6 }, // "italic"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    const patternText = "bold and italic";
+    const patternEntities = [
+      { type: "bold" as const, offset: 0, length: 4 }, // "bold"
+      { type: "italic" as const, offset: 9, length: 6 }, // "italic"
+    ];
+    const pattern = new FormattedString(patternText, patternEntities);
+
+    const replacementText = "underlined text";
+    const replacementEntities = [
+      { type: "underline" as const, offset: 0, length: 15 },
+    ];
+    const replacement = new FormattedString(replacementText, replacementEntities);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Start underlined text end");
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "underline");
+    assertEquals(result.rawEntities[0]?.offset, 6);
+    assertEquals(result.rawEntities[0]?.length, 15);
+  });
+
+  it("replaceAll method basic functionality", () => {
+    // Test replacing multiple simple text matches
+    const text = "Hello world, hello universe, hello galaxy";
+    const source = new FormattedString(text, []);
+    const pattern = new FormattedString("hello", []);
+    const replacement = new FormattedString("hi", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "Hello world, hi universe, hi galaxy");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replaceAll method with entities", () => {
+    // Test replacing multiple text matches with entities
+    const sourceText = "Hello bold world and bold text";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 6, length: 4 }, // first "bold"
+      { type: "bold" as const, offset: 21, length: 4 }, // second "bold"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    const pattern = new FormattedString("bold", [
+      { type: "bold" as const, offset: 0, length: 4 },
+    ]);
+    const replacement = new FormattedString("italic", [
+      { type: "italic" as const, offset: 0, length: 6 },
+    ]);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "Hello italic world and italic text");
+    assertEquals(result.rawEntities.length, 2);
+    
+    // Check first replacement
+    assertEquals(result.rawEntities[0]?.type, "italic");
+    assertEquals(result.rawEntities[0]?.offset, 6);
+    assertEquals(result.rawEntities[0]?.length, 6);
+    
+    // Check second replacement
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 25); // offset adjusted for length difference
+    assertEquals(result.rawEntities[1]?.length, 6);
+  });
+
+  it("replaceAll method no matches", () => {
+    // Test replaceAll when pattern is not found
+    const source = new FormattedString("Hello world", []);
+    const pattern = new FormattedString("goodbye", []);
+    const replacement = new FormattedString("hi", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "Hello world");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replaceAll method overlapping prevention", () => {
+    // Test that replaceAll doesn't create overlapping matches
+    const text = "aaaa";
+    const source = new FormattedString(text, []);
+    const pattern = new FormattedString("aa", []);
+    const replacement = new FormattedString("b", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    // Should replace non-overlapping matches: "aa|aa" -> "b|b"
+    assertEquals(result.rawText, "bb");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replaceAll method preserves complex entities", () => {
+    // Test that complex entity structures are preserved correctly
+    const sourceText = "Link to google and normal link text";
+    const sourceEntities = [
+      { type: "text_link" as const, offset: 0, length: 14, url: "https://google.com" }, // "Link to google"
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    const pattern = new FormattedString("link", []);
+    const replacement = new FormattedString("URL", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "Link to google and normal URL text");
+    assertEquals(result.rawEntities.length, 1);
+    
+    // Check that the link entity is preserved
+    assertEquals(result.rawEntities[0]?.type, "text_link");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 14); // "Link to google" unchanged
+    assertEquals((result.rawEntities[0] as any)?.url, "https://google.com");
+  });
+
+  it("replaceAll method with adjacent patterns", () => {
+    // Test replacing adjacent patterns
+    const text = "abcabc";
+    const source = new FormattedString(text, []);
+    const pattern = new FormattedString("abc", []);
+    const replacement = new FormattedString("xyz", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "xyzxyz");
+    assertEquals(result.rawEntities.length, 0);
+  });
+
+  it("replaceAll method empty replacement", () => {
+    // Test replacing with empty string (deletion)
+    const text = "Hello, world! Hello, universe!";
+    const source = new FormattedString(text, []);
+    const pattern = new FormattedString("Hello, ", []);
+    const replacement = new FormattedString("", []);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "world! universe!");
+    assertEquals(result.rawEntities.length, 0);
+  });
+});
