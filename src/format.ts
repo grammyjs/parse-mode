@@ -575,7 +575,10 @@ export class FormattedString
    * @param findAll If true, finds all matches; if false, stops after first match
    * @returns Array of all match offsets if findAll is true, or first match offset (or -1) if findAll is false
    */
-  protected _findMatches(pattern: FormattedString, findAll: boolean): number[] | number {
+  protected _findMatches(
+    pattern: FormattedString,
+    findAll: boolean,
+  ): number[] | number {
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
       return findAll ? [0] : 0;
