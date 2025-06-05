@@ -573,20 +573,20 @@ export class FormattedString
    * Protected method that finds pattern matches within this FormattedString.
    * @param pattern The FormattedString pattern to search for
    * @param findAll If true, finds all matches; if false, stops after first match
-   * @returns Array of all match offsets if findAll is true, or first match offset (or -1) if findAll is false
+   * @returns Array of match offsets
    */
   protected _findMatches(
     pattern: FormattedString,
     findAll: boolean,
-  ): number[] | number {
+  ): number[] {
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
-      return findAll ? [0] : 0;
+      return [0];
     }
 
     // Pattern cannot be longer than source
     if (pattern.rawText.length > this.rawText.length) {
-      return findAll ? [] : -1;
+      return [];
     }
 
     const matches: number[] = [];
@@ -607,10 +607,9 @@ export class FormattedString
           pattern.rawEntities,
         )
       ) {
-        if (findAll) {
-          matches.push(textIndex);
-        } else {
-          return textIndex;
+        matches.push(textIndex);
+        if (!findAll) {
+          break;
         }
       }
 
@@ -619,7 +618,7 @@ export class FormattedString
       textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
     }
 
-    return findAll ? matches : -1;
+    return matches;
   }
 
   /**
@@ -629,7 +628,8 @@ export class FormattedString
    * @returns The offset where the pattern is found, or -1 if not found
    */
   find(pattern: FormattedString): number {
-    return this._findMatches(pattern, false) as number;
+    const matches = this._findMatches(pattern, false);
+    return matches.length > 0 ? matches[0] : -1;
   }
 
   /**
@@ -639,7 +639,7 @@ export class FormattedString
    * @returns Array of offsets where the pattern is found, or empty array if not found
    */
   findAll(pattern: FormattedString): number[] {
-    return this._findMatches(pattern, true) as number[];
+    return this._findMatches(pattern, true);
   }
 }
 
