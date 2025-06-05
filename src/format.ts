@@ -641,6 +641,106 @@ export class FormattedString
   findAll(pattern: FormattedString): number[] {
     return this._findMatches(pattern, true);
   }
+
+  /**
+   * Protected method to replace matches at given offsets with a replacement.
+   * @param pattern The FormattedString pattern being replaced (needed for length calculation)
+   * @param replacement The FormattedString to replace matches with
+   * @param matchOffsets Array of offsets where matches were found
+   * @returns A new FormattedString with matches replaced
+   */
+  protected replaceMatches(
+    pattern: FormattedString,
+    replacement: FormattedString,
+    matchOffsets: number[],
+  ): FormattedString {
+    if (matchOffsets.length === 0) {
+      // No matches found, return a copy of the original
+      return new FormattedString(this.rawText, [...this.rawEntities]);
+    }
+
+    // Process matches from right to left to avoid offset shifts
+    const segments: FormattedString[] = [];
+    let currentOffset = this.rawText.length;
+
+    // Work backwards through the matches
+    for (let i = matchOffsets.length - 1; i >= 0; i--) {
+      const matchOffset = matchOffsets[i];
+      const matchEnd = matchOffset + pattern.rawText.length;
+
+      // Add the text after this match (if any)
+      if (currentOffset > matchEnd) {
+        segments.unshift(this.slice(matchEnd, currentOffset));
+      }
+
+      // Add the replacement
+      segments.unshift(replacement);
+
+      // Update current offset to the start of this match
+      currentOffset = matchOffset;
+    }
+
+    // Add any remaining text before the first match
+    if (currentOffset > 0) {
+      segments.unshift(this.slice(0, currentOffset));
+    }
+
+    // Join all segments
+    return FormattedString.join(segments);
+  }
+
+  /**
+   * Returns a new FormattedString with the first occurrence of pattern replaced by replacement.
+   * Both the raw text and raw entities must match exactly for replacement to occur.
+   * @param pattern The FormattedString pattern to search for and replace
+   * @param replacement The FormattedString to replace the pattern with
+   * @returns A new FormattedString with the first match replaced, or a copy if no match found
+   */
+  replace(
+    pattern: FormattedString,
+    replacement: FormattedString,
+  ): FormattedString {
+    const matchOffset = this.find(pattern);
+
+    if (matchOffset === -1) {
+      return this.replaceMatches(pattern, replacement, []);
+    }
+
+    return this.replaceMatches(pattern, replacement, [matchOffset]);
+  }
+
+  /**
+   * Returns a new FormattedString with all occurrences of pattern replaced by replacement.
+   * Both the raw text and raw entities must match exactly for replacement to occur.
+   * @param pattern The FormattedString pattern to search for and replace
+   * @param replacement The FormattedString to replace the pattern with
+   * @returns A new FormattedString with all matches replaced, or a copy if no matches found
+   */
+  replaceAll(
+    pattern: FormattedString,
+    replacement: FormattedString,
+  ): FormattedString {
+    const allMatches = this.findAll(pattern);
+
+    if (allMatches.length === 0) {
+      return this.replaceMatches(pattern, replacement, []);
+    }
+
+    // Filter out overlapping matches - keep only non-overlapping ones
+    const nonOverlappingMatches: number[] = [];
+    let lastEnd = -1;
+
+    for (const matchOffset of allMatches) {
+      const matchEnd = matchOffset + pattern.rawText.length;
+
+      if (matchOffset >= lastEnd) {
+        nonOverlappingMatches.push(matchOffset);
+        lastEnd = matchEnd;
+      }
+    }
+
+    return this.replaceMatches(pattern, replacement, nonOverlappingMatches);
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(
