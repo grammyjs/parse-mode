@@ -265,7 +265,10 @@ describe("FormattedString - Static special methods", () => {
     assertEquals(mentionFormatted.rawEntities[0]?.offset, 0);
     assertEquals(mentionFormatted.rawEntities[0]?.length, text.length);
     //@ts-expect-error quick test
-    assertEquals(mentionFormatted.rawEntities[0]?.url, `tg://user?id=123456789`);
+    assertEquals(
+      mentionFormatted.rawEntities[0]?.url,
+      `tg://user?id=123456789`,
+    );
   });
 
   it("Static customEmoji method", () => {
@@ -333,11 +336,8 @@ describe("FormattedString - Static special methods", () => {
   });
 });
 
-
-
 describe("FormattedString", () => {
   it("Instance bold methods", () => {
-
     const initialText = "Hello ";
     const boldText = "World";
     const initialFormatted = new FormattedString(initialText, []);
@@ -360,11 +360,9 @@ describe("FormattedString", () => {
     assertEquals(bResult.rawEntities[0]?.type, "bold");
     assertEquals(bResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(bResult.rawEntities[0]?.length, boldText.length);
-
   });
 
   it("Instance italic methods", () => {
-
     const initialText = "Hello ";
     const italicText = "World";
     const initialFormatted = new FormattedString(initialText, []);
@@ -387,11 +385,9 @@ describe("FormattedString", () => {
     assertEquals(iResult.rawEntities[0]?.type, "italic");
     assertEquals(iResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(iResult.rawEntities[0]?.length, italicText.length);
-
   });
 
   it("Instance strikethrough methods", () => {
-
     const initialText = "Hello ";
     const strikeText = "World";
     const initialFormatted = new FormattedString(initialText, []);
@@ -414,11 +410,9 @@ describe("FormattedString", () => {
     assertEquals(sResult.rawEntities[0]?.type, "strikethrough");
     assertEquals(sResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(sResult.rawEntities[0]?.length, strikeText.length);
-
   });
 
   it("Instance underline methods", () => {
-
     const initialText = "Hello ";
     const underlineText = "World";
     const initialFormatted = new FormattedString(initialText, []);
@@ -441,11 +435,9 @@ describe("FormattedString", () => {
     assertEquals(uResult.rawEntities[0]?.type, "underline");
     assertEquals(uResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(uResult.rawEntities[0]?.length, underlineText.length);
-
   });
 
   it("Instance link methods", () => {
-
     const initialText = "Visit ";
     const linkText = "our website";
     const url = "https://example.com";
@@ -473,11 +465,9 @@ describe("FormattedString", () => {
     assertEquals(aResult.rawEntities[0]?.length, linkText.length);
     //@ts-expect-error quick test
     assertEquals(aResult.rawEntities[0]?.url, url);
-
   });
 
   it("Instance code method", () => {
-
     const initialText = "Run ";
     const codeText = "npm install";
     const initialFormatted = new FormattedString(initialText, []);
@@ -492,11 +482,9 @@ describe("FormattedString", () => {
     assertEquals(codeResult.rawEntities[0]?.type, "code");
     assertEquals(codeResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(codeResult.rawEntities[0]?.length, codeText.length);
-
   });
 
   it("Instance pre method", () => {
-
     const initialText = "Code example:\n";
     const preText = "console.log('hello');";
     const language = "javascript";
@@ -514,11 +502,9 @@ describe("FormattedString", () => {
     assertEquals(preResult.rawEntities[0]?.length, preText.length);
     //@ts-expect-error quick test
     assertEquals(preResult.rawEntities[0]?.language, language);
-
   });
 
   it("Instance spoiler method", () => {
-
     const initialText = "Spoiler alert: ";
     const spoilerText = "secret text";
     const initialFormatted = new FormattedString(initialText, []);
@@ -533,11 +519,9 @@ describe("FormattedString", () => {
     assertEquals(spoilerResult.rawEntities[0]?.type, "spoiler");
     assertEquals(spoilerResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(spoilerResult.rawEntities[0]?.length, spoilerText.length);
-
   });
 
   it("Instance blockquote method", () => {
-
     const initialText = "As they say: ";
     const quoteText = "To be or not to be";
     const initialFormatted = new FormattedString(initialText, []);
@@ -552,11 +536,9 @@ describe("FormattedString", () => {
     assertEquals(quoteResult.rawEntities[0]?.type, "blockquote");
     assertEquals(quoteResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(quoteResult.rawEntities[0]?.length, quoteText.length);
-
   });
 
   it("Instance expandableBlockquote method", () => {
-
     const initialText = "Long quote: ";
     const quoteText = "This is a very long quote that should be expandable";
     const initialFormatted = new FormattedString(initialText, []);
@@ -571,11 +553,9 @@ describe("FormattedString", () => {
     assertEquals(quoteResult.rawEntities[0]?.type, "expandable_blockquote");
     assertEquals(quoteResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(quoteResult.rawEntities[0]?.length, quoteText.length);
-
   });
 
   it("Instance mentionUser method", () => {
-
     const initialText = "Hello ";
     const mentionText = "@user";
     const userId = 123456789;
@@ -593,11 +573,9 @@ describe("FormattedString", () => {
     assertEquals(mentionResult.rawEntities[0]?.length, mentionText.length);
     //@ts-expect-error quick test
     assertEquals(mentionResult.rawEntities[0]?.url, `tg://user?id=123456789`);
-
   });
 
   it("Instance customEmoji method", () => {
-
     const initialText = "Check this out ";
     const placeholder = "😀";
     const emojiId = "5123456789123456789";
@@ -618,18 +596,20 @@ describe("FormattedString", () => {
       emojiResult.rawEntities[0]?.url,
       `tg://emoji?id=5123456789123456789`,
     );
-
   });
 
   it("Instance linkMessage method", () => {
-
     const initialText = "See ";
     const linkText = "this message";
     const chatId = -1001234567890;
     const messageId = 123;
     const initialFormatted = new FormattedString(initialText, []);
 
-    const linkResult = initialFormatted.linkMessage(linkText, chatId, messageId);
+    const linkResult = initialFormatted.linkMessage(
+      linkText,
+      chatId,
+      messageId,
+    );
 
     assertInstanceOf(linkResult, FormattedString);
     assertEquals(linkResult.rawText, `${initialText}${linkText}`);
@@ -640,12 +620,13 @@ describe("FormattedString", () => {
     assertEquals(linkResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(linkResult.rawEntities[0]?.length, linkText.length);
     //@ts-expect-error quick test
-    assertEquals(linkResult.rawEntities[0]?.url, `https://t.me/c/1234567890/123`);
-
+    assertEquals(
+      linkResult.rawEntities[0]?.url,
+      `https://t.me/c/1234567890/123`,
+    );
   });
 
   it("Instance plain method", () => {
-
     const initialText = "Hello";
     const plainText = " World";
     const initialFormatted = new FormattedString(initialText, []);
@@ -657,11 +638,9 @@ describe("FormattedString", () => {
 
     // Test entity properties - plain text should not add any entities
     assertEquals(plainResult.rawEntities.length, 0);
-
   });
 
   it("Complex chaining", () => {
-
     const result = new FormattedString("Start: ", [])
       .bold("Bold")
       .plain(" then ")
@@ -689,11 +668,9 @@ describe("FormattedString", () => {
     assertEquals(result.rawEntities[2]?.type, "code");
     assertEquals(result.rawEntities[2]?.offset, 28); // After "Start: Bold then Italic and "
     assertEquals(result.rawEntities[2]?.length, 4); // "code"
-
   });
 
   it("Stringable object as input", () => {
-
     const stringableObject = {
       toString: () => "custom string",
     };
@@ -708,22 +685,18 @@ describe("FormattedString", () => {
     assertEquals(result.rawEntities[0]?.type, "bold");
     assertEquals(result.rawEntities[0]?.offset, 0);
     assertEquals(result.rawEntities[0]?.length, "custom string".length);
-
   });
 
   it("Empty entities array", () => {
-
     const text = "Plain text";
     const formatted = new FormattedString(text, []);
 
     assertEquals(formatted.text, text);
     assertEquals(formatted.entities.length, 0);
     assertEquals(formatted.caption_entities.length, 0);
-
   });
 
   it("Multiple entities", () => {
-
     const text = "Hello World";
     const entities: MessageEntity[] = [
       { type: "bold" as const, offset: 0, length: 5 },
@@ -735,11 +708,9 @@ describe("FormattedString", () => {
     assertEquals(formatted.entities.length, 2);
     assertEquals(formatted.entities[0]?.type, "bold");
     assertEquals(formatted.entities[1]?.type, "italic");
-
   });
 
   it("Static join method", () => {
-
     // Test empty array
     const emptyResult = FormattedString.join([]);
     assertInstanceOf(emptyResult, FormattedString);
@@ -818,11 +789,9 @@ describe("FormattedString", () => {
     assertEquals(combinedResult.rawEntities[1]?.type, "italic");
     assertEquals(combinedResult.rawEntities[1]?.offset, 28); // After "Start: TextWithEntities and "
     assertEquals(combinedResult.rawEntities[1]?.length, 7); // "Caption"
-
   });
 
   it("Static join method with separator", () => {
-
     // Test basic string separator
     const result1 = FormattedString.join(["a", "b", "c"], " ");
     assertInstanceOf(result1, FormattedString);
@@ -868,7 +837,10 @@ describe("FormattedString", () => {
 
     // Test with FormattedString as separator
     const separatorFormatted = FormattedString.underline(" - ");
-    const result8 = FormattedString.join(["Hello", "World"], separatorFormatted);
+    const result8 = FormattedString.join(
+      ["Hello", "World"],
+      separatorFormatted,
+    );
 
     assertInstanceOf(result8, FormattedString);
     assertEquals(result8.rawText, "Hello - World");
@@ -890,11 +862,9 @@ describe("FormattedString", () => {
     assertEquals(result9.rawEntities[0]?.type, "code");
     assertEquals(result9.rawEntities[0]?.offset, 2); // After "A "
     assertEquals(result9.rawEntities[0]?.length, 2); // "->"
-
   });
 
   it("Static join method entity behavior", () => {
-
     // Test entity behavior when joining FormattedStrings
     const boldText1 = FormattedString.bold("Hello");
     const boldText2 = FormattedString.bold("World");
@@ -961,11 +931,9 @@ describe("FormattedString", () => {
     assertInstanceOf(emptyResult, FormattedString);
     assertEquals(emptyResult.rawText, "");
     assertEquals(emptyResult.rawEntities.length, 0);
-
   });
 
   it("Instance slice method", () => {
-
     // Test the example from the problem statement
     const originalText = "hello bold and italic world";
     const entities: MessageEntity[] = [
@@ -989,11 +957,9 @@ describe("FormattedString", () => {
     assertEquals(sliced.rawEntities[1]?.type, "italic");
     assertEquals(sliced.rawEntities[1]?.offset, 9);
     assertEquals(sliced.rawEntities[1]?.length, 5);
-
   });
 
   it("slice method edge cases", () => {
-
     const text = "Hello World Test";
     const entities: MessageEntity[] = [
       { type: "bold" as const, offset: 0, length: 5 }, // "Hello"
@@ -1041,22 +1007,18 @@ describe("FormattedString", () => {
     assertEquals(noEntitiesSlice.rawEntities[0]?.type, "bold");
     assertEquals(noEntitiesSlice.rawEntities[0]?.offset, 0);
     assertEquals(noEntitiesSlice.rawEntities[0]?.length, 1);
-
   });
 
   it("slice method with empty string", () => {
-
     const empty = new FormattedString("", []);
     const sliced = empty.slice(0, 0);
 
     assertInstanceOf(sliced, FormattedString);
     assertEquals(sliced.rawText, "");
     assertEquals(sliced.rawEntities.length, 0);
-
   });
 
   it("slice method boundary conditions", () => {
-
     const text = "abcdef";
     const entities: MessageEntity[] = [
       { type: "bold" as const, offset: 1, length: 4 }, // "bcde"
@@ -1083,11 +1045,9 @@ describe("FormattedString", () => {
     assertEquals(negativeStart.rawEntities[0]?.type, "bold");
     assertEquals(negativeStart.rawEntities[0]?.offset, 1);
     assertEquals(negativeStart.rawEntities[0]?.length, 2); // "bc"
-
   });
 
   it("slice method creates deep copy", () => {
-
     const original = new FormattedString("hello world", [
       { type: "bold" as const, offset: 0, length: 5 },
     ]);
@@ -1106,11 +1066,9 @@ describe("FormattedString", () => {
     assertEquals(sliced.rawEntities[0]?.type, "bold");
     assertEquals(sliced.rawEntities[0]?.offset, 0);
     assertEquals(sliced.rawEntities[0]?.length, 5);
-
   });
 
   it("find method basic functionality", () => {
-
     // Test finding a simple text match
     const text = "Hello world, hello universe";
     const source = new FormattedString(text, []);
@@ -1118,11 +1076,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 13); // Should find "hello" at position 13
-
   });
 
   it("find method with entities", () => {
-
     // Create a source with bold "world" at position 6
     const sourceText = "Hello world test";
     const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // "world"
@@ -1135,11 +1091,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 6); // Should find bold "world" at position 6
-
   });
 
   it("find method entities must match exactly", () => {
-
     // Create source with bold "world"
     const sourceText = "Hello world test world end";
     const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
@@ -1152,11 +1106,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, -1); // Should not find because entities don't match
-
   });
 
   it("find method text without entities", () => {
-
     // Create source with bold "world"
     const sourceText = "Hello world test world end";
     const sourceEntities = [{ type: "bold" as const, offset: 6, length: 5 }]; // first "world"
@@ -1167,11 +1119,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 17); // Should find the second "world" at position 17 (plain text)
-
   });
 
   it("find method multiple entities", () => {
-
     // Create source with multiple formatting
     const sourceText = "Hello bold italic world";
     const sourceEntities = [
@@ -1190,41 +1140,33 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 6); // Should find the pattern starting at position 6
-
   });
 
   it("find method not found", () => {
-
     const source = new FormattedString("Hello world", []);
     const pattern = new FormattedString("foo", []);
 
     const result = source.find(pattern);
     assertEquals(result, -1); // Should return -1 when not found
-
   });
 
   it("find method empty pattern", () => {
-
     const source = new FormattedString("Hello world", []);
     const pattern = new FormattedString("", []);
 
     const result = source.find(pattern);
     assertEquals(result, 0); // Empty string should match at the beginning
-
   });
 
   it("find method pattern longer than source", () => {
-
     const source = new FormattedString("Hi", []);
     const pattern = new FormattedString("Hello world", []);
 
     const result = source.find(pattern);
     assertEquals(result, -1); // Should return -1 when pattern is longer than source
-
   });
 
   it("find method exact match", () => {
-
     const text = "Hello world";
     const entities = [{ type: "bold" as const, offset: 0, length: 5 }];
     const source = new FormattedString(text, entities);
@@ -1232,11 +1174,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 0); // Should find exact match at position 0
-
   });
 
   it("find method with special entity properties", () => {
-
     // Test with entities that have additional properties like URL
     const sourceText = "Click here to visit example.com";
     const sourceEntities = [{
@@ -1259,11 +1199,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 6); // Should find the link at position 6
-
   });
 
   it("find method different URL should not match", () => {
-
     // Test with entities that have different URLs
     const sourceText = "Click here to visit example.com";
     const sourceEntities = [{
@@ -1286,21 +1224,17 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, -1); // Should not find because URLs are different
-
   });
 
   it("find method case sensitive", () => {
-
     const source = new FormattedString("Hello World", []);
     const pattern = new FormattedString("hello", []);
 
     const result = source.find(pattern);
     assertEquals(result, -1); // Should be case sensitive and not find "hello" in "Hello"
-
   });
 
   it("find method overlapping matches", () => {
-
     // Test that it finds the first match when there are overlapping possibilities
     const sourceText = "aaaa";
     const source = new FormattedString(sourceText, []);
@@ -1308,11 +1242,9 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 0); // Should find the first "aa" at position 0
-
   });
 
   it("find method complex entity overlap", () => {
-
     // Test with entities that span across the search pattern boundaries
     const sourceText = "prefix bold and italic suffix";
     const sourceEntities = [
@@ -1331,7 +1263,5 @@ describe("FormattedString", () => {
 
     const result = source.find(pattern);
     assertEquals(result, 12); // Should find at position 12 where "and italic" starts
-
   });
-
 });

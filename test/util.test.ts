@@ -10,7 +10,6 @@ import type { MessageEntity, User } from "../src/deps.deno.ts";
 // Entity comparison method tests
 describe("isEntitySimilar", () => {
   it("basic functionality", () => {
-
     const entity1: MessageEntity = { type: "bold", offset: 0, length: 5 };
     const entity2: MessageEntity = { type: "bold", offset: 10, length: 3 };
     const entity3: MessageEntity = { type: "italic", offset: 0, length: 5 };
@@ -20,11 +19,9 @@ describe("isEntitySimilar", () => {
 
     // Different type should not be similar
     assertEquals(isEntitySimilar(entity1, entity3), false);
-
   });
 
   it("with text_link entities", () => {
-
     const entity1: MessageEntity = {
       type: "text_link",
       offset: 0,
@@ -49,11 +46,9 @@ describe("isEntitySimilar", () => {
 
     // Same type but different URL should not be similar
     assertEquals(isEntitySimilar(entity1, entity3), false);
-
   });
 
   it("with pre entities", () => {
-
     const entity1: MessageEntity = {
       type: "pre",
       offset: 0,
@@ -78,11 +73,9 @@ describe("isEntitySimilar", () => {
 
     // Same type but different language should not be similar
     assertEquals(isEntitySimilar(entity1, entity3), false);
-
   });
 
   it("with custom_emoji entities", () => {
-
     const entity1: MessageEntity = {
       type: "custom_emoji",
       offset: 0,
@@ -107,11 +100,9 @@ describe("isEntitySimilar", () => {
 
     // Same type but different emoji ID should not be similar
     assertEquals(isEntitySimilar(entity1, entity3), false);
-
   });
 
   it("with text_mention entities", () => {
-
     const user1 = { id: 123, is_bot: false, first_name: "John" };
     const copyUser1 = { id: 123, is_bot: false, first_name: "John" };
     const user2 = { id: 456, is_bot: false, first_name: "Jane" };
@@ -136,9 +127,12 @@ describe("isEntitySimilar", () => {
     };
 
     // Same type and user, different offset/length should be similar
-    assertEquals(isEntitySimilar(entity1, entity2describe("isEntityEqual", () => {
-  it("basic functionality", () => {
+    assertEquals(isEntitySimilar(entity1, entity2), true);
+  });
+});
 
+describe("isEntityEqual", () => {
+  it("basic functionality", () => {
     const entity1: MessageEntity = { type: "bold", offset: 0, length: 5 };
     const entity2: MessageEntity = { type: "bold", offset: 0, length: 5 };
     const entity3: MessageEntity = { type: "bold", offset: 10, length: 5 };
@@ -152,11 +146,9 @@ describe("isEntitySimilar", () => {
 
     // Same type and offset but different length should not be equal
     assertEquals(isEntityEqual(entity1, entity4), false);
-
   });
 
   it("with text_link entities", () => {
-
     const entity1: MessageEntity = {
       type: "text_link",
       offset: 0,
@@ -190,11 +182,9 @@ describe("isEntitySimilar", () => {
 
     // Same URL but different position should not be equal
     assertEquals(isEntityEqual(entity1, entity4), false);
-
   });
 
   it("comprehensive comparison", () => {
-
     const entity1: MessageEntity = {
       type: "pre",
       offset: 10,
@@ -217,9 +207,13 @@ describe("isEntitySimilar", () => {
     // Completely identical entities should be equal
     assertEquals(isEntityEqual(entity1, entity2), true);
 
-    // Different language should not be equal even with same describe("isUserEqual", () => {
-  it("identical users", () => {
+    // Different language should not be equal even with same type, offset, length
+    assertEquals(isEntityEqual(entity1, entity3), false);
+  });
+});
 
+describe("isUserEqual", () => {
+  it("identical users", () => {
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -236,11 +230,9 @@ describe("isEntitySimilar", () => {
     };
 
     assertEquals(isUserEqual(user1, user2), true);
-
   });
 
   it("different users", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -253,11 +245,9 @@ describe("isEntitySimilar", () => {
     };
 
     assertEquals(isUserEqual(user1, user2), false);
-
   });
 
   it("same properties but different values", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -270,11 +260,9 @@ describe("isEntitySimilar", () => {
     };
 
     assertEquals(isUserEqual(user1, user2), false);
-
   });
 
   it("null and undefined handling", () => {
-
     const user1 = {
       id: 123,
       is_bot: false,
@@ -290,11 +278,9 @@ describe("isEntitySimilar", () => {
 
     // null and undefined properties should be considered equal to absent properties
     assertEquals(isUserEqual(user1, user2), true);
-
   });
 
   it("undefined vs null equivalence", () => {
-
     const user1 = {
       id: 123,
       is_bot: false,
@@ -310,11 +296,9 @@ describe("isEntitySimilar", () => {
 
     // null and undefined should be considered equal
     assertEquals(isUserEqual(user1, user2), true);
-
   });
 
   it("extra properties with null/undefined", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -332,11 +316,9 @@ describe("isEntitySimilar", () => {
 
     // Extra null/undefined properties should not affect equality
     assertEquals(isUserEqual(user1, user2), true);
-
   });
 
   it("missing vs present property", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -351,11 +333,9 @@ describe("isEntitySimilar", () => {
 
     // user2 has a non-null property that user1 doesn't have
     assertEquals(isUserEqual(user1, user2), false);
-
   });
 
   it("different property sets", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -371,24 +351,36 @@ describe("isEntitySimilar", () => {
 
     // Different non-null properties should make users unequal
     assertEquals(isUserEqual(user1, user2), false);
-
   });
 
   it("empty object equivalence", () => {
-
     const user1: User = { id: 123, is_bot: false, first_name: "Test" };
     const user2: User = { id: 123, is_bot: false, first_name: "Test" };
 
     assertEquals(isUserEqual(user1, user2), true);
-
   });
 
   it("complex scenario with mixed null/undefined", () => {
-   id: 123, is_bot: false, first_name: "Test" 
+    const user1 = {
+      id: 123,
+      is_bot: false,
+      first_name: "John",
+      last_name: null,
+      username: "johndoe",
+      language_code: undefined,
+    } as unknown as User;
+    const user2: User = {
+      id: 123,
+      is_bot: false,
+      first_name: "John",
+      username: "johndoe",
+    };
+
+    // Should be equal despite null/undefined differences
+    assertEquals(isUserEqual(user1, user2), true);
   });
 
   it("boolean properties", () => {
-
     const user1: User = {
       id: 123,
       is_bot: false,
@@ -409,12 +401,8 @@ describe("isEntitySimilar", () => {
     };
 
     assertEquals(isUserEqual(user1, user3), false);
-
   });
-
 });
-
-);
 
 describe("Utility method tests", () => {
   it("Entity comparison methods consistency", () => {
