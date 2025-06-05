@@ -1339,11 +1339,35 @@ describe("FormattedString", () => {
     const source = new FormattedString(sourceText, []);
     const pattern = new FormattedString("aa", []);
 
-    const results = source.findAll(pattern);
+    const results = source.findAll(pattern, true);
     assertEquals(results.length, 3); // Should find "aa" at positions 0, 1, 2
     assertEquals(results[0], 0);
     assertEquals(results[1], 1);
     assertEquals(results[2], 2);
+  });
+
+  it("findAll method non-overlapping patterns (default)", () => {
+    // Test that it finds only non-overlapping matches by default
+    const sourceText = "aaaa";
+    const source = new FormattedString(sourceText, []);
+    const pattern = new FormattedString("aa", []);
+
+    const results = source.findAll(pattern);
+    assertEquals(results.length, 2); // Should find "aa" at positions 0, 2 (non-overlapping)
+    assertEquals(results[0], 0);
+    assertEquals(results[1], 2);
+  });
+
+  it("findAll method non-overlapping patterns explicit", () => {
+    // Test that it finds only non-overlapping matches when explicitly specified
+    const sourceText = "aaaa";
+    const source = new FormattedString(sourceText, []);
+    const pattern = new FormattedString("aa", []);
+
+    const results = source.findAll(pattern, false);
+    assertEquals(results.length, 2); // Should find "aa" at positions 0, 2 (non-overlapping)
+    assertEquals(results[0], 0);
+    assertEquals(results[1], 2);
   });
 
   it("findAll method with complex entities", () => {

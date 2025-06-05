@@ -573,11 +573,13 @@ export class FormattedString
    * Protected method that finds pattern matches within this FormattedString.
    * @param pattern The FormattedString pattern to search for
    * @param findAll If true, finds all matches; if false, stops after first match
+   * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
    * @returns Array of match offsets
    */
   protected _findMatches(
     pattern: FormattedString,
     findAll: boolean,
+    allowOverlapping: boolean = true,
   ): number[] {
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
@@ -614,7 +616,13 @@ export class FormattedString
       }
 
       // Continue searching from the next position
-      searchStart = textIndex + 1;
+      // For non-overlapping matches, skip ahead by pattern length if we found a match
+      // For overlapping matches, move only one position forward
+      if (!allowOverlapping && matches.length > 0 && matches[matches.length - 1] === textIndex) {
+        searchStart = textIndex + pattern.rawText.length;
+      } else {
+        searchStart = textIndex + 1;
+      }
       textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
     }
 
@@ -628,7 +636,7 @@ export class FormattedString
    * @returns The offset where the pattern is found, or -1 if not found
    */
   find(pattern: FormattedString): number {
-    const matches = this._findMatches(pattern, false);
+    const matches = this._findMatches(pattern, false, true);
     return matches.length > 0 ? matches[0] : -1;
   }
 
@@ -636,10 +644,11 @@ export class FormattedString
    * Finds all occurrences of a FormattedString pattern within this FormattedString
    * that match both the raw text and raw entities exactly.
    * @param pattern The FormattedString pattern to search for
+   * @param allowOverlapping If true, allows overlapping matches; defaults to false (non-overlapping)
    * @returns Array of offsets where the pattern is found, or empty array if not found
    */
-  findAll(pattern: FormattedString): number[] {
-    return this._findMatches(pattern, true);
+  findAll(pattern: FormattedString, allowOverlapping: boolean = false): number[] {
+    return this._findMatches(pattern, true, allowOverlapping);
   }
 
   /**
@@ -720,25 +729,7 @@ export class FormattedString
     pattern: FormattedString,
     replacement: FormattedString,
   ): FormattedString {
-    const allMatches = this.findAll(pattern);
-
-    if (allMatches.length === 0) {
-      return this.replaceMatches(pattern, replacement, []);
-    }
-
-    // Filter out overlapping matches - keep only non-overlapping ones
-    const nonOverlappingMatches: number[] = [];
-    let lastEnd = -1;
-
-    for (const matchOffset of allMatches) {
-      const matchEnd = matchOffset + pattern.rawText.length;
-
-      if (matchOffset >= lastEnd) {
-        nonOverlappingMatches.push(matchOffset);
-        lastEnd = matchEnd;
-      }
-    }
-
+    const nonOverlappingMatches = this.findAll(pattern, false);
     return this.replaceMatches(pattern, replacement, nonOverlappingMatches);
   }
 }
