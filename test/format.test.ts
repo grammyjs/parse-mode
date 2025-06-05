@@ -1482,12 +1482,12 @@ describe("FormattedString - Replace methods", () => {
     const result = source.replace(pattern, replacement);
     assertEquals(result.rawText, "Hello bold universe and italic text");
     assertEquals(result.rawEntities.length, 2);
-    
+
     // Check that "bold" entity is preserved
     assertEquals(result.rawEntities[0]?.type, "bold");
     assertEquals(result.rawEntities[0]?.offset, 6);
     assertEquals(result.rawEntities[0]?.length, 4);
-    
+
     // Check that "italic text" entity is preserved and offset adjusted
     assertEquals(result.rawEntities[1]?.type, "italic");
     assertEquals(result.rawEntities[1]?.offset, 24); // offset shifted by +3 ("universe" vs "world")
@@ -1514,7 +1514,10 @@ describe("FormattedString - Replace methods", () => {
     const replacementEntities = [
       { type: "underline" as const, offset: 0, length: 15 },
     ];
-    const replacement = new FormattedString(replacementText, replacementEntities);
+    const replacement = new FormattedString(
+      replacementText,
+      replacementEntities,
+    );
 
     const result = source.replace(pattern, replacement);
     assertEquals(result.rawText, "Start underlined text end");
@@ -1555,12 +1558,12 @@ describe("FormattedString - Replace methods", () => {
     const result = source.replaceAll(pattern, replacement);
     assertEquals(result.rawText, "Hello italic world and italic text");
     assertEquals(result.rawEntities.length, 2);
-    
+
     // Check first replacement
     assertEquals(result.rawEntities[0]?.type, "italic");
     assertEquals(result.rawEntities[0]?.offset, 6);
     assertEquals(result.rawEntities[0]?.length, 6);
-    
+
     // Check second replacement
     assertEquals(result.rawEntities[1]?.type, "italic");
     assertEquals(result.rawEntities[1]?.offset, 25); // offset adjusted for length difference
@@ -1595,7 +1598,12 @@ describe("FormattedString - Replace methods", () => {
     // Test that complex entity structures are preserved correctly
     const sourceText = "Link to google and normal link text";
     const sourceEntities = [
-      { type: "text_link" as const, offset: 0, length: 14, url: "https://google.com" }, // "Link to google"
+      {
+        type: "text_link" as const,
+        offset: 0,
+        length: 14,
+        url: "https://google.com",
+      }, // "Link to google"
     ];
     const source = new FormattedString(sourceText, sourceEntities);
 
@@ -1605,12 +1613,15 @@ describe("FormattedString - Replace methods", () => {
     const result = source.replaceAll(pattern, replacement);
     assertEquals(result.rawText, "Link to google and normal URL text");
     assertEquals(result.rawEntities.length, 1);
-    
+
     // Check that the link entity is preserved
     assertEquals(result.rawEntities[0]?.type, "text_link");
     assertEquals(result.rawEntities[0]?.offset, 0);
     assertEquals(result.rawEntities[0]?.length, 14); // "Link to google" unchanged
-    assertEquals((result.rawEntities[0] as any)?.url, "https://google.com");
+    assertEquals(
+      (result.rawEntities[0] as { url: string })?.url,
+      "https://google.com",
+    );
   });
 
   it("replaceAll method with adjacent patterns", () => {

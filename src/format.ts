@@ -649,9 +649,12 @@ export class FormattedString
    * @param replacement The FormattedString to replace the pattern with
    * @returns A new FormattedString with the first match replaced, or a copy if no match found
    */
-  replace(pattern: FormattedString, replacement: FormattedString): FormattedString {
+  replace(
+    pattern: FormattedString,
+    replacement: FormattedString,
+  ): FormattedString {
     const matchOffset = this.find(pattern);
-    
+
     if (matchOffset === -1) {
       // No match found, return a copy of the original
       return new FormattedString(this.rawText, [...this.rawEntities]);
@@ -672,9 +675,12 @@ export class FormattedString
    * @param replacement The FormattedString to replace the pattern with
    * @returns A new FormattedString with all matches replaced, or a copy if no matches found
    */
-  replaceAll(pattern: FormattedString, replacement: FormattedString): FormattedString {
+  replaceAll(
+    pattern: FormattedString,
+    replacement: FormattedString,
+  ): FormattedString {
     const allMatches = this.findAll(pattern);
-    
+
     if (allMatches.length === 0) {
       // No matches found, return a copy of the original
       return new FormattedString(this.rawText, [...this.rawEntities]);
@@ -686,7 +692,7 @@ export class FormattedString
 
     for (const matchOffset of allMatches) {
       const matchEnd = matchOffset + pattern.rawText.length;
-      
+
       if (matchOffset >= lastEnd) {
         nonOverlappingMatches.push(matchOffset);
         lastEnd = matchEnd;
