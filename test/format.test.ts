@@ -1,134 +1,138 @@
-import { assertEquals, assertInstanceOf } from "./deps.test.ts";
+import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 import type { MessageEntity } from "../src/deps.deno.ts";
 
-Deno.test("FormattedString - Constructor", () => {
-  const text = "Hello World";
-  const entities: MessageEntity[] = [
-    { type: "bold" as const, offset: 0, length: 5 },
-  ];
+describe("FormattedString - Basic functionality", () => {
+  it("Constructor", () => {
+    const text = "Hello World";
+    const entities: MessageEntity[] = [
+      { type: "bold" as const, offset: 0, length: 5 },
+    ];
 
-  const formatted = new FormattedString(text, entities);
+    const formatted = new FormattedString(text, entities);
 
-  assertEquals(formatted.rawText, text);
-  assertEquals(formatted.rawEntities, entities);
+    assertEquals(formatted.rawText, text);
+    assertEquals(formatted.rawEntities, entities);
+  });
+
+  it("Text and caption getters", () => {
+    const text = "Hello World";
+    const entities: MessageEntity[] = [
+      { type: "bold" as const, offset: 0, length: 5 },
+    ];
+
+    const formatted = new FormattedString(text, entities);
+
+    assertEquals(formatted.text, text);
+    assertEquals(formatted.caption, text);
+    assertEquals(formatted.entities, entities);
+    assertEquals(formatted.caption_entities, entities);
+  });
+
+  it("toString method", () => {
+    const text = "Hello World";
+    const entities: MessageEntity[] = [
+      { type: "bold" as const, offset: 0, length: 5 },
+    ];
+
+    const formatted = new FormattedString(text, entities);
+
+    assertEquals(formatted.toString(), text);
+  });
 });
 
-Deno.test("FormattedString - Text and caption getters", () => {
-  const text = "Hello World";
-  const entities: MessageEntity[] = [
-    { type: "bold" as const, offset: 0, length: 5 },
-  ];
+describe("FormattedString - Static formatting methods", () => {
+  it("Static bold methods", () => {
+    const text = "bold text";
 
-  const formatted = new FormattedString(text, entities);
+    const boldFormatted = FormattedString.bold(text);
+    const bFormatted = FormattedString.b(text);
 
-  assertEquals(formatted.text, text);
-  assertEquals(formatted.caption, text);
-  assertEquals(formatted.entities, entities);
-  assertEquals(formatted.caption_entities, entities);
-});
+    assertInstanceOf(boldFormatted, FormattedString);
+    assertInstanceOf(bFormatted, FormattedString);
+    assertEquals(boldFormatted.rawText, text);
+    assertEquals(bFormatted.rawText, text);
 
-Deno.test("FormattedString - toString method", () => {
-  const text = "Hello World";
-  const entities: MessageEntity[] = [
-    { type: "bold" as const, offset: 0, length: 5 },
-  ];
+    // Test entity properties
+    assertEquals(boldFormatted.rawEntities.length, 1);
+    assertEquals(boldFormatted.rawEntities[0]?.type, "bold");
+    assertEquals(boldFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(boldFormatted.rawEntities[0]?.length, text.length);
 
-  const formatted = new FormattedString(text, entities);
+    assertEquals(bFormatted.rawEntities.length, 1);
+    assertEquals(bFormatted.rawEntities[0]?.type, "bold");
+    assertEquals(bFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(bFormatted.rawEntities[0]?.length, text.length);
+  });
 
-  assertEquals(formatted.toString(), text);
-});
+  it("Static italic methods", () => {
+    const text = "italic text";
 
-Deno.test("FormattedString - Static bold methods", () => {
-  const text = "bold text";
+    const italicFormatted = FormattedString.italic(text);
+    const iFormatted = FormattedString.i(text);
 
-  const boldFormatted = FormattedString.bold(text);
-  const bFormatted = FormattedString.b(text);
+    assertInstanceOf(italicFormatted, FormattedString);
+    assertInstanceOf(iFormatted, FormattedString);
+    assertEquals(italicFormatted.rawText, text);
+    assertEquals(iFormatted.rawText, text);
 
-  assertInstanceOf(boldFormatted, FormattedString);
-  assertInstanceOf(bFormatted, FormattedString);
-  assertEquals(boldFormatted.rawText, text);
-  assertEquals(bFormatted.rawText, text);
+    // Test entity properties
+    assertEquals(italicFormatted.rawEntities.length, 1);
+    assertEquals(italicFormatted.rawEntities[0]?.type, "italic");
+    assertEquals(italicFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(italicFormatted.rawEntities[0]?.length, text.length);
 
-  // Test entity properties
-  assertEquals(boldFormatted.rawEntities.length, 1);
-  assertEquals(boldFormatted.rawEntities[0]?.type, "bold");
-  assertEquals(boldFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(boldFormatted.rawEntities[0]?.length, text.length);
+    assertEquals(iFormatted.rawEntities.length, 1);
+    assertEquals(iFormatted.rawEntities[0]?.type, "italic");
+    assertEquals(iFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(iFormatted.rawEntities[0]?.length, text.length);
+  });
 
-  assertEquals(bFormatted.rawEntities.length, 1);
-  assertEquals(bFormatted.rawEntities[0]?.type, "bold");
-  assertEquals(bFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(bFormatted.rawEntities[0]?.length, text.length);
-});
+  it("Static strikethrough methods", () => {
+    const text = "strikethrough text";
 
-Deno.test("FormattedString - Static italic methods", () => {
-  const text = "italic text";
+    const strikethroughFormatted = FormattedString.strikethrough(text);
+    const sFormatted = FormattedString.s(text);
 
-  const italicFormatted = FormattedString.italic(text);
-  const iFormatted = FormattedString.i(text);
+    assertInstanceOf(strikethroughFormatted, FormattedString);
+    assertInstanceOf(sFormatted, FormattedString);
+    assertEquals(strikethroughFormatted.rawText, text);
+    assertEquals(sFormatted.rawText, text);
 
-  assertInstanceOf(italicFormatted, FormattedString);
-  assertInstanceOf(iFormatted, FormattedString);
-  assertEquals(italicFormatted.rawText, text);
-  assertEquals(iFormatted.rawText, text);
+    // Test entity properties
+    assertEquals(strikethroughFormatted.rawEntities.length, 1);
+    assertEquals(strikethroughFormatted.rawEntities[0]?.type, "strikethrough");
+    assertEquals(strikethroughFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(strikethroughFormatted.rawEntities[0]?.length, text.length);
 
-  // Test entity properties
-  assertEquals(italicFormatted.rawEntities.length, 1);
-  assertEquals(italicFormatted.rawEntities[0]?.type, "italic");
-  assertEquals(italicFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(italicFormatted.rawEntities[0]?.length, text.length);
+    assertEquals(sFormatted.rawEntities.length, 1);
+    assertEquals(sFormatted.rawEntities[0]?.type, "strikethrough");
+    assertEquals(sFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(sFormatted.rawEntities[0]?.length, text.length);
+  });
 
-  assertEquals(iFormatted.rawEntities.length, 1);
-  assertEquals(iFormatted.rawEntities[0]?.type, "italic");
-  assertEquals(iFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(iFormatted.rawEntities[0]?.length, text.length);
-});
+  it("Static underline methods", () => {
+    const text = "underline text";
 
-Deno.test("FormattedString - Static strikethrough methods", () => {
-  const text = "strikethrough text";
+    const underlineFormatted = FormattedString.underline(text);
+    const uFormatted = FormattedString.u(text);
 
-  const strikethroughFormatted = FormattedString.strikethrough(text);
-  const sFormatted = FormattedString.s(text);
+    assertInstanceOf(underlineFormatted, FormattedString);
+    assertInstanceOf(uFormatted, FormattedString);
+    assertEquals(underlineFormatted.rawText, text);
+    assertEquals(uFormatted.rawText, text);
 
-  assertInstanceOf(strikethroughFormatted, FormattedString);
-  assertInstanceOf(sFormatted, FormattedString);
-  assertEquals(strikethroughFormatted.rawText, text);
-  assertEquals(sFormatted.rawText, text);
+    // Test entity properties
+    assertEquals(underlineFormatted.rawEntities.length, 1);
+    assertEquals(underlineFormatted.rawEntities[0]?.type, "underline");
+    assertEquals(underlineFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(underlineFormatted.rawEntities[0]?.length, text.length);
 
-  // Test entity properties
-  assertEquals(strikethroughFormatted.rawEntities.length, 1);
-  assertEquals(strikethroughFormatted.rawEntities[0]?.type, "strikethrough");
-  assertEquals(strikethroughFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(strikethroughFormatted.rawEntities[0]?.length, text.length);
-
-  assertEquals(sFormatted.rawEntities.length, 1);
-  assertEquals(sFormatted.rawEntities[0]?.type, "strikethrough");
-  assertEquals(sFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(sFormatted.rawEntities[0]?.length, text.length);
-});
-
-Deno.test("FormattedString - Static underline methods", () => {
-  const text = "underline text";
-
-  const underlineFormatted = FormattedString.underline(text);
-  const uFormatted = FormattedString.u(text);
-
-  assertInstanceOf(underlineFormatted, FormattedString);
-  assertInstanceOf(uFormatted, FormattedString);
-  assertEquals(underlineFormatted.rawText, text);
-  assertEquals(uFormatted.rawText, text);
-
-  // Test entity properties
-  assertEquals(underlineFormatted.rawEntities.length, 1);
-  assertEquals(underlineFormatted.rawEntities[0]?.type, "underline");
-  assertEquals(underlineFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(underlineFormatted.rawEntities[0]?.length, text.length);
-
-  assertEquals(uFormatted.rawEntities.length, 1);
-  assertEquals(uFormatted.rawEntities[0]?.type, "underline");
-  assertEquals(uFormatted.rawEntities[0]?.offset, 0);
-  assertEquals(uFormatted.rawEntities[0]?.length, text.length);
+    assertEquals(uFormatted.rawEntities.length, 1);
+    assertEquals(uFormatted.rawEntities[0]?.type, "underline");
+    assertEquals(uFormatted.rawEntities[0]?.offset, 0);
+    assertEquals(uFormatted.rawEntities[0]?.length, text.length);
+  });
 });
 
 Deno.test("FormattedString - Static link methods", () => {
