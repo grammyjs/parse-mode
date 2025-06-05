@@ -264,8 +264,8 @@ describe("FormattedString - Static special methods", () => {
     assertEquals(mentionFormatted.rawEntities[0]?.type, "text_link");
     assertEquals(mentionFormatted.rawEntities[0]?.offset, 0);
     assertEquals(mentionFormatted.rawEntities[0]?.length, text.length);
-    //@ts-expect-error quick test
     assertEquals(
+      //@ts-expect-error quick test
       mentionFormatted.rawEntities[0]?.url,
       `tg://user?id=123456789`,
     );
@@ -619,8 +619,8 @@ describe("FormattedString", () => {
     assertEquals(linkResult.rawEntities[0]?.type, "text_link");
     assertEquals(linkResult.rawEntities[0]?.offset, initialText.length);
     assertEquals(linkResult.rawEntities[0]?.length, linkText.length);
-    //@ts-expect-error quick test
     assertEquals(
+      //@ts-expect-error quick test
       linkResult.rawEntities[0]?.url,
       `https://t.me/c/1234567890/123`,
     );
