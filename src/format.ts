@@ -570,23 +570,23 @@ export class FormattedString
   }
 
   /**
-   * Finds the first occurrence of a FormattedString pattern within this FormattedString
-   * that matches both the raw text and raw entities exactly.
+   * Protected method that finds pattern matches within this FormattedString.
    * @param pattern The FormattedString pattern to search for
-   * @returns The offset where the pattern is found, or -1 if not found
+   * @param findAll If true, finds all matches; if false, stops after first match
+   * @returns Array of all match offsets if findAll is true, or first match offset (or -1) if findAll is false
    */
-  find(pattern: FormattedString): number {
+  protected _findMatches(pattern: FormattedString, findAll: boolean): number[] | number {
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
-      return 0;
+      return findAll ? [0] : 0;
     }
 
     // Pattern cannot be longer than source
     if (pattern.rawText.length > this.rawText.length) {
-      return -1;
+      return findAll ? [] : -1;
     }
 
-    // Use indexOf to find text matches efficiently
+    const matches: number[] = [];
     let searchStart = 0;
     let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
 
@@ -604,7 +604,11 @@ export class FormattedString
           pattern.rawEntities,
         )
       ) {
-        return textIndex;
+        if (findAll) {
+          matches.push(textIndex);
+        } else {
+          return textIndex;
+        }
       }
 
       // Continue searching from the next position
@@ -612,7 +616,27 @@ export class FormattedString
       textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
     }
 
-    return -1;
+    return findAll ? matches : -1;
+  }
+
+  /**
+   * Finds the first occurrence of a FormattedString pattern within this FormattedString
+   * that matches both the raw text and raw entities exactly.
+   * @param pattern The FormattedString pattern to search for
+   * @returns The offset where the pattern is found, or -1 if not found
+   */
+  find(pattern: FormattedString): number {
+    return this._findMatches(pattern, false) as number;
+  }
+
+  /**
+   * Finds all occurrences of a FormattedString pattern within this FormattedString
+   * that match both the raw text and raw entities exactly.
+   * @param pattern The FormattedString pattern to search for
+   * @returns Array of offsets where the pattern is found, or empty array if not found
+   */
+  findAll(pattern: FormattedString): number[] {
+    return this._findMatches(pattern, true) as number[];
   }
 }
 
