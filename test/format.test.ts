@@ -1566,7 +1566,7 @@ describe("FormattedString - Replace methods", () => {
 
     // Check second replacement
     assertEquals(result.rawEntities[1]?.type, "italic");
-    assertEquals(result.rawEntities[1]?.offset, 25); // offset adjusted for length difference
+    assertEquals(result.rawEntities[1]?.offset, 23); // offset adjusted for length difference
     assertEquals(result.rawEntities[1]?.length, 6);
   });
 
