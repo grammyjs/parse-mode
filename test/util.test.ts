@@ -128,6 +128,9 @@ describe("isEntitySimilar", () => {
 
     // Same type and user, different offset/length should be similar
     assertEquals(isEntitySimilar(entity1, entity2), true);
+
+    // Same type but different user should not be similar
+    assertEquals(isEntitySimilar(entity1, entity3), false);
   });
 });
 
