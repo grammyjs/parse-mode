@@ -618,7 +618,10 @@ export class FormattedString
       // Continue searching from the next position
       // For non-overlapping matches, skip ahead by pattern length if we found a match
       // For overlapping matches, move only one position forward
-      if (!allowOverlapping && matches.length > 0 && matches[matches.length - 1] === textIndex) {
+      if (
+        !allowOverlapping && matches.length > 0 &&
+        matches[matches.length - 1] === textIndex
+      ) {
         searchStart = textIndex + pattern.rawText.length;
       } else {
         searchStart = textIndex + 1;
@@ -647,7 +650,10 @@ export class FormattedString
    * @param allowOverlapping If true, allows overlapping matches; defaults to false (non-overlapping)
    * @returns Array of offsets where the pattern is found, or empty array if not found
    */
-  findAll(pattern: FormattedString, allowOverlapping: boolean = false): number[] {
+  findAll(
+    pattern: FormattedString,
+    allowOverlapping: boolean = false,
+  ): number[] {
     return this._findMatches(pattern, true, allowOverlapping);
   }
 
