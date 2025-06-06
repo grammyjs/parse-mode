@@ -735,7 +735,7 @@ export class FormattedString
     pattern: FormattedString,
     replacement: FormattedString,
   ): FormattedString {
-    const nonOverlappingMatches = this.findAll(pattern, false);
+    const nonOverlappingMatches = this.findAll(pattern);
     return this.replaceMatches(pattern, replacement, nonOverlappingMatches);
   }
 }
