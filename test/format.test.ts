@@ -1685,7 +1685,7 @@ describe("FormattedString - Replace methods", () => {
     const pattern = new FormattedString("bolded", [
       { type: "bold" as const, offset: 0, length: 6 },
     ]);
-    
+
     // Replacement is "italics" with italic formatting
     const replacement = new FormattedString("italics", [
       { type: "italic" as const, offset: 0, length: 7 },
@@ -1723,7 +1723,7 @@ describe("FormattedString - Replace methods", () => {
     const pattern = new FormattedString("bolded", [
       { type: "bold" as const, offset: 0, length: 6 },
     ]);
-    
+
     // Replacement is "italics" with italic formatting
     const replacement = new FormattedString("italics", [
       { type: "italic" as const, offset: 0, length: 7 },
