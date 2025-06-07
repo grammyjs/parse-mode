@@ -1671,4 +1671,91 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawText, "world! universe!");
     assertEquals(result.rawEntities.length, 0);
   });
+
+  it("replace method replacement inside longer formatted string", () => {
+    // Test the scenario from the issue: replace part of a longer formatted string
+    // "Hello bolded world" where entire string is bolded, replace "bolded" with italicized "italics"
+    const sourceText = "Hello bolded world";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 0, length: 18 }, // entire string is bolded
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    // Pattern is "bolded" with bold formatting to match the source formatting
+    const pattern = new FormattedString("bolded", [
+      { type: "bold" as const, offset: 0, length: 6 },
+    ]);
+    
+    // Replacement is "italics" with italic formatting
+    const replacement = new FormattedString("italics", [
+      { type: "italic" as const, offset: 0, length: 7 },
+    ]);
+
+    const result = source.replace(pattern, replacement);
+    assertEquals(result.rawText, "Hello italics world");
+    assertEquals(result.rawEntities.length, 3);
+
+    // Check that "Hello " remains bolded
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 6); // "Hello "
+
+    // Check that "italics" is italicized
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 6);
+    assertEquals(result.rawEntities[1]?.length, 7); // "italics"
+
+    // Check that " world" remains bolded
+    assertEquals(result.rawEntities[2]?.type, "bold");
+    assertEquals(result.rawEntities[2]?.offset, 13);
+    assertEquals(result.rawEntities[2]?.length, 6); // " world"
+  });
+
+  it("replaceAll method replacement inside longer formatted string", () => {
+    // Test replaceAll with the same scenario: multiple replacements inside longer formatted strings
+    const sourceText = "Hello bolded world and bolded universe";
+    const sourceEntities = [
+      { type: "bold" as const, offset: 0, length: 38 }, // entire string is bolded
+    ];
+    const source = new FormattedString(sourceText, sourceEntities);
+
+    // Pattern is "bolded" with bold formatting to match the source formatting
+    const pattern = new FormattedString("bolded", [
+      { type: "bold" as const, offset: 0, length: 6 },
+    ]);
+    
+    // Replacement is "italics" with italic formatting
+    const replacement = new FormattedString("italics", [
+      { type: "italic" as const, offset: 0, length: 7 },
+    ]);
+
+    const result = source.replaceAll(pattern, replacement);
+    assertEquals(result.rawText, "Hello italics world and italics universe");
+    assertEquals(result.rawEntities.length, 5);
+
+    // Check that "Hello " remains bolded
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 6); // "Hello "
+
+    // Check that first "italics" is italicized
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 6);
+    assertEquals(result.rawEntities[1]?.length, 7); // "italics"
+
+    // Check that " world and " remains bolded
+    assertEquals(result.rawEntities[2]?.type, "bold");
+    assertEquals(result.rawEntities[2]?.offset, 13);
+    assertEquals(result.rawEntities[2]?.length, 11); // " world and "
+
+    // Check that second "italics" is italicized
+    assertEquals(result.rawEntities[3]?.type, "italic");
+    assertEquals(result.rawEntities[3]?.offset, 24);
+    assertEquals(result.rawEntities[3]?.length, 7); // "italics"
+
+    // Check that " universe" remains bolded
+    assertEquals(result.rawEntities[4]?.type, "bold");
+    assertEquals(result.rawEntities[4]?.offset, 31);
+    assertEquals(result.rawEntities[4]?.length, 9); // " universe"
+  });
 });
