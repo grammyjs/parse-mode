@@ -816,6 +816,83 @@ export class FormattedString
   concat(...formattedStrings: FormattedString[]): FormattedString {
     return FormattedString.join([this, ...formattedStrings]);
   }
+
+  /**
+   * Checks whether this FormattedString starts with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param pattern The FormattedString pattern to check for at the beginning
+   * @returns true if this FormattedString starts with the pattern, false otherwise
+   */
+  startsWith(pattern: FormattedString): boolean {
+    return FormattedString.startsWith(this, pattern);
+  }
+
+  /**
+   * Checks whether this FormattedString ends with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param pattern The FormattedString pattern to check for at the end
+   * @returns true if this FormattedString ends with the pattern, false otherwise
+   */
+  endsWith(pattern: FormattedString): boolean {
+    return FormattedString.endsWith(this, pattern);
+  }
+
+  /**
+   * Static method to check whether a FormattedString starts with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param source The FormattedString to check
+   * @param pattern The FormattedString pattern to check for at the beginning
+   * @returns true if the source starts with the pattern, false otherwise
+   */
+  static startsWith(
+    source: FormattedString,
+    pattern: FormattedString,
+  ): boolean {
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > source.rawText.length) {
+      return false;
+    }
+
+    // Handle empty pattern - always matches at the beginning
+    if (pattern.rawText.length === 0) {
+      return true;
+    }
+
+    // Extract the beginning of the source with the same length as pattern
+    const candidate = source.slice(0, pattern.rawText.length);
+
+    // Compare both text and entities for exact match
+    return candidate.rawText === pattern.rawText &&
+      isEntitiesEqual(candidate.rawEntities, pattern.rawEntities);
+  }
+
+  /**
+   * Static method to check whether a FormattedString ends with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param source The FormattedString to check
+   * @param pattern The FormattedString pattern to check for at the end
+   * @returns true if the source ends with the pattern, false otherwise
+   */
+  static endsWith(source: FormattedString, pattern: FormattedString): boolean {
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > source.rawText.length) {
+      return false;
+    }
+
+    // Handle empty pattern - always matches at the end
+    if (pattern.rawText.length === 0) {
+      return true;
+    }
+
+    // Extract the end of the source with the same length as pattern
+    const candidate = source.slice(
+      source.rawText.length - pattern.rawText.length,
+    );
+
+    // Compare both text and entities for exact match
+    return candidate.rawText === pattern.rawText &&
+      isEntitiesEqual(candidate.rawEntities, pattern.rawEntities);
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(
