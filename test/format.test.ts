@@ -2030,3 +2030,207 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawEntities[0]?.length, 5);
   });
 });
+
+describe("FormattedString - startsWith and endsWith methods", () => {
+  it("Static startsWith - basic functionality", () => {
+    const source = new FormattedString("Hello World");
+    const pattern1 = new FormattedString("Hello");
+    const pattern2 = new FormattedString("World");
+    const pattern3 = new FormattedString("Hi");
+
+    assertEquals(FormattedString.startsWith(source, pattern1), true);
+    assertEquals(FormattedString.startsWith(source, pattern2), false);
+    assertEquals(FormattedString.startsWith(source, pattern3), false);
+  });
+
+  it("Static startsWith - empty pattern", () => {
+    const source = new FormattedString("Hello World");
+    const emptyPattern = new FormattedString("");
+
+    assertEquals(FormattedString.startsWith(source, emptyPattern), true);
+  });
+
+  it("Static startsWith - empty source", () => {
+    const emptySource = new FormattedString("");
+    const pattern = new FormattedString("Hello");
+    const emptyPattern = new FormattedString("");
+
+    assertEquals(FormattedString.startsWith(emptySource, pattern), false);
+    assertEquals(FormattedString.startsWith(emptySource, emptyPattern), true);
+  });
+
+  it("Static startsWith - pattern longer than source", () => {
+    const source = new FormattedString("Hi");
+    const pattern = new FormattedString("Hello World");
+
+    assertEquals(FormattedString.startsWith(source, pattern), false);
+  });
+
+  it("Static startsWith - exact match", () => {
+    const source = new FormattedString("Hello World");
+    const pattern = new FormattedString("Hello World");
+
+    assertEquals(FormattedString.startsWith(source, pattern), true);
+  });
+
+  it("Static startsWith - with entities matching", () => {
+    const source = FormattedString.bold("Hello").concat(
+      new FormattedString(" World"),
+    );
+    const pattern = FormattedString.bold("Hello");
+
+    assertEquals(FormattedString.startsWith(source, pattern), true);
+  });
+
+  it("Static startsWith - with entities not matching", () => {
+    const source = FormattedString.bold("Hello World");
+    const pattern = new FormattedString("Hello"); // no bold entity
+
+    assertEquals(FormattedString.startsWith(source, pattern), false);
+  });
+
+  it("Static startsWith - complex entities matching", () => {
+    const boldHello = FormattedString.bold("Hello");
+    const space = new FormattedString(" ");
+    const italicWorld = FormattedString.italic("World");
+    const source = FormattedString.join([boldHello, space, italicWorld]);
+
+    const pattern1 = FormattedString.join([boldHello, space]);
+    const pattern2 = FormattedString.join([
+      new FormattedString("Hello"),
+      space,
+    ]);
+
+    assertEquals(FormattedString.startsWith(source, pattern1), true);
+    assertEquals(FormattedString.startsWith(source, pattern2), false);
+  });
+
+  it("Instance startsWith - basic functionality", () => {
+    const source = new FormattedString("Hello World");
+    const pattern1 = new FormattedString("Hello");
+    const pattern2 = new FormattedString("World");
+
+    assertEquals(source.startsWith(pattern1), true);
+    assertEquals(source.startsWith(pattern2), false);
+  });
+
+  it("Static endsWith - basic functionality", () => {
+    const source = new FormattedString("Hello World");
+    const pattern1 = new FormattedString("World");
+    const pattern2 = new FormattedString("Hello");
+    const pattern3 = new FormattedString("Earth");
+
+    assertEquals(FormattedString.endsWith(source, pattern1), true);
+    assertEquals(FormattedString.endsWith(source, pattern2), false);
+    assertEquals(FormattedString.endsWith(source, pattern3), false);
+  });
+
+  it("Static endsWith - empty pattern", () => {
+    const source = new FormattedString("Hello World");
+    const emptyPattern = new FormattedString("");
+
+    assertEquals(FormattedString.endsWith(source, emptyPattern), true);
+  });
+
+  it("Static endsWith - empty source", () => {
+    const emptySource = new FormattedString("");
+    const pattern = new FormattedString("World");
+    const emptyPattern = new FormattedString("");
+
+    assertEquals(FormattedString.endsWith(emptySource, pattern), false);
+    assertEquals(FormattedString.endsWith(emptySource, emptyPattern), true);
+  });
+
+  it("Static endsWith - pattern longer than source", () => {
+    const source = new FormattedString("Hi");
+    const pattern = new FormattedString("Hello World");
+
+    assertEquals(FormattedString.endsWith(source, pattern), false);
+  });
+
+  it("Static endsWith - exact match", () => {
+    const source = new FormattedString("Hello World");
+    const pattern = new FormattedString("Hello World");
+
+    assertEquals(FormattedString.endsWith(source, pattern), true);
+  });
+
+  it("Static endsWith - with entities matching", () => {
+    const source = new FormattedString("Hello ").concat(
+      FormattedString.italic("World"),
+    );
+    const pattern = FormattedString.italic("World");
+
+    assertEquals(FormattedString.endsWith(source, pattern), true);
+  });
+
+  it("Static endsWith - with entities not matching", () => {
+    const source = FormattedString.italic("Hello World");
+    const pattern = new FormattedString("World"); // no italic entity
+
+    assertEquals(FormattedString.endsWith(source, pattern), false);
+  });
+
+  it("Static endsWith - complex entities matching", () => {
+    const boldHello = FormattedString.bold("Hello");
+    const space = new FormattedString(" ");
+    const italicWorld = FormattedString.italic("World");
+    const source = FormattedString.join([boldHello, space, italicWorld]);
+
+    const pattern1 = FormattedString.join([space, italicWorld]);
+    const pattern2 = FormattedString.join([
+      space,
+      new FormattedString("World"),
+    ]);
+
+    assertEquals(FormattedString.endsWith(source, pattern1), true);
+    assertEquals(FormattedString.endsWith(source, pattern2), false);
+  });
+
+  it("Instance endsWith - basic functionality", () => {
+    const source = new FormattedString("Hello World");
+    const pattern1 = new FormattedString("World");
+    const pattern2 = new FormattedString("Hello");
+
+    assertEquals(source.endsWith(pattern1), true);
+    assertEquals(source.endsWith(pattern2), false);
+  });
+
+  it("startsWith and endsWith - single character", () => {
+    const source = new FormattedString("Hello");
+    const hPattern = new FormattedString("H");
+    const oPattern = new FormattedString("o");
+
+    assertEquals(source.startsWith(hPattern), true);
+    assertEquals(source.endsWith(oPattern), true);
+    assertEquals(source.startsWith(oPattern), false);
+    assertEquals(source.endsWith(hPattern), false);
+  });
+
+  it("startsWith and endsWith - with link entities", () => {
+    const linkText = FormattedString.link("click here", "https://example.com");
+    const source = new FormattedString("Visit ").concat(linkText).concat(
+      new FormattedString(" now"),
+    );
+
+    const startsPattern = new FormattedString("Visit ");
+    const endsPattern = new FormattedString(" now");
+    const linkPattern = FormattedString.link(
+      "click here",
+      "https://example.com",
+    );
+
+    assertEquals(source.startsWith(startsPattern), true);
+    assertEquals(source.endsWith(endsPattern), true);
+    assertEquals(source.startsWith(linkPattern), false);
+    assertEquals(source.endsWith(linkPattern), false);
+  });
+
+  it("startsWith and endsWith - overlapping patterns", () => {
+    const source = new FormattedString("abcabc");
+    const abcPattern = new FormattedString("abc");
+
+    assertEquals(source.startsWith(abcPattern), true);
+    assertEquals(source.endsWith(abcPattern), true);
+  });
+});
