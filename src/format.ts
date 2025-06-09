@@ -407,6 +407,67 @@ export class FormattedString
     return segments;
   }
 
+  /**
+   * Splits a FormattedString into an array of FormattedStrings using a separator,
+   * ignoring inequalities in rawEntities. Only uses rawText to determine if this is a valid position to split.
+   * @param text The FormattedString to split
+   * @param separator The FormattedString separator to split by (only rawText is used for matching)
+   * @returns An array of FormattedString segments
+   */
+  static splitByPlainText(
+    text: FormattedString,
+    separator: FormattedString,
+  ): FormattedString[] {
+    // Handle empty separator - split into individual characters
+    if (separator.rawText.length === 0) {
+      // Special case: if both text and separator are empty, return array with one empty string
+      if (text.rawText.length === 0) {
+        return [new FormattedString("")];
+      }
+
+      const result: FormattedString[] = [];
+      for (let i = 0; i < text.rawText.length; i++) {
+        result.push(text.slice(i, i + 1));
+      }
+      return result;
+    }
+
+    // Find all plain text matches of the separator (ignoring entities)
+    const matches = text._findPlainTextMatches(separator, true, false); // non-overlapping
+
+    // If no matches found, return the original text as single element
+    if (matches.length === 0) {
+      return [new FormattedString(text.rawText, [...text.rawEntities])];
+    }
+
+    const segments: FormattedString[] = [];
+    let currentOffset = 0;
+
+    // Extract segments between matches
+    for (const matchOffset of matches) {
+      // Add segment before this match
+      if (matchOffset > currentOffset) {
+        segments.push(text.slice(currentOffset, matchOffset));
+      } else if (matchOffset === currentOffset) {
+        // Empty segment (separator at beginning or consecutive separators)
+        segments.push(new FormattedString(""));
+      }
+
+      // Move past this separator
+      currentOffset = matchOffset + separator.rawText.length;
+    }
+
+    // Add final segment after last match
+    if (currentOffset < text.rawText.length) {
+      segments.push(text.slice(currentOffset));
+    } else if (currentOffset === text.rawText.length) {
+      // Text ends with separator
+      segments.push(new FormattedString(""));
+    }
+
+    return segments;
+  }
+
   // Instance formatting methods
   /**
    * Combines this FormattedString with a bold formatted string
@@ -596,6 +657,16 @@ export class FormattedString
   }
 
   /**
+   * Splits this FormattedString into an array of FormattedStrings using a separator,
+   * ignoring inequalities in rawEntities. Only uses rawText to determine if this is a valid position to split.
+   * @param separator The FormattedString separator to split by (only rawText is used for matching)
+   * @returns An array of FormattedString segments
+   */
+  splitByPlainText(separator: FormattedString): FormattedString[] {
+    return FormattedString.splitByPlainText(this, separator);
+  }
+
+  /**
    * Returns a deep copy of a portion of this FormattedString
    * @param start The start index (inclusive), defaults to 0
    * @param end The end index (exclusive), defaults to text length
@@ -691,6 +762,54 @@ export class FormattedString
         !allowOverlapping && matches.length > 0 &&
         matches[matches.length - 1] === textIndex
       ) {
+        searchStart = textIndex + pattern.rawText.length;
+      } else {
+        searchStart = textIndex + 1;
+      }
+      textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+    }
+
+    return matches;
+  }
+
+  /**
+   * Protected method that finds pattern matches within this FormattedString based on plain text only.
+   * This method ignores entity differences and only matches on raw text content.
+   * @param pattern The FormattedString pattern to search for (only rawText is used)
+   * @param findAll If true, finds all matches; if false, stops after first match
+   * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
+   * @returns Array of match offsets
+   */
+  protected _findPlainTextMatches(
+    pattern: FormattedString,
+    findAll: boolean,
+    allowOverlapping: boolean = true,
+  ): number[] {
+    // Handle empty pattern - matches at the beginning
+    if (pattern.rawText.length === 0) {
+      return [0];
+    }
+
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > this.rawText.length) {
+      return [];
+    }
+
+    const matches: number[] = [];
+    let searchStart = 0;
+    let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
+
+    while (textIndex !== -1) {
+      // For plain text matching, we don't compare entities - just add the match
+      matches.push(textIndex);
+      if (!findAll) {
+        break;
+      }
+
+      // Continue searching from the next position
+      // For non-overlapping matches, skip ahead by pattern length
+      // For overlapping matches, move only one position forward
+      if (!allowOverlapping) {
         searchStart = textIndex + pattern.rawText.length;
       } else {
         searchStart = textIndex + 1;
