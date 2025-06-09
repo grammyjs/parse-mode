@@ -38,5 +38,8 @@
     "middleware",
     "parse",
     "transformer"
-  ]
+  ],
+  "dependencies": {
+    "typescript": "^5.8.3"
+  }
 }
