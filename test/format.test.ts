@@ -1758,4 +1758,193 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawEntities[4]?.offset, 31);
     assertEquals(result.rawEntities[4]?.length, 9); // " universe"
   });
+
+  it("Static split method - basic functionality", () => {
+    // Test basic string split with plain separator
+    const text = new FormattedString("a,b,c");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 3);
+    assertEquals(result[0]?.rawText, "a");
+    assertEquals(result[1]?.rawText, "b");
+    assertEquals(result[2]?.rawText, "c");
+    assertEquals(result[0]?.rawEntities.length, 0);
+    assertEquals(result[1]?.rawEntities.length, 0);
+    assertEquals(result[2]?.rawEntities.length, 0);
+  });
+
+  it("Static split method - no separator found", () => {
+    // Test when separator is not found
+    const text = new FormattedString("hello world");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 1);
+    assertEquals(result[0]?.rawText, "hello world");
+    assertEquals(result[0]?.rawEntities.length, 0);
+  });
+
+  it("Static split method - empty separator", () => {
+    // Test with empty separator - should return array of individual characters
+    const text = new FormattedString("abc");
+    const separator = new FormattedString("");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 3);
+    assertEquals(result[0]?.rawText, "a");
+    assertEquals(result[1]?.rawText, "b");
+    assertEquals(result[2]?.rawText, "c");
+  });
+
+  it("Static split method - empty text", () => {
+    // Test with empty text
+    const text = new FormattedString("");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 1);
+    assertEquals(result[0]?.rawText, "");
+    assertEquals(result[0]?.rawEntities.length, 0);
+  });
+
+  it("Static split method - empty text and empty separator", () => {
+    // Test with both empty text and empty separator
+    const text = new FormattedString("");
+    const separator = new FormattedString("");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 1);
+    assertEquals(result[0]?.rawText, "");
+    assertEquals(result[0]?.rawEntities.length, 0);
+  });
+
+  it("Static split method - separator at beginning/end", () => {
+    // Test separator at beginning and end
+    const text = new FormattedString(",a,b,");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 4);
+    assertEquals(result[0]?.rawText, "");
+    assertEquals(result[1]?.rawText, "a");
+    assertEquals(result[2]?.rawText, "b");
+    assertEquals(result[3]?.rawText, "");
+  });
+
+  it("Static split method - with entities", () => {
+    // Test split with entities in text and separator
+    const boldText = FormattedString.bold("Hello");
+    const separator = FormattedString.italic(" | ");
+    const italicText = FormattedString.italic("World");
+    const text = FormattedString.join([boldText, separator, italicText]);
+
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 2);
+    assertEquals(result[0]?.rawText, "Hello");
+    assertEquals(result[1]?.rawText, "World");
+
+    // First segment should have bold entity
+    assertEquals(result[0]?.rawEntities.length, 1);
+    assertEquals(result[0]?.rawEntities[0]?.type, "bold");
+    assertEquals(result[0]?.rawEntities[0]?.offset, 0);
+    assertEquals(result[0]?.rawEntities[0]?.length, 5);
+
+    // Second segment should have italic entity
+    assertEquals(result[1]?.rawEntities.length, 1);
+    assertEquals(result[1]?.rawEntities[0]?.type, "italic");
+    assertEquals(result[1]?.rawEntities[0]?.offset, 0);
+    assertEquals(result[1]?.rawEntities[0]?.length, 5);
+  });
+
+  it("Static split method - separator with entities must match exactly", () => {
+    // Test that separator entities must match exactly
+    const text = new FormattedString("Hello | World | Test");
+    const plainSeparator = new FormattedString(" | ");
+    const boldSeparator = FormattedString.bold(" | ");
+
+    // Plain separator should split successfully
+    const result1 = FormattedString.split(text, plainSeparator);
+    assertEquals(result1.length, 3);
+    assertEquals(result1[0]?.rawText, "Hello");
+    assertEquals(result1[1]?.rawText, "World");
+    assertEquals(result1[2]?.rawText, "Test");
+
+    // Bold separator should not find matches (no bold entities in text)
+    const result2 = FormattedString.split(text, boldSeparator);
+    assertEquals(result2.length, 1);
+    assertEquals(result2[0]?.rawText, "Hello | World | Test");
+  });
+
+  it("Instance split method", () => {
+    // Test instance split method
+    const text = new FormattedString("a,b,c");
+    const separator = new FormattedString(",");
+    const result = text.split(separator);
+
+    assertEquals(result.length, 3);
+    assertEquals(result[0]?.rawText, "a");
+    assertEquals(result[1]?.rawText, "b");
+    assertEquals(result[2]?.rawText, "c");
+  });
+
+  it("Instance split method - with entities", () => {
+    // Test instance split with entities
+    const boldA = FormattedString.bold("A");
+    const separator = new FormattedString(",");
+    const italicB = FormattedString.italic("B");
+    const text = FormattedString.join([boldA, separator, italicB]);
+
+    const result = text.split(separator);
+
+    assertEquals(result.length, 2);
+    assertEquals(result[0]?.rawText, "A");
+    assertEquals(result[1]?.rawText, "B");
+
+    // Check entities are preserved
+    assertEquals(result[0]?.rawEntities[0]?.type, "bold");
+    assertEquals(result[1]?.rawEntities[0]?.type, "italic");
+  });
+
+  it("Static split method - consecutive separators", () => {
+    // Test consecutive separators create empty segments
+    const text = new FormattedString("a,,b");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 3);
+    assertEquals(result[0]?.rawText, "a");
+    assertEquals(result[1]?.rawText, ""); // empty segment
+    assertEquals(result[2]?.rawText, "b");
+  });
+
+  it("Static split method - separator equals entire text", () => {
+    // Test when separator is the entire text
+    const text = new FormattedString(",");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 2);
+    assertEquals(result[0]?.rawText, ""); // empty before
+    assertEquals(result[1]?.rawText, ""); // empty after
+  });
+
+  it("Static split method - entity coverage affects matching", () => {
+    // Test that entity coverage affects separator matching
+    const boldText = FormattedString.bold("Hello World"); // bold covers entire text including space
+    const plainSeparator = new FormattedString(" "); // space without entities
+
+    // Should not match because space in bold text has bold entity but separator doesn't
+    const result1 = FormattedString.split(boldText, plainSeparator);
+    assertEquals(result1.length, 1);
+    assertEquals(result1[0]?.rawText, "Hello World");
+
+    // Should match if separator also has bold entity covering the space
+    const boldSeparator = FormattedString.bold(" ");
+    const result2 = FormattedString.split(boldText, boldSeparator);
+    assertEquals(result2.length, 2);
+    assertEquals(result2[0]?.rawText, "Hello");
+    assertEquals(result2[1]?.rawText, "World");
+  });
 });

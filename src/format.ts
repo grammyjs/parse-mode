@@ -347,6 +347,66 @@ export class FormattedString
     );
   }
 
+  /**
+   * Splits a FormattedString into an array of FormattedStrings using a separator
+   * @param text The FormattedString to split
+   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @returns An array of FormattedString segments
+   */
+  static split(
+    text: FormattedString,
+    separator: FormattedString,
+  ): FormattedString[] {
+    // Handle empty separator - split into individual characters
+    if (separator.rawText.length === 0) {
+      // Special case: if both text and separator are empty, return array with one empty string
+      if (text.rawText.length === 0) {
+        return [new FormattedString("")];
+      }
+
+      const result: FormattedString[] = [];
+      for (let i = 0; i < text.rawText.length; i++) {
+        result.push(text.slice(i, i + 1));
+      }
+      return result;
+    }
+
+    // Find all matches of the separator
+    const matches = text._findMatches(separator, true, false); // non-overlapping
+
+    // If no matches found, return the original text as single element
+    if (matches.length === 0) {
+      return [new FormattedString(text.rawText, [...text.rawEntities])];
+    }
+
+    const segments: FormattedString[] = [];
+    let currentOffset = 0;
+
+    // Extract segments between matches
+    for (const matchOffset of matches) {
+      // Add segment before this match
+      if (matchOffset > currentOffset) {
+        segments.push(text.slice(currentOffset, matchOffset));
+      } else if (matchOffset === currentOffset) {
+        // Empty segment (separator at beginning or consecutive separators)
+        segments.push(new FormattedString(""));
+      }
+
+      // Move past this separator
+      currentOffset = matchOffset + separator.rawText.length;
+    }
+
+    // Add final segment after last match
+    if (currentOffset < text.rawText.length) {
+      segments.push(text.slice(currentOffset));
+    } else if (currentOffset === text.rawText.length) {
+      // Text ends with separator
+      segments.push(new FormattedString(""));
+    }
+
+    return segments;
+  }
+
   // Instance formatting methods
   /**
    * Combines this FormattedString with a bold formatted string
@@ -524,6 +584,15 @@ export class FormattedString
    */
   plain(text: string) {
     return fmt`${this}${text}`;
+  }
+
+  /**
+   * Splits this FormattedString into an array of FormattedStrings using a separator
+   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @returns An array of FormattedString segments
+   */
+  split(separator: FormattedString): FormattedString[] {
+    return FormattedString.split(this, separator);
   }
 
   /**
