@@ -1947,4 +1947,86 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result2[0]?.rawText, "Hello");
     assertEquals(result2[1]?.rawText, "World");
   });
+
+  it("Instance concat method - single argument", () => {
+    const first = FormattedString.bold("Hello");
+    const second = FormattedString.italic("World");
+
+    const result = first.concat(second);
+
+    assertInstanceOf(result, FormattedString);
+    assertEquals(result.rawText, "HelloWorld");
+    assertEquals(result.rawEntities.length, 2);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 5);
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 5);
+    assertEquals(result.rawEntities[1]?.length, 5);
+  });
+
+  it("Instance concat method - multiple arguments", () => {
+    const first = FormattedString.bold("Hello");
+    const second = new FormattedString(" ");
+    const third = FormattedString.italic("Beautiful");
+    const fourth = new FormattedString(" ");
+    const fifth = FormattedString.code("World");
+
+    const result = first.concat(second, third, fourth, fifth);
+
+    assertInstanceOf(result, FormattedString);
+    assertEquals(result.rawText, "Hello Beautiful World");
+    assertEquals(result.rawEntities.length, 3);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 5);
+    assertEquals(result.rawEntities[1]?.type, "italic");
+    assertEquals(result.rawEntities[1]?.offset, 6);
+    assertEquals(result.rawEntities[1]?.length, 9);
+    assertEquals(result.rawEntities[2]?.type, "code");
+    assertEquals(result.rawEntities[2]?.offset, 16);
+    assertEquals(result.rawEntities[2]?.length, 5);
+  });
+
+  it("Instance concat method - empty arguments", () => {
+    const first = FormattedString.bold("Hello");
+    const empty = new FormattedString("");
+
+    const result = first.concat(empty);
+
+    assertInstanceOf(result, FormattedString);
+    assertEquals(result.rawText, "Hello");
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 5);
+  });
+
+  it("Instance concat method - entity consolidation", () => {
+    const first = FormattedString.bold("Hello");
+    const second = FormattedString.bold("World");
+
+    const result = first.concat(second);
+
+    assertInstanceOf(result, FormattedString);
+    assertEquals(result.rawText, "HelloWorld");
+    // Should consolidate adjacent bold entities
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 10);
+  });
+
+  it("Instance concat method - no arguments", () => {
+    const first = FormattedString.bold("Hello");
+
+    const result = first.concat();
+
+    assertInstanceOf(result, FormattedString);
+    assertEquals(result.rawText, "Hello");
+    assertEquals(result.rawEntities.length, 1);
+    assertEquals(result.rawEntities[0]?.type, "bold");
+    assertEquals(result.rawEntities[0]?.offset, 0);
+    assertEquals(result.rawEntities[0]?.length, 5);
+  });
 });

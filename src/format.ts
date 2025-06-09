@@ -807,6 +807,15 @@ export class FormattedString
     const nonOverlappingMatches = this.findAll(pattern);
     return this.replaceMatches(pattern, replacement, nonOverlappingMatches);
   }
+
+  /**
+   * Concatenates this FormattedString with one or more other FormattedStrings
+   * @param formattedStrings One or more FormattedString instances to concatenate
+   * @returns A new FormattedString combining this instance with all provided FormattedStrings
+   */
+  concat(...formattedStrings: FormattedString[]): FormattedString {
+    return FormattedString.join([this, ...formattedStrings]);
+  }
 }
 
 function buildFormatter<T extends Array<unknown> = never>(
