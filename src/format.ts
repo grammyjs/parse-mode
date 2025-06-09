@@ -347,6 +347,134 @@ export class FormattedString
     );
   }
 
+  /**
+   * Splits a FormattedString into an array of FormattedStrings using a separator
+   * @param text The FormattedString to split
+   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @returns An array of FormattedString segments
+   */
+  static split(
+    text: FormattedString,
+    separator: FormattedString,
+  ): FormattedString[] {
+    // Handle empty separator - split into individual characters
+    if (separator.rawText.length === 0) {
+      // Special case: if both text and separator are empty, return array with one empty string
+      if (text.rawText.length === 0) {
+        return [new FormattedString("")];
+      }
+
+      const result: FormattedString[] = [];
+      for (let i = 0; i < text.rawText.length; i++) {
+        result.push(text.slice(i, i + 1));
+      }
+      return result;
+    }
+
+    // Find all matches of the separator
+    const matches = text._findMatches(separator, {
+      findAll: true,
+      allowOverlapping: false,
+    }); // non-overlapping
+
+    // If no matches found, return the original text as single element
+    if (matches.length === 0) {
+      return [new FormattedString(text.rawText, [...text.rawEntities])];
+    }
+
+    const segments: FormattedString[] = [];
+    let currentOffset = 0;
+
+    // Extract segments between matches
+    for (const matchOffset of matches) {
+      // Add segment before this match
+      if (matchOffset > currentOffset) {
+        segments.push(text.slice(currentOffset, matchOffset));
+      } else if (matchOffset === currentOffset) {
+        // Empty segment (separator at beginning or consecutive separators)
+        segments.push(new FormattedString(""));
+      }
+
+      // Move past this separator
+      currentOffset = matchOffset + separator.rawText.length;
+    }
+
+    // Add final segment after last match
+    if (currentOffset < text.rawText.length) {
+      segments.push(text.slice(currentOffset));
+    } else if (currentOffset === text.rawText.length) {
+      // Text ends with separator
+      segments.push(new FormattedString(""));
+    }
+
+    return segments;
+  }
+
+  /**
+   * Splits a FormattedString into an array of FormattedStrings using a separator,
+   * ignoring inequalities in rawEntities. Only uses rawText to determine if this is a valid position to split.
+   * @param text The FormattedString to split
+   * @param separator The FormattedString separator to split by (only rawText is used for matching)
+   * @returns An array of FormattedString segments
+   */
+  static splitByText(
+    text: FormattedString,
+    separator: FormattedString,
+  ): FormattedString[] {
+    // Handle empty separator - split into individual characters
+    if (separator.rawText.length === 0) {
+      // Special case: if both text and separator are empty, return array with one empty string
+      if (text.rawText.length === 0) {
+        return [new FormattedString("")];
+      }
+
+      const result: FormattedString[] = [];
+      for (let i = 0; i < text.rawText.length; i++) {
+        result.push(text.slice(i, i + 1));
+      }
+      return result;
+    }
+
+    // Find all plain text matches of the separator (ignoring entities)
+    const matches = text._findMatches(separator, {
+      findAll: true,
+      allowOverlapping: false,
+      matchByTextOnly: true,
+    }); // non-overlapping
+
+    // If no matches found, return the original text as single element
+    if (matches.length === 0) {
+      return [new FormattedString(text.rawText, [...text.rawEntities])];
+    }
+
+    const segments: FormattedString[] = [];
+    let currentOffset = 0;
+
+    // Extract segments between matches
+    for (const matchOffset of matches) {
+      // Add segment before this match
+      if (matchOffset > currentOffset) {
+        segments.push(text.slice(currentOffset, matchOffset));
+      } else if (matchOffset === currentOffset) {
+        // Empty segment (separator at beginning or consecutive separators)
+        segments.push(new FormattedString(""));
+      }
+
+      // Move past this separator
+      currentOffset = matchOffset + separator.rawText.length;
+    }
+
+    // Add final segment after last match
+    if (currentOffset < text.rawText.length) {
+      segments.push(text.slice(currentOffset));
+    } else if (currentOffset === text.rawText.length) {
+      // Text ends with separator
+      segments.push(new FormattedString(""));
+    }
+
+    return segments;
+  }
+
   // Instance formatting methods
   /**
    * Combines this FormattedString with a bold formatted string
@@ -527,6 +655,25 @@ export class FormattedString
   }
 
   /**
+   * Splits this FormattedString into an array of FormattedStrings using a separator
+   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @returns An array of FormattedString segments
+   */
+  split(separator: FormattedString): FormattedString[] {
+    return FormattedString.split(this, separator);
+  }
+
+  /**
+   * Splits this FormattedString into an array of FormattedStrings using a separator,
+   * ignoring inequalities in rawEntities. Only uses rawText to determine if this is a valid position to split.
+   * @param separator The FormattedString separator to split by (only rawText is used for matching)
+   * @returns An array of FormattedString segments
+   */
+  splitByText(separator: FormattedString): FormattedString[] {
+    return FormattedString.splitByText(this, separator);
+  }
+
+  /**
    * Returns a deep copy of a portion of this FormattedString
    * @param start The start index (inclusive), defaults to 0
    * @param end The end index (exclusive), defaults to text length
@@ -572,15 +719,22 @@ export class FormattedString
   /**
    * Protected method that finds pattern matches within this FormattedString.
    * @param pattern The FormattedString pattern to search for
-   * @param findAll If true, finds all matches; if false, stops after first match
-   * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
+   * @param options Configuration options for the search
    * @returns Array of match offsets
    */
   protected _findMatches(
     pattern: FormattedString,
-    findAll: boolean,
-    allowOverlapping: boolean = true,
+    options: {
+      findAll?: boolean;
+      allowOverlapping?: boolean;
+      matchByTextOnly?: boolean;
+    } = {},
   ): number[] {
+    const {
+      findAll = false,
+      allowOverlapping = true,
+      matchByTextOnly = false,
+    } = options;
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
       return [0];
@@ -596,19 +750,26 @@ export class FormattedString
     let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
 
     while (textIndex !== -1) {
-      // Use slice to extract candidate and compare entities
-      const candidate = this.slice(
-        textIndex,
-        textIndex + pattern.rawText.length,
-      );
+      let shouldAddMatch = false;
 
-      // Compare entities for exact match
-      if (
-        isEntitiesEqual(
+      if (matchByTextOnly) {
+        // For text-only matching, we don't compare entities - just add the match
+        shouldAddMatch = true;
+      } else {
+        // Use slice to extract candidate and compare entities
+        const candidate = this.slice(
+          textIndex,
+          textIndex + pattern.rawText.length,
+        );
+
+        // Compare entities for exact match
+        shouldAddMatch = isEntitiesEqual(
           candidate.rawEntities,
           pattern.rawEntities,
-        )
-      ) {
+        );
+      }
+
+      if (shouldAddMatch) {
         matches.push(textIndex);
         if (!findAll) {
           break;
@@ -619,8 +780,7 @@ export class FormattedString
       // For non-overlapping matches, skip ahead by pattern length if we found a match
       // For overlapping matches, move only one position forward
       if (
-        !allowOverlapping && matches.length > 0 &&
-        matches[matches.length - 1] === textIndex
+        !allowOverlapping && shouldAddMatch
       ) {
         searchStart = textIndex + pattern.rawText.length;
       } else {
@@ -639,7 +799,10 @@ export class FormattedString
    * @returns The offset where the pattern is found, or -1 if not found
    */
   find(pattern: FormattedString): number {
-    const matches = this._findMatches(pattern, false, true);
+    const matches = this._findMatches(pattern, {
+      findAll: false,
+      allowOverlapping: true,
+    });
     return matches.length > 0 ? matches[0] : -1;
   }
 
@@ -654,7 +817,7 @@ export class FormattedString
     pattern: FormattedString,
     allowOverlapping: boolean = false,
   ): number[] {
-    return this._findMatches(pattern, true, allowOverlapping);
+    return this._findMatches(pattern, { findAll: true, allowOverlapping });
   }
 
   /**
@@ -737,6 +900,92 @@ export class FormattedString
   ): FormattedString {
     const nonOverlappingMatches = this.findAll(pattern);
     return this.replaceMatches(pattern, replacement, nonOverlappingMatches);
+  }
+
+  /**
+   * Concatenates this FormattedString with one or more other FormattedStrings
+   * @param formattedStrings One or more FormattedString instances to concatenate
+   * @returns A new FormattedString combining this instance with all provided FormattedStrings
+   */
+  concat(...formattedStrings: FormattedString[]): FormattedString {
+    return FormattedString.join([this, ...formattedStrings]);
+  }
+
+  /**
+   * Checks whether this FormattedString starts with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param pattern The FormattedString pattern to check for at the beginning
+   * @returns true if this FormattedString starts with the pattern, false otherwise
+   */
+  startsWith(pattern: FormattedString): boolean {
+    return FormattedString.startsWith(this, pattern);
+  }
+
+  /**
+   * Checks whether this FormattedString ends with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param pattern The FormattedString pattern to check for at the end
+   * @returns true if this FormattedString ends with the pattern, false otherwise
+   */
+  endsWith(pattern: FormattedString): boolean {
+    return FormattedString.endsWith(this, pattern);
+  }
+
+  /**
+   * Static method to check whether a FormattedString starts with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param source The FormattedString to check
+   * @param pattern The FormattedString pattern to check for at the beginning
+   * @returns true if the source starts with the pattern, false otherwise
+   */
+  static startsWith(
+    source: FormattedString,
+    pattern: FormattedString,
+  ): boolean {
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > source.rawText.length) {
+      return false;
+    }
+
+    // Handle empty pattern - always matches at the beginning
+    if (pattern.rawText.length === 0) {
+      return true;
+    }
+
+    // Extract the beginning of the source with the same length as pattern
+    const candidate = source.slice(0, pattern.rawText.length);
+
+    // Compare both text and entities for exact match
+    return candidate.rawText === pattern.rawText &&
+      isEntitiesEqual(candidate.rawEntities, pattern.rawEntities);
+  }
+
+  /**
+   * Static method to check whether a FormattedString ends with the specified pattern.
+   * Both the raw text and raw entities must match exactly.
+   * @param source The FormattedString to check
+   * @param pattern The FormattedString pattern to check for at the end
+   * @returns true if the source ends with the pattern, false otherwise
+   */
+  static endsWith(source: FormattedString, pattern: FormattedString): boolean {
+    // Pattern cannot be longer than source
+    if (pattern.rawText.length > source.rawText.length) {
+      return false;
+    }
+
+    // Handle empty pattern - always matches at the end
+    if (pattern.rawText.length === 0) {
+      return true;
+    }
+
+    // Extract the end of the source with the same length as pattern
+    const candidate = source.slice(
+      source.rawText.length - pattern.rawText.length,
+    );
+
+    // Compare both text and entities for exact match
+    return candidate.rawText === pattern.rawText &&
+      isEntitiesEqual(candidate.rawEntities, pattern.rawEntities);
   }
 }
 
