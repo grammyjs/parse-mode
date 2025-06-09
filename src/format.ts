@@ -414,7 +414,7 @@ export class FormattedString
    * @param separator The FormattedString separator to split by (only rawText is used for matching)
    * @returns An array of FormattedString segments
    */
-  static splitByPlainText(
+  static splitByText(
     text: FormattedString,
     separator: FormattedString,
   ): FormattedString[] {
@@ -662,8 +662,8 @@ export class FormattedString
    * @param separator The FormattedString separator to split by (only rawText is used for matching)
    * @returns An array of FormattedString segments
    */
-  splitByPlainText(separator: FormattedString): FormattedString[] {
-    return FormattedString.splitByPlainText(this, separator);
+  splitByText(separator: FormattedString): FormattedString[] {
+    return FormattedString.splitByText(this, separator);
   }
 
   /**
