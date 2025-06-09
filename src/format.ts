@@ -363,7 +363,7 @@ export class FormattedString
       if (text.rawText.length === 0) {
         return [new FormattedString("")];
       }
-      
+
       const result: FormattedString[] = [];
       for (let i = 0; i < text.rawText.length; i++) {
         result.push(text.slice(i, i + 1));

@@ -1915,7 +1915,7 @@ describe("FormattedString - Replace methods", () => {
 
     assertEquals(result.length, 3);
     assertEquals(result[0]?.rawText, "a");
-    assertEquals(result[1]?.rawText, "");  // empty segment
+    assertEquals(result[1]?.rawText, ""); // empty segment
     assertEquals(result[2]?.rawText, "b");
   });
 
@@ -1926,20 +1926,20 @@ describe("FormattedString - Replace methods", () => {
     const result = FormattedString.split(text, separator);
 
     assertEquals(result.length, 2);
-    assertEquals(result[0]?.rawText, "");  // empty before
-    assertEquals(result[1]?.rawText, "");  // empty after
+    assertEquals(result[0]?.rawText, ""); // empty before
+    assertEquals(result[1]?.rawText, ""); // empty after
   });
 
   it("Static split method - entity coverage affects matching", () => {
     // Test that entity coverage affects separator matching
-    const boldText = FormattedString.bold("Hello World");  // bold covers entire text including space
-    const plainSeparator = new FormattedString(" ");      // space without entities
-    
+    const boldText = FormattedString.bold("Hello World"); // bold covers entire text including space
+    const plainSeparator = new FormattedString(" "); // space without entities
+
     // Should not match because space in bold text has bold entity but separator doesn't
     const result1 = FormattedString.split(boldText, plainSeparator);
     assertEquals(result1.length, 1);
     assertEquals(result1[0]?.rawText, "Hello World");
-    
+
     // Should match if separator also has bold entity covering the space
     const boldSeparator = FormattedString.bold(" ");
     const result2 = FormattedString.split(boldText, boldSeparator);
