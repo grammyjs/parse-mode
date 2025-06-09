@@ -372,7 +372,10 @@ export class FormattedString
     }
 
     // Find all matches of the separator
-    const matches = text._findMatches(separator, true, false); // non-overlapping
+    const matches = text._findMatches(separator, {
+      findAll: true,
+      allowOverlapping: false,
+    }); // non-overlapping
 
     // If no matches found, return the original text as single element
     if (matches.length === 0) {
@@ -433,7 +436,11 @@ export class FormattedString
     }
 
     // Find all plain text matches of the separator (ignoring entities)
-    const matches = text._findTextMatches(separator, true, false); // non-overlapping
+    const matches = text._findMatches(separator, {
+      findAll: true,
+      allowOverlapping: false,
+      matchByTextOnly: true,
+    }); // non-overlapping
 
     // If no matches found, return the original text as single element
     if (matches.length === 0) {
@@ -712,15 +719,22 @@ export class FormattedString
   /**
    * Protected method that finds pattern matches within this FormattedString.
    * @param pattern The FormattedString pattern to search for
-   * @param findAll If true, finds all matches; if false, stops after first match
-   * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
+   * @param options Configuration options for the search
    * @returns Array of match offsets
    */
   protected _findMatches(
     pattern: FormattedString,
-    findAll: boolean,
-    allowOverlapping: boolean = true,
+    options: {
+      findAll?: boolean;
+      allowOverlapping?: boolean;
+      matchByTextOnly?: boolean;
+    } = {},
   ): number[] {
+    const {
+      findAll = false,
+      allowOverlapping = true,
+      matchByTextOnly = false,
+    } = options;
     // Handle empty pattern - matches at the beginning
     if (pattern.rawText.length === 0) {
       return [0];
@@ -736,19 +750,26 @@ export class FormattedString
     let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
 
     while (textIndex !== -1) {
-      // Use slice to extract candidate and compare entities
-      const candidate = this.slice(
-        textIndex,
-        textIndex + pattern.rawText.length,
-      );
+      let shouldAddMatch = false;
 
-      // Compare entities for exact match
-      if (
-        isEntitiesEqual(
+      if (matchByTextOnly) {
+        // For text-only matching, we don't compare entities - just add the match
+        shouldAddMatch = true;
+      } else {
+        // Use slice to extract candidate and compare entities
+        const candidate = this.slice(
+          textIndex,
+          textIndex + pattern.rawText.length,
+        );
+
+        // Compare entities for exact match
+        shouldAddMatch = isEntitiesEqual(
           candidate.rawEntities,
           pattern.rawEntities,
-        )
-      ) {
+        );
+      }
+
+      if (shouldAddMatch) {
         matches.push(textIndex);
         if (!findAll) {
           break;
@@ -759,57 +780,8 @@ export class FormattedString
       // For non-overlapping matches, skip ahead by pattern length if we found a match
       // For overlapping matches, move only one position forward
       if (
-        !allowOverlapping && matches.length > 0 &&
-        matches[matches.length - 1] === textIndex
+        !allowOverlapping && shouldAddMatch
       ) {
-        searchStart = textIndex + pattern.rawText.length;
-      } else {
-        searchStart = textIndex + 1;
-      }
-      textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
-    }
-
-    return matches;
-  }
-
-  /**
-   * Protected method that finds pattern matches within this FormattedString based on plain text only.
-   * This method ignores entity differences and only matches on raw text content.
-   * @param pattern The FormattedString pattern to search for (only rawText is used)
-   * @param findAll If true, finds all matches; if false, stops after first match
-   * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
-   * @returns Array of match offsets
-   */
-  protected _findTextMatches(
-    pattern: FormattedString,
-    findAll: boolean,
-    allowOverlapping: boolean = true,
-  ): number[] {
-    // Handle empty pattern - matches at the beginning
-    if (pattern.rawText.length === 0) {
-      return [0];
-    }
-
-    // Pattern cannot be longer than source
-    if (pattern.rawText.length > this.rawText.length) {
-      return [];
-    }
-
-    const matches: number[] = [];
-    let searchStart = 0;
-    let textIndex = this.rawText.indexOf(pattern.rawText, searchStart);
-
-    while (textIndex !== -1) {
-      // For plain text matching, we don't compare entities - just add the match
-      matches.push(textIndex);
-      if (!findAll) {
-        break;
-      }
-
-      // Continue searching from the next position
-      // For non-overlapping matches, skip ahead by pattern length
-      // For overlapping matches, move only one position forward
-      if (!allowOverlapping) {
         searchStart = textIndex + pattern.rawText.length;
       } else {
         searchStart = textIndex + 1;
@@ -827,7 +799,10 @@ export class FormattedString
    * @returns The offset where the pattern is found, or -1 if not found
    */
   find(pattern: FormattedString): number {
-    const matches = this._findMatches(pattern, false, true);
+    const matches = this._findMatches(pattern, {
+      findAll: false,
+      allowOverlapping: true,
+    });
     return matches.length > 0 ? matches[0] : -1;
   }
 
@@ -842,7 +817,7 @@ export class FormattedString
     pattern: FormattedString,
     allowOverlapping: boolean = false,
   ): number[] {
-    return this._findMatches(pattern, true, allowOverlapping);
+    return this._findMatches(pattern, { findAll: true, allowOverlapping });
   }
 
   /**
