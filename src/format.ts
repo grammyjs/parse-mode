@@ -433,7 +433,7 @@ export class FormattedString
     }
 
     // Find all plain text matches of the separator (ignoring entities)
-    const matches = text._findPlainTextMatches(separator, true, false); // non-overlapping
+    const matches = text._findTextMatches(separator, true, false); // non-overlapping
 
     // If no matches found, return the original text as single element
     if (matches.length === 0) {
@@ -780,7 +780,7 @@ export class FormattedString
    * @param allowOverlapping If true, allows overlapping matches; if false, skips overlapping matches
    * @returns Array of match offsets
    */
-  protected _findPlainTextMatches(
+  protected _findTextMatches(
     pattern: FormattedString,
     findAll: boolean,
     allowOverlapping: boolean = true,
