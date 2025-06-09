@@ -359,6 +359,11 @@ export class FormattedString
   ): FormattedString[] {
     // Handle empty separator - split into individual characters
     if (separator.rawText.length === 0) {
+      // Special case: if both text and separator are empty, return array with one empty string
+      if (text.rawText.length === 0) {
+        return [new FormattedString("")];
+      }
+      
       const result: FormattedString[] = [];
       for (let i = 0; i < text.rawText.length; i++) {
         result.push(text.slice(i, i + 1));

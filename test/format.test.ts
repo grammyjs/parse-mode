@@ -1808,6 +1808,17 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result[0]?.rawEntities.length, 0);
   });
 
+  it("Static split method - empty text and empty separator", () => {
+    // Test with both empty text and empty separator
+    const text = new FormattedString("");
+    const separator = new FormattedString("");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 1);
+    assertEquals(result[0]?.rawText, "");
+    assertEquals(result[0]?.rawEntities.length, 0);
+  });
+
   it("Static split method - separator at beginning/end", () => {
     // Test separator at beginning and end
     const text = new FormattedString(",a,b,");
@@ -1894,5 +1905,46 @@ describe("FormattedString - Replace methods", () => {
     // Check entities are preserved
     assertEquals(result[0]?.rawEntities[0]?.type, "bold");
     assertEquals(result[1]?.rawEntities[0]?.type, "italic");
+  });
+
+  it("Static split method - consecutive separators", () => {
+    // Test consecutive separators create empty segments
+    const text = new FormattedString("a,,b");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 3);
+    assertEquals(result[0]?.rawText, "a");
+    assertEquals(result[1]?.rawText, "");  // empty segment
+    assertEquals(result[2]?.rawText, "b");
+  });
+
+  it("Static split method - separator equals entire text", () => {
+    // Test when separator is the entire text
+    const text = new FormattedString(",");
+    const separator = new FormattedString(",");
+    const result = FormattedString.split(text, separator);
+
+    assertEquals(result.length, 2);
+    assertEquals(result[0]?.rawText, "");  // empty before
+    assertEquals(result[1]?.rawText, "");  // empty after
+  });
+
+  it("Static split method - entity coverage affects matching", () => {
+    // Test that entity coverage affects separator matching
+    const boldText = FormattedString.bold("Hello World");  // bold covers entire text including space
+    const plainSeparator = new FormattedString(" ");      // space without entities
+    
+    // Should not match because space in bold text has bold entity but separator doesn't
+    const result1 = FormattedString.split(boldText, plainSeparator);
+    assertEquals(result1.length, 1);
+    assertEquals(result1[0]?.rawText, "Hello World");
+    
+    // Should match if separator also has bold entity covering the space
+    const boldSeparator = FormattedString.bold(" ");
+    const result2 = FormattedString.split(boldText, boldSeparator);
+    assertEquals(result2.length, 2);
+    assertEquals(result2[0]?.rawText, "Hello");
+    assertEquals(result2[1]?.rawText, "World");
   });
 });
