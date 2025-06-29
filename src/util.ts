@@ -104,10 +104,12 @@ export function isEntitiesEqual(
   if (entities1.length !== entities2.length) {
     return false;
   }
+  const sortedEntities1 = sortEntities(entities1);
+  const sortedEntities2 = sortEntities(entities2);
 
-  for (let i = 0; i < entities1.length; i++) {
-    const entity1 = entities1[i];
-    const entity2 = entities2[i];
+  for (let i = 0; i < sortedEntities1.length; i++) {
+    const entity1 = sortedEntities1[i];
+    const entity2 = sortedEntities2[i];
     if (!isEntityEqual(entity1, entity2)) {
       return false;
     }
@@ -254,7 +256,7 @@ function compareEntities(a: MessageEntity, b: MessageEntity): number {
   }
 
   if (a.type === "pre" && b.type === "pre") {
-    return (a.language || "").localeCompare(b.language || "");
+    return (a.language ?? "").localeCompare(b.language ?? "");
   }
 
   if (a.type === "custom_emoji" && b.type === "custom_emoji") {
@@ -262,31 +264,8 @@ function compareEntities(a: MessageEntity, b: MessageEntity): number {
   }
 
   if (a.type === "text_mention" && b.type === "text_mention") {
-    // Sort by user ID first, then by other user properties
-    const aUserId = a.user.id;
-    const bUserId = b.user.id;
-    if (aUserId !== bUserId) {
-      return aUserId - bUserId;
-    }
-
-    // If user IDs are the same, sort by username
-    const aUsername = a.user.username || "";
-    const bUsername = b.user.username || "";
-    if (aUsername !== bUsername) {
-      return aUsername.localeCompare(bUsername);
-    }
-
-    // If usernames are the same, sort by first_name
-    const aFirstName = a.user.first_name || "";
-    const bFirstName = b.user.first_name || "";
-    if (aFirstName !== bFirstName) {
-      return aFirstName.localeCompare(bFirstName);
-    }
-
-    // If first_names are the same, sort by last_name
-    const aLastName = a.user.last_name || "";
-    const bLastName = b.user.last_name || "";
-    return aLastName.localeCompare(bLastName);
+    // Sort by user ID first only
+    return a.user.id - b.user.id;
   }
 
   // For entities of the same type without type-specific properties,

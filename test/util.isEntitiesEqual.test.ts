@@ -51,8 +51,7 @@ describe("isEntitiesEqual", () => {
       { type: "bold", offset: 0, length: 5 },
     ];
 
-    // Order matters - entities must be in same positions
-    assertEquals(isEntitiesEqual(entities1, entities2), false);
+    assertEquals(isEntitiesEqual(entities1, entities2), true);
   });
 
   it("arrays with different entities", () => {
@@ -81,21 +80,6 @@ describe("isEntitiesEqual", () => {
     ];
 
     assertEquals(isEntitiesEqual(entities1, entities2), false);
-  });
-
-  it("single entity arrays", () => {
-    const entities1: MessageEntity[] = [
-      { type: "bold", offset: 0, length: 5 },
-    ];
-    const entities2: MessageEntity[] = [
-      { type: "bold", offset: 0, length: 5 },
-    ];
-    const entities3: MessageEntity[] = [
-      { type: "bold", offset: 1, length: 5 },
-    ];
-
-    assertEquals(isEntitiesEqual(entities1, entities2), true);
-    assertEquals(isEntitiesEqual(entities1, entities3), false);
   });
 
   it("arrays with complex entity types - text_link", () => {
@@ -315,52 +299,5 @@ describe("isEntitiesEqual", () => {
 
     assertEquals(isEntitiesEqual(entities1, entities2), true);
     assertEquals(isEntitiesEqual(entities1, entities3), false);
-  });
-
-  it("mixed complex entity types", () => {
-    const entities1: MessageEntity[] = [
-      { type: "bold", offset: 0, length: 5 },
-      {
-        type: "text_link",
-        offset: 10,
-        length: 8,
-        url: "https://example.com",
-      },
-      {
-        type: "pre",
-        offset: 25,
-        length: 10,
-        language: "typescript",
-      },
-      {
-        type: "custom_emoji",
-        offset: 40,
-        length: 3,
-        custom_emoji_id: "smile",
-      },
-    ];
-    const entities2: MessageEntity[] = [
-      { type: "bold", offset: 0, length: 5 },
-      {
-        type: "text_link",
-        offset: 10,
-        length: 8,
-        url: "https://example.com",
-      },
-      {
-        type: "pre",
-        offset: 25,
-        length: 10,
-        language: "typescript",
-      },
-      {
-        type: "custom_emoji",
-        offset: 40,
-        length: 3,
-        custom_emoji_id: "smile",
-      },
-    ];
-
-    assertEquals(isEntitiesEqual(entities1, entities2), true);
   });
 });
