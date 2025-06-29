@@ -1,6 +1,5 @@
-import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
+import { assertEquals, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
-import type { MessageEntity } from "../src/deps.deno.ts";
 
 describe("FormattedString - Replace methods", () => {
   it("replace method basic functionality", () => {

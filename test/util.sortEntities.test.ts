@@ -312,7 +312,7 @@ describe("sortEntitiesDeterministically", () => {
       { type: "italic", offset: 5, length: 3 },
     ];
 
-    const originalOrder = entities.map((e) => ({ ...e }));
+    const _originalOrder = entities.map((e) => ({ ...e }));
     const sorted = sortEntities(entities);
 
     // Original array should be unchanged

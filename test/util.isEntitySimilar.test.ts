@@ -145,18 +145,18 @@ describe("isEntitySimilar", () => {
       length: 10,
       language: "javascript",
     };
-    const preWithNullLanguage: MessageEntity = {
+    const preWithNullLanguage = {
       type: "pre",
       offset: 0,
       length: 10,
-      language: null as any,
-    };
-    const preWithUndefinedLanguage: MessageEntity = {
+      language: null,
+    } as unknown as MessageEntity;
+    const preWithUndefinedLanguage = {
       type: "pre",
       offset: 0,
       length: 10,
-      language: undefined as any,
-    };
+      language: undefined,
+    } as unknown as MessageEntity;
 
     // Pre entities without language should be similar
     assertEquals(
@@ -197,18 +197,18 @@ describe("isEntitySimilar", () => {
       length: 5,
       url: "https://example.com",
     };
-    const textLinkWithNullUrl: MessageEntity = {
+    const textLinkWithNullUrl = {
       type: "text_link",
       offset: 0,
       length: 5,
-      url: null as any,
-    };
-    const textLinkWithUndefinedUrl: MessageEntity = {
+      url: null,
+    } as unknown as MessageEntity;
+    const textLinkWithUndefinedUrl = {
       type: "text_link",
       offset: 0,
       length: 5,
-      url: undefined as any,
-    };
+      url: undefined,
+    } as unknown as MessageEntity;
 
     // text_link entities without URL should be similar
     assertEquals(
@@ -249,18 +249,18 @@ describe("isEntitySimilar", () => {
       length: 2,
       custom_emoji_id: "123456",
     };
-    const customEmojiWithNullId: MessageEntity = {
+    const customEmojiWithNullId = {
       type: "custom_emoji",
       offset: 0,
       length: 2,
-      custom_emoji_id: null as any,
-    };
-    const customEmojiWithUndefinedId: MessageEntity = {
+      custom_emoji_id: null,
+    } as unknown as MessageEntity;
+    const customEmojiWithUndefinedId = {
       type: "custom_emoji",
       offset: 0,
       length: 2,
-      custom_emoji_id: undefined as any,
-    };
+      custom_emoji_id: undefined,
+    } as unknown as MessageEntity;
 
     // custom_emoji entities without custom_emoji_id should be similar
     assertEquals(
@@ -292,15 +292,15 @@ describe("isEntitySimilar", () => {
       id: 123,
       is_bot: false,
       first_name: "John",
-      last_name: null as any,
-      username: undefined as any,
-    };
+      last_name: null,
+      username: undefined,
+    } as unknown as import("../src/deps.deno.ts").User;
     const userWithUndefinedProperties = {
       id: 123,
       is_bot: false,
       first_name: "John",
-      last_name: undefined as any,
-    };
+      last_name: undefined,
+    } as unknown as import("../src/deps.deno.ts").User;
     const userWithMissingProperties = {
       id: 123,
       is_bot: false,
@@ -352,16 +352,16 @@ describe("isEntitySimilar", () => {
       id: 123,
       is_bot: false,
       first_name: "John",
-      last_name: null as any,
-      username: null as any,
-    };
+      last_name: null,
+      username: null,
+    } as unknown as import("../src/deps.deno.ts").User;
     const userWithNestedUndefined = {
       id: 123,
       is_bot: false,
       first_name: "John",
-      last_name: undefined as any,
-      username: undefined as any,
-    };
+      last_name: undefined,
+      username: undefined,
+    } as unknown as import("../src/deps.deno.ts").User;
 
     const entity5: MessageEntity = {
       type: "text_mention",

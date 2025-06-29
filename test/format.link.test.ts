@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - Static link methods", () => {
+describe("FormattedString - link formatting methods", () => {
   it("Static link methods", () => {
     const text = "link text";
     const url = "https://example.com";
@@ -29,14 +29,11 @@ describe("FormattedString - Static link methods", () => {
     //@ts-expect-error quick test
     assertEquals(aFormatted.rawEntities[0]?.url, url);
   });
-});
-
-describe("FormattedString - Instance link methods", () => {
   it("Instance link methods", () => {
     const initialText = "Visit ";
     const linkText = "our website";
     const url = "https://example.com";
-    const initialFormatted = new FormattedString(initialText, []);
+    const initialFormatted = new FormattedString(initialText);
 
     const linkResult = initialFormatted.link(linkText, url);
     const aResult = initialFormatted.a(linkText, url);

@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - Static formatting methods", () => {
+describe("FormattedString - code formatting methods", () => {
   it("Static code method", () => {
     const text = "code text";
 
@@ -16,13 +16,10 @@ describe("FormattedString - Static formatting methods", () => {
     assertEquals(codeFormatted.rawEntities[0]?.offset, 0);
     assertEquals(codeFormatted.rawEntities[0]?.length, text.length);
   });
-});
-
-describe("FormattedString", () => {
   it("Instance code method", () => {
     const initialText = "Run ";
     const codeText = "npm install";
-    const initialFormatted = new FormattedString(initialText, []);
+    const initialFormatted = new FormattedString(initialText);
 
     const codeResult = initialFormatted.code(codeText);
 

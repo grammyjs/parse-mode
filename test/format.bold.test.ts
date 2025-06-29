@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - Static formatting methods", () => {
+describe("FormattedString - bold formatting methods", () => {
   it("Static bold methods", () => {
     const text = "bold text";
 
@@ -24,13 +24,10 @@ describe("FormattedString - Static formatting methods", () => {
     assertEquals(bFormatted.rawEntities[0]?.offset, 0);
     assertEquals(bFormatted.rawEntities[0]?.length, text.length);
   });
-});
-
-describe("FormattedString", () => {
   it("Instance bold methods", () => {
     const initialText = "Hello ";
     const boldText = "World";
-    const initialFormatted = new FormattedString(initialText, []);
+    const initialFormatted = new FormattedString(initialText);
 
     const boldResult = initialFormatted.bold(boldText);
     const bResult = initialFormatted.b(boldText);

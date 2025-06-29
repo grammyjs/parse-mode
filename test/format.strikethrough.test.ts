@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - Static formatting methods", () => {
+describe("FormattedString - strikethrough formatting methods", () => {
   it("Static strikethrough methods", () => {
     const text = "strikethrough text";
 
@@ -24,13 +24,10 @@ describe("FormattedString - Static formatting methods", () => {
     assertEquals(sFormatted.rawEntities[0]?.offset, 0);
     assertEquals(sFormatted.rawEntities[0]?.length, text.length);
   });
-});
-
-describe("FormattedString - Instance methods", () => {
   it("Instance strikethrough methods", () => {
     const initialText = "Hello ";
     const strikeText = "World";
-    const initialFormatted = new FormattedString(initialText, []);
+    const initialFormatted = new FormattedString(initialText);
 
     const strikeResult = initialFormatted.strikethrough(strikeText);
     const sResult = initialFormatted.s(strikeText);

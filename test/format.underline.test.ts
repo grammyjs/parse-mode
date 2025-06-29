@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - Static formatting methods", () => {
+describe("FormattedString - underline formatting methods", () => {
   it("Static underline methods", () => {
     const text = "underline text";
 
@@ -24,13 +24,10 @@ describe("FormattedString - Static formatting methods", () => {
     assertEquals(uFormatted.rawEntities[0]?.offset, 0);
     assertEquals(uFormatted.rawEntities[0]?.length, text.length);
   });
-});
-
-describe("FormattedString", () => {
   it("Instance underline methods", () => {
     const initialText = "Hello ";
     const underlineText = "World";
-    const initialFormatted = new FormattedString(initialText, []);
+    const initialFormatted = new FormattedString(initialText);
 
     const underlineResult = initialFormatted.underline(underlineText);
     const uResult = initialFormatted.u(underlineText);

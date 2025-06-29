@@ -223,19 +223,19 @@ describe("consolidateEntities", () => {
     // Test mixed consolidation with overlapping pre entities having different languages
     const mixedLanguageEntities: MessageEntity[] = [
       {
-        type: "pre" as const,
+        type: "pre",
         offset: 0,
         length: 5,
         language: "javascript",
       },
       {
-        type: "pre" as const,
+        type: "pre",
         offset: 2,
         length: 4,
         language: "javascript",
       },
       {
-        type: "pre" as const,
+        type: "pre",
         offset: 7,
         length: 3,
         language: "python",
@@ -246,10 +246,10 @@ describe("consolidateEntities", () => {
     assertEquals(mixedLanguageResult.length, 2); // Should have 2 entities: 1 for each language
 
     const jsEntity = mixedLanguageResult.find((e) =>
-      e.type === "pre" && (e as any).language === "javascript"
+      e.type === "pre" && e.language === "javascript"
     );
     const pythonEntity = mixedLanguageResult.find((e) =>
-      e.type === "pre" && (e as any).language === "python"
+      e.type === "pre" && e.language === "python"
     );
 
     assertEquals(jsEntity?.offset, 0);
@@ -326,10 +326,14 @@ describe("consolidateEntities", () => {
     assertEquals(mixedEmojiResult.length, 2); // Should have 2 entities: 1 for each emoji ID
 
     const emoji123Entity = mixedEmojiResult.find((e) =>
-      e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_123"
+      e.type === "custom_emoji" &&
+      (e as MessageEntity & { custom_emoji_id: string }).custom_emoji_id ===
+        "emoji_123"
     );
     const emoji456Entity = mixedEmojiResult.find((e) =>
-      e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_456"
+      e.type === "custom_emoji" &&
+      (e as MessageEntity & { custom_emoji_id: string }).custom_emoji_id ===
+        "emoji_456"
     );
 
     assertEquals(emoji123Entity?.offset, 0);
@@ -406,10 +410,14 @@ describe("consolidateEntities", () => {
     assertEquals(mixedUserResult.length, 2); // Should have 2 entities: 1 for each user
 
     const aliceEntity = mixedUserResult.find((e) =>
-      e.type === "text_mention" && (e as any).user?.id === 123
+      e.type === "text_mention" &&
+      (e as MessageEntity & { user: import("../src/deps.deno.ts").User }).user
+          ?.id === 123
     );
     const bobEntity = mixedUserResult.find((e) =>
-      e.type === "text_mention" && (e as any).user?.id === 456
+      e.type === "text_mention" &&
+      (e as MessageEntity & { user: import("../src/deps.deno.ts").User }).user
+          ?.id === 456
     );
 
     assertEquals(aliceEntity?.offset, 0);
@@ -447,12 +455,15 @@ describe("consolidateEntities", () => {
       if (
         consolidated[i].type === "text_link" && sorted[i].type === "text_link"
       ) {
-        assertEquals((consolidated[i] as any).url, (sorted[i] as any).url);
+        assertEquals(
+          (consolidated[i] as MessageEntity & { url: string }).url,
+          (sorted[i] as MessageEntity & { url: string }).url,
+        );
       }
       if (consolidated[i].type === "pre" && sorted[i].type === "pre") {
         assertEquals(
-          (consolidated[i] as any).language,
-          (sorted[i] as any).language,
+          (consolidated[i] as MessageEntity & { language?: string }).language,
+          (sorted[i] as MessageEntity & { language?: string }).language,
         );
       }
     }
