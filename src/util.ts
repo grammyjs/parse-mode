@@ -118,7 +118,7 @@ export function isEntitiesEqual(
 /**
  * Helper method to check if two entities can be consolidated
  * @param entity1 First entity
- * @param entity2 Second entity (should have offset >= entity1.offset)
+ * @param entity2 Second entity
  * @returns true if entities can be consolidated, false otherwise
  */
 export function canConsolidateEntities(
@@ -130,12 +130,17 @@ export function canConsolidateEntities(
     return false;
   }
 
+  // Decide who comes first
+  const [leftEntity, rightEntity] = entity1.offset > entity2.offset
+    ? [entity2, entity1]
+    : [entity1, entity2];
+
   // Check if entities overlap or are adjacent
-  const entity1End = entity1.offset + entity1.length;
-  const entity2Start = entity2.offset;
+  const leftEntityEnd = leftEntity.offset + leftEntity.length;
+  const rightEntityStart = rightEntity.offset;
 
   // Adjacent (touching) or overlapping entities can be consolidated
-  return entity2Start <= entity1End;
+  return rightEntityStart <= leftEntityEnd;
 }
 
 /**

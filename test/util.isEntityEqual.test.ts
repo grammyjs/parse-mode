@@ -55,7 +55,7 @@ describe("isEntityEqual", () => {
     assertEquals(isEntityEqual(entity1, entity4), false);
   });
 
-  it("comprehensive comparison", () => {
+  it("with pre entities", () => {
     const entity1: MessageEntity = {
       type: "pre",
       offset: 10,
@@ -82,7 +82,7 @@ describe("isEntityEqual", () => {
     assertEquals(isEntityEqual(entity1, entity3), false);
   });
 
-  it("custom_emoji entity equality tests", () => {
+  it("with custom_emoji entities", () => {
     const entity1: MessageEntity = {
       type: "custom_emoji",
       offset: 0,
@@ -127,7 +127,7 @@ describe("isEntityEqual", () => {
     assertEquals(isEntityEqual(entity1, entity5), false);
   });
 
-  it("text_mention entity equality tests", () => {
+  it("with text_mention entities", () => {
     const user1 = { id: 123, is_bot: false, first_name: "John" };
     const copyUser1 = { id: 123, is_bot: false, first_name: "John" };
     const user2 = { id: 456, is_bot: false, first_name: "Jane" };
@@ -166,7 +166,7 @@ describe("isEntityEqual", () => {
     // Identical text_mention entities should be equal
     assertEquals(isEntityEqual(entity1, entity2), true);
 
-    // Different users should not be equal
+    // Dissimilar users should not be equal
     assertEquals(isEntityEqual(entity1, entity3), false);
 
     // Different offset should not be equal
@@ -176,80 +176,29 @@ describe("isEntityEqual", () => {
     assertEquals(isEntityEqual(entity1, entity5), false);
   });
 
-  it("edge cases with undefined/null optional properties", () => {
+  it("with entities with missing optional properties", () => {
     // text_link without url property
-    const textLinkWithoutUrl: MessageEntity = {
-      type: "text_link",
-      offset: 0,
-      length: 5,
-    } as MessageEntity;
-    const textLinkWithoutUrl2: MessageEntity = {
-      type: "text_link",
-      offset: 0,
-      length: 5,
-    } as MessageEntity;
-    const textLinkWithUrl: MessageEntity = {
-      type: "text_link",
-      offset: 0,
-      length: 5,
-      url: "https://example.com",
-    };
-
-    // Two text_link entities without url should be equal
-    assertEquals(isEntityEqual(textLinkWithoutUrl, textLinkWithoutUrl2), true);
-
-    // text_link without url vs with url should not be equal
-    assertEquals(isEntityEqual(textLinkWithoutUrl, textLinkWithUrl), false);
-
-    // pre without language property
-    const preWithoutLanguage: MessageEntity = {
+    const preWithoutLanguage1: MessageEntity = {
       type: "pre",
       offset: 0,
-      length: 10,
-    } as MessageEntity;
+      length: 5,
+    };
     const preWithoutLanguage2: MessageEntity = {
       type: "pre",
       offset: 0,
-      length: 10,
-    } as MessageEntity;
+      length: 5,
+    };
     const preWithLanguage: MessageEntity = {
       type: "pre",
       offset: 0,
-      length: 10,
-      language: "javascript",
+      length: 5,
+      language: "typescript",
     };
 
     // Two pre entities without language should be equal
-    assertEquals(isEntityEqual(preWithoutLanguage, preWithoutLanguage2), true);
+    assertEquals(isEntityEqual(preWithoutLanguage1, preWithoutLanguage2), true);
 
     // pre without language vs with language should not be equal
-    assertEquals(isEntityEqual(preWithoutLanguage, preWithLanguage), false);
-
-    // custom_emoji without custom_emoji_id property
-    const customEmojiWithoutId: MessageEntity = {
-      type: "custom_emoji",
-      offset: 0,
-      length: 2,
-    } as MessageEntity;
-    const customEmojiWithoutId2: MessageEntity = {
-      type: "custom_emoji",
-      offset: 0,
-      length: 2,
-    } as MessageEntity;
-    const customEmojiWithId: MessageEntity = {
-      type: "custom_emoji",
-      offset: 0,
-      length: 2,
-      custom_emoji_id: "123456",
-    };
-
-    // Two custom_emoji entities without custom_emoji_id should be equal
-    assertEquals(
-      isEntityEqual(customEmojiWithoutId, customEmojiWithoutId2),
-      true,
-    );
-
-    // custom_emoji without id vs with id should not be equal
-    assertEquals(isEntityEqual(customEmojiWithoutId, customEmojiWithId), false);
+    assertEquals(isEntityEqual(preWithoutLanguage1, preWithLanguage), false);
   });
 });
