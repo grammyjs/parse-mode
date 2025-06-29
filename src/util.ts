@@ -10,19 +10,19 @@ export function isUserSimilar(user1: User, user2: User): boolean {
   const propertyComparisonMap = new Map<string, unknown>();
 
   for (const [key, value] of Object.entries(user1)) {
-    if (value == undefined) {
-      // We shall consider absent properties, null, and undefined as "equal"
+    if (value === undefined) {
+      // We shall consider absent properties and undefined as "equal"
       continue;
     }
     propertyComparisonMap.set(key, value);
   }
 
   for (const [key, value] of Object.entries(user2)) {
-    if (value == undefined) {
+    if (value === undefined) {
       continue;
     }
     if (!propertyComparisonMap.has(key)) {
-      return false; // user2 has a non-nil property that user1 does not
+      return false; // user2 has a defined property that user1 does not
     }
     if (propertyComparisonMap.get(key) !== value) {
       return false;

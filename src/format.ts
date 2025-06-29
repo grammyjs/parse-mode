@@ -348,14 +348,16 @@ export class FormattedString
   }
 
   /**
-   * Splits a FormattedString into an array of FormattedStrings using a separator
+   * Internal method that implements the shared splitting logic for both split and splitByText methods
    * @param text The FormattedString to split
-   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @param separator The FormattedString separator to split by
+   * @param isSplitByTextOnly If true, ignore entities for separator. Defaults to false.
    * @returns An array of FormattedString segments
    */
-  static split(
+  protected static _split(
     text: FormattedString,
     separator: FormattedString,
+    isSplitByTextOnly: boolean = false,
   ): FormattedString[] {
     // Handle empty separator - split into individual characters
     if (separator.rawText.length === 0) {
@@ -375,6 +377,7 @@ export class FormattedString
     const matches = text._findMatches(separator, {
       findAll: true,
       allowOverlapping: false,
+      matchByTextOnly: isSplitByTextOnly,
     }); // non-overlapping
 
     // If no matches found, return the original text as single element
@@ -411,6 +414,19 @@ export class FormattedString
   }
 
   /**
+   * Splits a FormattedString into an array of FormattedStrings using a separator
+   * @param text The FormattedString to split
+   * @param separator The FormattedString separator to split by (must match both rawText and rawEntities exactly)
+   * @returns An array of FormattedString segments
+   */
+  static split(
+    text: FormattedString,
+    separator: FormattedString,
+  ): FormattedString[] {
+    return FormattedString._split(text, separator);
+  }
+
+  /**
    * Splits a FormattedString into an array of FormattedStrings using a separator,
    * ignoring inequalities in rawEntities. Only uses rawText to determine if this is a valid position to split.
    * @param text The FormattedString to split
@@ -421,58 +437,7 @@ export class FormattedString
     text: FormattedString,
     separator: FormattedString,
   ): FormattedString[] {
-    // Handle empty separator - split into individual characters
-    if (separator.rawText.length === 0) {
-      // Special case: if both text and separator are empty, return array with one empty string
-      if (text.rawText.length === 0) {
-        return [new FormattedString("")];
-      }
-
-      const result: FormattedString[] = [];
-      for (let i = 0; i < text.rawText.length; i++) {
-        result.push(text.slice(i, i + 1));
-      }
-      return result;
-    }
-
-    // Find all plain text matches of the separator (ignoring entities)
-    const matches = text._findMatches(separator, {
-      findAll: true,
-      allowOverlapping: false,
-      matchByTextOnly: true,
-    }); // non-overlapping
-
-    // If no matches found, return the original text as single element
-    if (matches.length === 0) {
-      return [new FormattedString(text.rawText, [...text.rawEntities])];
-    }
-
-    const segments: FormattedString[] = [];
-    let currentOffset = 0;
-
-    // Extract segments between matches
-    for (const matchOffset of matches) {
-      // Add segment before this match
-      if (matchOffset > currentOffset) {
-        segments.push(text.slice(currentOffset, matchOffset));
-      } else if (matchOffset === currentOffset) {
-        // Empty segment (separator at beginning or consecutive separators)
-        segments.push(new FormattedString(""));
-      }
-
-      // Move past this separator
-      currentOffset = matchOffset + separator.rawText.length;
-    }
-
-    // Add final segment after last match
-    if (currentOffset < text.rawText.length) {
-      segments.push(text.slice(currentOffset));
-    } else if (currentOffset === text.rawText.length) {
-      // Text ends with separator
-      segments.push(new FormattedString(""));
-    }
-
-    return segments;
+    return FormattedString._split(text, separator, true);
   }
 
   // Instance formatting methods
@@ -674,7 +639,7 @@ export class FormattedString
   }
 
   /**
-   * Returns a deep copy of a portion of this FormattedString
+   * Returns a copy of a portion of this FormattedString
    * @param start The start index (inclusive), defaults to 0
    * @param end The end index (exclusive), defaults to text length
    * @returns A new FormattedString containing the sliced text and properly adjusted entities
@@ -779,9 +744,7 @@ export class FormattedString
       // Continue searching from the next position
       // For non-overlapping matches, skip ahead by pattern length if we found a match
       // For overlapping matches, move only one position forward
-      if (
-        !allowOverlapping && shouldAddMatch
-      ) {
+      if (!allowOverlapping && shouldAddMatch) {
         searchStart = textIndex + pattern.rawText.length;
       } else {
         searchStart = textIndex + 1;
@@ -839,28 +802,17 @@ export class FormattedString
 
     // Process matches from right to left to avoid offset shifts
     const segments: FormattedString[] = [];
-    let currentOffset = this.rawText.length;
-
-    // Work backwards through the matches
-    for (let i = matchOffsets.length - 1; i >= 0; i--) {
+    let currentOffset = 0;
+    for (let i = 0; i < matchOffsets.length; i++) {
       const matchOffset = matchOffsets[i];
-      const matchEnd = matchOffset + pattern.rawText.length;
-
-      // Add the text after this match (if any)
-      if (currentOffset > matchEnd) {
-        segments.unshift(this.slice(matchEnd, currentOffset));
+      if (currentOffset < matchOffset) {
+        segments.push(this.slice(currentOffset, matchOffset));
       }
-
-      // Add the replacement
-      segments.unshift(replacement);
-
-      // Update current offset to the start of this match
-      currentOffset = matchOffset;
+      segments.push(replacement);
+      currentOffset = matchOffset + pattern.rawText.length;
     }
-
-    // Add any remaining text before the first match
-    if (currentOffset > 0) {
-      segments.unshift(this.slice(0, currentOffset));
+    if (currentOffset < this.rawText.length) {
+      segments.push(this.slice(currentOffset, this.rawText.length));
     }
 
     // Join all segments
@@ -879,12 +831,11 @@ export class FormattedString
     replacement: FormattedString,
   ): FormattedString {
     const matchOffset = this.find(pattern);
-
-    if (matchOffset === -1) {
-      return this.replaceMatches(pattern, replacement, []);
-    }
-
-    return this.replaceMatches(pattern, replacement, [matchOffset]);
+    return this.replaceMatches(
+      pattern,
+      replacement,
+      matchOffset === -1 ? [] : [matchOffset],
+    );
   }
 
   /**

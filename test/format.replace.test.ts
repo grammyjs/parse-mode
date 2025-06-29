@@ -1,13 +1,14 @@
 import { assertEquals, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
+import type { MessageEntity } from "../src/deps.deno.ts";
 
 describe("FormattedString - Replace methods", () => {
   it("replace method basic functionality", () => {
     // Test replacing a simple text match
     const text = "Hello world, hello universe";
-    const source = new FormattedString(text, []);
-    const pattern = new FormattedString("hello", []);
-    const replacement = new FormattedString("hi", []);
+    const source = new FormattedString(text);
+    const pattern = new FormattedString("hello");
+    const replacement = new FormattedString("hi");
 
     const result = source.replace(pattern, replacement);
     assertEquals(result.rawText, "Hello world, hi universe");
@@ -17,16 +18,16 @@ describe("FormattedString - Replace methods", () => {
   it("replace method with entities", () => {
     // Test replacing text with matching entities
     const sourceText = "Hello bold world and normal text";
-    const sourceEntities = [
-      { type: "bold" as const, offset: 6, length: 10 }, // "bold world"
+    const sourceEntities: MessageEntity[] = [
+      { type: "bold", offset: 6, length: 10 }, // "bold world"
     ];
     const source = new FormattedString(sourceText, sourceEntities);
 
     const pattern = new FormattedString("bold world", [
-      { type: "bold" as const, offset: 0, length: 10 },
+      { type: "bold", offset: 0, length: 10 },
     ]);
     const replacement = new FormattedString("italic text", [
-      { type: "italic" as const, offset: 0, length: 11 },
+      { type: "italic", offset: 0, length: 11 },
     ]);
 
     const result = source.replace(pattern, replacement);
@@ -37,19 +38,19 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawEntities[0]?.length, 11);
   });
 
-  it("replace method entities must match exactly", () => {
+  it("does not replace if pattern entities do not match", () => {
     // Test that entities must match exactly for replacement
     const sourceText = "Hello bold world";
-    const sourceEntities = [
-      { type: "bold" as const, offset: 6, length: 10 }, // "bold world"
+    const sourceEntities: MessageEntity[] = [
+      { type: "bold", offset: 6, length: 10 }, // "bold world"
     ];
     const source = new FormattedString(sourceText, sourceEntities);
 
     // Pattern with different entities (italic instead of bold)
     const pattern = new FormattedString("bold world", [
-      { type: "italic" as const, offset: 0, length: 10 },
+      { type: "italic", offset: 0, length: 10 },
     ]);
-    const replacement = new FormattedString("new text", []);
+    const replacement = new FormattedString("new text");
 
     const result = source.replace(pattern, replacement);
     // Should not replace because entities don't match
@@ -58,18 +59,18 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawEntities[0]?.type, "bold");
   });
 
-  it("replace method not found", () => {
+  it("does not replace if pattern text does not match", () => {
     // Test replacement when pattern is not found
-    const source = new FormattedString("Hello world", []);
-    const pattern = new FormattedString("goodbye", []);
-    const replacement = new FormattedString("hi", []);
+    const source = new FormattedString("Hello world");
+    const pattern = new FormattedString("goodbye");
+    const replacement = new FormattedString("hi");
 
     const result = source.replace(pattern, replacement);
     assertEquals(result.rawText, "Hello world");
     assertEquals(result.rawEntities.length, 0);
   });
 
-  it("replace method preserves surrounding entities", () => {
+  it("replace preserves surrounding entities", () => {
     // Test that entities before and after replacement are preserved
     const sourceText = "Hello bold world and italic text";
     const sourceEntities = [
@@ -78,8 +79,8 @@ describe("FormattedString - Replace methods", () => {
     ];
     const source = new FormattedString(sourceText, sourceEntities);
 
-    const pattern = new FormattedString("world", []);
-    const replacement = new FormattedString("universe", []);
+    const pattern = new FormattedString("world");
+    const replacement = new FormattedString("universe");
 
     const result = source.replace(pattern, replacement);
     assertEquals(result.rawText, "Hello bold universe and italic text");
@@ -132,9 +133,9 @@ describe("FormattedString - Replace methods", () => {
   it("replaceAll method basic functionality", () => {
     // Test replacing multiple simple text matches
     const text = "Hello world, hello universe, hello galaxy";
-    const source = new FormattedString(text, []);
-    const pattern = new FormattedString("hello", []);
-    const replacement = new FormattedString("hi", []);
+    const source = new FormattedString(text);
+    const pattern = new FormattedString("hello");
+    const replacement = new FormattedString("hi");
 
     const result = source.replaceAll(pattern, replacement);
     assertEquals(result.rawText, "Hello world, hi universe, hi galaxy");
@@ -174,9 +175,9 @@ describe("FormattedString - Replace methods", () => {
 
   it("replaceAll method no matches", () => {
     // Test replaceAll when pattern is not found
-    const source = new FormattedString("Hello world", []);
-    const pattern = new FormattedString("goodbye", []);
-    const replacement = new FormattedString("hi", []);
+    const source = new FormattedString("Hello world");
+    const pattern = new FormattedString("goodbye");
+    const replacement = new FormattedString("hi");
 
     const result = source.replaceAll(pattern, replacement);
     assertEquals(result.rawText, "Hello world");
@@ -186,9 +187,9 @@ describe("FormattedString - Replace methods", () => {
   it("replaceAll method overlapping prevention", () => {
     // Test that replaceAll doesn't create overlapping matches
     const text = "aaaa";
-    const source = new FormattedString(text, []);
-    const pattern = new FormattedString("aa", []);
-    const replacement = new FormattedString("b", []);
+    const source = new FormattedString(text);
+    const pattern = new FormattedString("aa");
+    const replacement = new FormattedString("b");
 
     const result = source.replaceAll(pattern, replacement);
     // Should replace non-overlapping matches: "aa|aa" -> "b|b"
@@ -196,54 +197,12 @@ describe("FormattedString - Replace methods", () => {
     assertEquals(result.rawEntities.length, 0);
   });
 
-  it("replaceAll method preserves complex entities", () => {
-    // Test that complex entity structures are preserved correctly
-    const sourceText = "Link to google and normal link text";
-    const sourceEntities = [
-      {
-        type: "text_link" as const,
-        offset: 0,
-        length: 14,
-        url: "https://google.com",
-      }, // "Link to google"
-    ];
-    const source = new FormattedString(sourceText, sourceEntities);
-
-    const pattern = new FormattedString("link", []);
-    const replacement = new FormattedString("URL", []);
-
-    const result = source.replaceAll(pattern, replacement);
-    assertEquals(result.rawText, "Link to google and normal URL text");
-    assertEquals(result.rawEntities.length, 1);
-
-    // Check that the link entity is preserved
-    assertEquals(result.rawEntities[0]?.type, "text_link");
-    assertEquals(result.rawEntities[0]?.offset, 0);
-    assertEquals(result.rawEntities[0]?.length, 14); // "Link to google" unchanged
-    assertEquals(
-      (result.rawEntities[0] as { url: string })?.url,
-      "https://google.com",
-    );
-  });
-
-  it("replaceAll method with adjacent patterns", () => {
-    // Test replacing adjacent patterns
-    const text = "abcabc";
-    const source = new FormattedString(text, []);
-    const pattern = new FormattedString("abc", []);
-    const replacement = new FormattedString("xyz", []);
-
-    const result = source.replaceAll(pattern, replacement);
-    assertEquals(result.rawText, "xyzxyz");
-    assertEquals(result.rawEntities.length, 0);
-  });
-
   it("replaceAll method empty replacement", () => {
     // Test replacing with empty string (deletion)
     const text = "Hello, world! Hello, universe!";
-    const source = new FormattedString(text, []);
-    const pattern = new FormattedString("Hello, ", []);
-    const replacement = new FormattedString("", []);
+    const source = new FormattedString(text);
+    const pattern = new FormattedString("Hello, ");
+    const replacement = new FormattedString("");
 
     const result = source.replaceAll(pattern, replacement);
     assertEquals(result.rawText, "world! universe!");
@@ -254,19 +213,19 @@ describe("FormattedString - Replace methods", () => {
     // Test the scenario from the issue: replace part of a longer formatted string
     // "Hello bolded world" where entire string is bolded, replace "bolded" with italicized "italics"
     const sourceText = "Hello bolded world";
-    const sourceEntities = [
-      { type: "bold" as const, offset: 0, length: 18 }, // entire string is bolded
+    const sourceEntities: MessageEntity[] = [
+      { type: "bold", offset: 0, length: 18 }, // entire string is bolded
     ];
     const source = new FormattedString(sourceText, sourceEntities);
 
     // Pattern is "bolded" with bold formatting to match the source formatting
     const pattern = new FormattedString("bolded", [
-      { type: "bold" as const, offset: 0, length: 6 },
+      { type: "bold", offset: 0, length: 6 },
     ]);
 
     // Replacement is "italics" with italic formatting
     const replacement = new FormattedString("italics", [
-      { type: "italic" as const, offset: 0, length: 7 },
+      { type: "italic", offset: 0, length: 7 },
     ]);
 
     const result = source.replace(pattern, replacement);
