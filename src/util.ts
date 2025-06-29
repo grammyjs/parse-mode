@@ -1,12 +1,12 @@
 import type { MessageEntity, User } from "./deps.deno.ts";
 
 /**
- * Compares two user objects for deep equality.
+ * Compares two user objects for deep similarity.
  * @param user1 First user object to compare
  * @param user2 Second user object to compare
  * @returns true if the users have the same properties, false otherwise
  */
-export function isUserEqual(user1: User, user2: User): boolean {
+export function isUserSimilar(user1: User, user2: User): boolean {
   const propertyComparisonMap = new Map<string, unknown>();
 
   for (const [key, value] of Object.entries(user1)) {
@@ -64,7 +64,7 @@ export function isEntitySimilar(
   }
 
   if (entity1.type === "text_mention" && entity2.type === "text_mention") {
-    return isUserEqual(entity1.user, entity2.user);
+    return isUserSimilar(entity1.user, entity2.user);
   }
 
   // For entities without type-specific properties, having the same type means they are similar
@@ -211,6 +211,86 @@ export function consolidateEntities(
     consolidated.push(current);
   }
 
-  // Sort the final result by offset
-  return consolidated.sort((a, b) => a.offset - b.offset);
+  // Sort the final result using the same deterministic comparison as sortEntities
+  return consolidated.sort(compareEntities);
+}
+
+/**
+ * Sorts an array of MessageEntity objects deterministically.
+ * Entities are sorted by offset first, then by length, then by type,
+ * and finally by type-specific properties to ensure consistent ordering.
+ * @param entities Array of entities to sort
+ * @returns New sorted array of entities
+ */
+/**
+ * Compare two entities for deterministic sorting.
+ * This comparison function is used by both sortEntities and consolidateEntities
+ * to ensure consistent entity ordering across different operations.
+ */
+function compareEntities(a: MessageEntity, b: MessageEntity): number {
+  // Primary sort: by offset (position in text)
+  if (a.offset !== b.offset) {
+    return a.offset - b.offset;
+  }
+
+  // Secondary sort: by length (shorter entities first)
+  if (a.length !== b.length) {
+    return a.length - b.length;
+  }
+
+  // Tertiary sort: by type (alphabetically)
+  if (a.type !== b.type) {
+    return a.type.localeCompare(b.type);
+  }
+
+  // Quaternary sort: by type-specific properties
+  if (a.type === "text_link" && b.type === "text_link") {
+    return (a.url).localeCompare(b.url);
+  }
+
+  if (a.type === "pre" && b.type === "pre") {
+    return (a.language || "").localeCompare(b.language || "");
+  }
+
+  if (a.type === "custom_emoji" && b.type === "custom_emoji") {
+    return (a.custom_emoji_id).localeCompare(b.custom_emoji_id);
+  }
+
+  if (a.type === "text_mention" && b.type === "text_mention") {
+    // Sort by user ID first, then by other user properties
+    const aUserId = a.user.id;
+    const bUserId = b.user.id;
+    if (aUserId !== bUserId) {
+      return aUserId - bUserId;
+    }
+
+    // If user IDs are the same, sort by username
+    const aUsername = a.user.username || "";
+    const bUsername = b.user.username || "";
+    if (aUsername !== bUsername) {
+      return aUsername.localeCompare(bUsername);
+    }
+
+    // If usernames are the same, sort by first_name
+    const aFirstName = a.user.first_name || "";
+    const bFirstName = b.user.first_name || "";
+    if (aFirstName !== bFirstName) {
+      return aFirstName.localeCompare(bFirstName);
+    }
+
+    // If first_names are the same, sort by last_name
+    const aLastName = a.user.last_name || "";
+    const bLastName = b.user.last_name || "";
+    return aLastName.localeCompare(bLastName);
+  }
+
+  // For entities of the same type without type-specific properties,
+  // they are considered equal in terms of sorting
+  return 0;
+}
+
+export function sortEntities(
+  entities: MessageEntity[],
+): MessageEntity[] {
+  return [...entities].sort(compareEntities);
 }
