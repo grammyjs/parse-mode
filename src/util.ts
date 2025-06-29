@@ -157,69 +157,62 @@ export function consolidateEntities(
     return entities;
   }
 
-  // Group entities by type and type-specific properties
-  const entityGroups = new Map<string, MessageEntity[]>();
+  const sortedEntities = sortEntities(entities);
+  const consolidatedEntities: MessageEntity[] = [];
+  const consolidatingEntities: Map<string, MessageEntity> = new Map();
 
-  for (const entity of entities) {
+  for (const sortedEntity of sortedEntities) {
     // Create a key that includes type and type-specific properties
-    let key = entity.type;
+    let key = sortedEntity.type;
 
-    if (entity.type === "text_link") {
-      key += `|${entity.url}`;
-    } else if (entity.type === "pre") {
-      key += `|${entity.language || ""}`;
-    } else if (entity.type === "custom_emoji") {
-      key += `|${entity.custom_emoji_id}`;
-    } else if (entity.type === "text_mention") {
-      // Create a unique key for the user object
-      const userKey = JSON.stringify(entity.user);
-      key += `|${userKey}`;
+    if (sortedEntity.type === "text_link") {
+      key += `|${sortedEntity.url}`;
+    } else if (sortedEntity.type === "pre") {
+      key += `|${sortedEntity.language || ""}`;
+    } else if (sortedEntity.type === "custom_emoji") {
+      key += `|${sortedEntity.custom_emoji_id}`;
+    } else if (sortedEntity.type === "text_mention") {
+      // Use user.id as key, nothing we can do about different User object with same id (e.g. username changes over time)
+      key += `|${sortedEntity.user.id}`;
     }
 
-    if (!entityGroups.has(key)) {
-      entityGroups.set(key, []);
-    }
-    entityGroups.get(key)!.push({ ...entity });
-  }
-
-  const consolidated: MessageEntity[] = [];
-
-  // Process each group separately
-  for (const group of entityGroups.values()) {
-    if (group.length === 1) {
-      consolidated.push(group[0]);
+    // If no consolidating entity for this key, this is the consolidating entity
+    const consolidatingEntity = consolidatingEntities.get(key);
+    if (consolidatingEntity === undefined) {
+      consolidatingEntities.set(key, sortedEntity);
       continue;
     }
 
-    // Sort entities in the group by offset
-    group.sort((a, b) => a.offset - b.offset);
-
-    let current = group[0];
-
-    for (let i = 1; i < group.length; i++) {
-      const next = group[i];
-
-      // Check if entities overlap or are adjacent
-      const currentEnd = current.offset + current.length;
-      const nextStart = next.offset;
-
-      if (nextStart <= currentEnd) {
-        // Merge the entities by extending the current entity
-        const nextEnd = next.offset + next.length;
-        current.length = Math.max(currentEnd, nextEnd) - current.offset;
-      } else {
-        // Gap between entities, add current to result and start new consolidation
-        consolidated.push(current);
-        current = next;
-      }
+    // If a consolidating entity exist, check if it can be consolidated
+    if (canConsolidateEntities(consolidatingEntity, sortedEntity)) {
+      // entities were sorted by offset first, so previous entity is always at least less than or equal in offset
+      const offset = consolidatingEntity.offset;
+      const end = Math.max(
+        consolidatingEntity.offset + consolidatingEntity.length,
+        sortedEntity.offset + sortedEntity.length,
+      );
+      const length = end - offset;
+      const consolidatedEntity = {
+        ...consolidatingEntity,
+        offset,
+        length,
+      };
+      consolidatingEntities.set(key, consolidatedEntity);
+      continue;
     }
 
-    // Add the last entity from this group
-    consolidated.push(current);
+    // If the key match but cannot be consolidated, then replace consolidatingEntity
+    consolidatedEntities.push(consolidatingEntity);
+    consolidatingEntities.set(key, sortedEntity);
   }
 
-  // Sort the final result using the same deterministic comparison as sortEntities
-  return consolidated.sort(compareEntities);
+  // Pop everything out of consolidatingEntities
+  for (const consolidatingEntity of consolidatingEntities.values()) {
+    consolidatedEntities.push(consolidatingEntity);
+  }
+
+  // Finally, sort and return
+  return sortEntities(consolidatedEntities);
 }
 
 /**
