@@ -800,7 +800,7 @@ export class FormattedString
       return new FormattedString(this.rawText, [...this.rawEntities]);
     }
 
-    // Process matches from right to left to avoid offset shifts
+    // Gather slices of unreplaced FormattedString and replacements to join
     const segments: FormattedString[] = [];
     let currentOffset = 0;
     for (let i = 0; i < matchOffsets.length; i++) {
