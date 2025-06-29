@@ -148,7 +148,7 @@ describe("FormattedString - findAll method", () => {
     const sourceEntities = [
       { type: "bold" as const, offset: 6, length: 15 }, // first "bold and italic"
       { type: "italic" as const, offset: 15, length: 6 }, // first "italic"
-       { type: "bold" as const, offset: 33, length: 15 }, // second "bold and italic"
+      { type: "bold" as const, offset: 33, length: 15 }, // second "bold and italic"
       { type: "italic" as const, offset: 42, length: 6 }, // second "italic"
     ];
     const source = new FormattedString(sourceText, sourceEntities);

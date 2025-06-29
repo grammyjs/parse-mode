@@ -1,7 +1,7 @@
 import { assertEquals, describe, it } from "./deps.test.ts";
 import { FormattedString } from "../src/format.ts";
 
-describe("FormattedString - startsWith and endsWith methods", () => {
+describe("FormattedString - endsWith methods", () => {
   it("Static endsWith - basic functionality", () => {
     const source = new FormattedString("Hello World");
     const pattern1 = new FormattedString("World");
@@ -60,16 +60,20 @@ describe("FormattedString - startsWith and endsWith methods", () => {
   });
 
   it("Static endsWith - complex entities matching", () => {
-    const boldHello = FormattedString.bold("Hello");
+    const plainStart = new FormattedString("Start");
     const space = new FormattedString(" ");
+    const boldHello = FormattedString.bold("Hello");
     const italicWorld = FormattedString.italic("World");
-    const source = FormattedString.join([boldHello, space, italicWorld]);
-
-    const pattern1 = FormattedString.join([space, italicWorld]);
-    const pattern2 = FormattedString.join([
+    const source = FormattedString.join([
+      plainStart,
       space,
-      new FormattedString("World"),
+      boldHello,
+      space,
+      italicWorld,
     ]);
+
+    const pattern1 = FormattedString.join([boldHello, space, italicWorld]);
+    const pattern2 = new FormattedString("World");
 
     assertEquals(FormattedString.endsWith(source, pattern1), true);
     assertEquals(FormattedString.endsWith(source, pattern2), false);
