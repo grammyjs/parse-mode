@@ -244,7 +244,10 @@ describe("isEntityEqual", () => {
     };
 
     // Two custom_emoji entities without custom_emoji_id should be equal
-    assertEquals(isEntityEqual(customEmojiWithoutId, customEmojiWithoutId2), true);
+    assertEquals(
+      isEntityEqual(customEmojiWithoutId, customEmojiWithoutId2),
+      true,
+    );
 
     // custom_emoji without id vs with id should not be equal
     assertEquals(isEntityEqual(customEmojiWithoutId, customEmojiWithId), false);

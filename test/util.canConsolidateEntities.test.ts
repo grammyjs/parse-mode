@@ -203,8 +203,8 @@ describe("canConsolidateEntities", () => {
     // The function checks if entity2.offset <= entity1.offset + entity1.length
     // So even if entity2 comes before entity1, if entity2.offset <= entity1End, they can consolidate
     const entity1: MessageEntity = { type: "bold", offset: 10, length: 5 }; // 10-15
-    const entity2: MessageEntity = { type: "bold", offset: 3, length: 4 };  // 3-7
-    
+    const entity2: MessageEntity = { type: "bold", offset: 3, length: 4 }; // 3-7
+
     // entity2.offset (3) <= entity1End (15)? Yes, so they can consolidate
     assertEquals(canConsolidateEntities(entity1, entity2), true);
   });

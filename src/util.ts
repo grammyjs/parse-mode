@@ -245,7 +245,7 @@ function compareEntities(a: MessageEntity, b: MessageEntity): number {
 
   // Quaternary sort: by type-specific properties
   if (a.type === "text_link" && b.type === "text_link") {
-    return (a.url).localeCompare(b.url);
+    return a.url.localeCompare(b.url);
   }
 
   if (a.type === "pre" && b.type === "pre") {
@@ -253,7 +253,7 @@ function compareEntities(a: MessageEntity, b: MessageEntity): number {
   }
 
   if (a.type === "custom_emoji" && b.type === "custom_emoji") {
-    return (a.custom_emoji_id).localeCompare(b.custom_emoji_id);
+    return a.custom_emoji_id.localeCompare(b.custom_emoji_id);
   }
 
   if (a.type === "text_mention" && b.type === "text_mention") {

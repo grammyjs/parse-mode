@@ -1,23 +1,25 @@
 # Project: TypeScript Type Safety Remediation
 
 ## Phase 1: Critical Type Safety Fixes
+
 - [ ] **Task 1.1**: Fix `any` type violations in test files
   - **Agent**: Code
   - **Dependencies**: None
-  - **Outputs**: [test/util.test.ts]
+  - **Outputs**: [test/util.consolidateEntities.test.ts, test/util.isEntitySimilar.test.ts]
   - **Validation**: Zero `any` type usage in tests
   - **Human Checkpoint**: NO
-  - **Scope**: Replace all 11 instances of `as any` type assertions with proper type guards and discriminated unions in test/util.test.ts
+  - **Scope**: Replace 16 instances of `as any` type assertions with proper type guards and discriminated unions in test files
 
 - [ ] **Task 1.2**: Add ESLint rules for type safety enforcement
-  - **Agent**: Guardian  
+  - **Agent**: Guardian
   - **Dependencies**: task_1.1
   - **Outputs**: [.eslintrc.json, package.json]
   - **Validation**: ESLint prevents `any` type usage
   - **Human Checkpoint**: NO
   - **Scope**: Configure ESLint with TypeScript rules to prevent future `any` type violations
 
-## Phase 2: Type System Enhancement  
+## Phase 2: Type System Enhancement
+
 - [ ] **Task 2.1**: Enhance MessageEntity type definitions
   - **Agent**: Architect
   - **Dependencies**: task_1.1

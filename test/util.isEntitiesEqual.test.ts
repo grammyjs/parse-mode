@@ -6,7 +6,7 @@ describe("isEntitiesEqual", () => {
   it("empty arrays comparison", () => {
     const empty1: MessageEntity[] = [];
     const empty2: MessageEntity[] = [];
-    
+
     assertEquals(isEntitiesEqual(empty1, empty2), true);
   });
 

@@ -245,8 +245,12 @@ describe("consolidateEntities", () => {
     const mixedLanguageResult = consolidateEntities(mixedLanguageEntities);
     assertEquals(mixedLanguageResult.length, 2); // Should have 2 entities: 1 for each language
 
-    const jsEntity = mixedLanguageResult.find((e) => e.type === "pre" && (e as any).language === "javascript");
-    const pythonEntity = mixedLanguageResult.find((e) => e.type === "pre" && (e as any).language === "python");
+    const jsEntity = mixedLanguageResult.find((e) =>
+      e.type === "pre" && (e as any).language === "javascript"
+    );
+    const pythonEntity = mixedLanguageResult.find((e) =>
+      e.type === "pre" && (e as any).language === "python"
+    );
 
     assertEquals(jsEntity?.offset, 0);
     assertEquals(jsEntity?.length, 6); // Should consolidate overlapping JS entities (0-6)
@@ -321,8 +325,12 @@ describe("consolidateEntities", () => {
     const mixedEmojiResult = consolidateEntities(mixedEmojiEntities);
     assertEquals(mixedEmojiResult.length, 2); // Should have 2 entities: 1 for each emoji ID
 
-    const emoji123Entity = mixedEmojiResult.find((e) => e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_123");
-    const emoji456Entity = mixedEmojiResult.find((e) => e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_456");
+    const emoji123Entity = mixedEmojiResult.find((e) =>
+      e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_123"
+    );
+    const emoji456Entity = mixedEmojiResult.find((e) =>
+      e.type === "custom_emoji" && (e as any).custom_emoji_id === "emoji_456"
+    );
 
     assertEquals(emoji123Entity?.offset, 0);
     assertEquals(emoji123Entity?.length, 6); // Should consolidate overlapping entities with same ID (0-6)
@@ -397,8 +405,12 @@ describe("consolidateEntities", () => {
     const mixedUserResult = consolidateEntities(mixedUserEntities);
     assertEquals(mixedUserResult.length, 2); // Should have 2 entities: 1 for each user
 
-    const aliceEntity = mixedUserResult.find((e) => e.type === "text_mention" && (e as any).user?.id === 123);
-    const bobEntity = mixedUserResult.find((e) => e.type === "text_mention" && (e as any).user?.id === 456);
+    const aliceEntity = mixedUserResult.find((e) =>
+      e.type === "text_mention" && (e as any).user?.id === 123
+    );
+    const bobEntity = mixedUserResult.find((e) =>
+      e.type === "text_mention" && (e as any).user?.id === 456
+    );
 
     assertEquals(aliceEntity?.offset, 0);
     assertEquals(aliceEntity?.length, 6); // Should consolidate overlapping Alice entities (0-6)
@@ -430,13 +442,18 @@ describe("consolidateEntities", () => {
       assertEquals(consolidated[i].type, sorted[i].type);
       assertEquals(consolidated[i].offset, sorted[i].offset);
       assertEquals(consolidated[i].length, sorted[i].length);
-      
+
       // Check type-specific properties
-      if (consolidated[i].type === "text_link" && sorted[i].type === "text_link") {
+      if (
+        consolidated[i].type === "text_link" && sorted[i].type === "text_link"
+      ) {
         assertEquals((consolidated[i] as any).url, (sorted[i] as any).url);
       }
       if (consolidated[i].type === "pre" && sorted[i].type === "pre") {
-        assertEquals((consolidated[i] as any).language, (sorted[i] as any).language);
+        assertEquals(
+          (consolidated[i] as any).language,
+          (sorted[i] as any).language,
+        );
       }
     }
 
@@ -450,21 +467,21 @@ describe("consolidateEntities", () => {
     ];
 
     const consolidatedMixed = consolidateEntities(consolidatableEntities);
-    
+
     // Should have 4 entities: 1 consolidated bold + 1 italic + 2 text_links
     assertEquals(consolidatedMixed.length, 4);
-    
+
     // Verify they are sorted deterministically by offset first
     assertEquals(consolidatedMixed[0].type, "bold");
     assertEquals(consolidatedMixed[0].offset, 0);
     assertEquals(consolidatedMixed[0].length, 6); // consolidated from 0-6
-    
+
     assertEquals(consolidatedMixed[1].type, "italic");
     assertEquals(consolidatedMixed[1].offset, 10);
-    
+
     assertEquals(consolidatedMixed[2].type, "text_link");
     assertEquals(consolidatedMixed[2].offset, 15);
-    
+
     assertEquals(consolidatedMixed[3].type, "text_link");
     assertEquals(consolidatedMixed[3].offset, 20);
   });

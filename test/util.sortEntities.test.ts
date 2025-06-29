@@ -50,9 +50,18 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_link' }).url, "https://a.com");
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_link' }).url, "https://m.com");
-    assertEquals((sorted[2] as MessageEntity & { type: 'text_link' }).url, "https://z.com");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "text_link" }).url,
+      "https://a.com",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_link" }).url,
+      "https://m.com",
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "text_link" }).url,
+      "https://z.com",
+    );
   });
 
   it("sorts pre entities by language", () => {
@@ -63,9 +72,18 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'pre' }).language, "javascript");
-    assertEquals((sorted[1] as MessageEntity & { type: 'pre' }).language, "python");
-    assertEquals((sorted[2] as MessageEntity & { type: 'pre' }).language, "typescript");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "pre" }).language,
+      "javascript",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "pre" }).language,
+      "python",
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "pre" }).language,
+      "typescript",
+    );
   });
 
   it("sorts custom_emoji entities by emoji ID", () => {
@@ -76,9 +94,18 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'custom_emoji' }).custom_emoji_id, "111");
-    assertEquals((sorted[1] as MessageEntity & { type: 'custom_emoji' }).custom_emoji_id, "555");
-    assertEquals((sorted[2] as MessageEntity & { type: 'custom_emoji' }).custom_emoji_id, "999");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "custom_emoji" }).custom_emoji_id,
+      "111",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "custom_emoji" }).custom_emoji_id,
+      "555",
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "custom_emoji" }).custom_emoji_id,
+      "999",
+    );
   });
 
   it("sorts text_mention entities by user properties", () => {
@@ -104,9 +131,18 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_mention' }).user.id, 100);
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_mention' }).user.id, 200);
-    assertEquals((sorted[2] as MessageEntity & { type: 'text_mention' }).user.id, 300);
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "text_mention" }).user.id,
+      100,
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_mention" }).user.id,
+      200,
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "text_mention" }).user.id,
+      300,
+    );
   });
 
   it("sorts text_mention entities by username when user ID is same", () => {
@@ -126,8 +162,14 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_mention' }).user.username, "alpha");
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_mention' }).user.username, "zebra");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "text_mention" }).user.username,
+      "alpha",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_mention" }).user.username,
+      "zebra",
+    );
   });
 
   it("sorts text_mention entities by first_name when ID and username are same", () => {
@@ -147,8 +189,14 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_mention' }).user.first_name, "Alice");
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_mention' }).user.first_name, "Zoe");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "text_mention" }).user.first_name,
+      "Alice",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_mention" }).user.first_name,
+      "Zoe",
+    );
   });
 
   it("sorts text_mention entities by last_name when other properties are same", () => {
@@ -180,8 +228,14 @@ describe("sortEntitiesDeterministically", () => {
     ];
 
     const sorted = sortEntities(entities);
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_mention' }).user.last_name, "Doe");
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_mention' }).user.last_name, "Smith");
+    assertEquals(
+      (sorted[0] as MessageEntity & { type: "text_mention" }).user.last_name,
+      "Doe",
+    );
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_mention" }).user.last_name,
+      "Smith",
+    );
   });
 
   it("handles missing optional properties in text_link entities", () => {
@@ -193,9 +247,15 @@ describe("sortEntitiesDeterministically", () => {
 
     const sorted = sortEntities(entities);
     // Entity with empty URL should come first (empty string comparison)
-    assertEquals((sorted[0] as MessageEntity & { type: 'text_link' }).url, "");
-    assertEquals((sorted[1] as MessageEntity & { type: 'text_link' }).url, "https://a.com");
-    assertEquals((sorted[2] as MessageEntity & { type: 'text_link' }).url, "https://b.com");
+    assertEquals((sorted[0] as MessageEntity & { type: "text_link" }).url, "");
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "text_link" }).url,
+      "https://a.com",
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "text_link" }).url,
+      "https://b.com",
+    );
   });
 
   it("handles missing optional properties in pre entities", () => {
@@ -207,9 +267,15 @@ describe("sortEntitiesDeterministically", () => {
 
     const sorted = sortEntities(entities);
     // Entity with empty language should come first
-    assertEquals((sorted[0] as MessageEntity & { type: 'pre' }).language, "");
-    assertEquals((sorted[1] as MessageEntity & { type: 'pre' }).language, "javascript");
-    assertEquals((sorted[2] as MessageEntity & { type: 'pre' }).language, "python");
+    assertEquals((sorted[0] as MessageEntity & { type: "pre" }).language, "");
+    assertEquals(
+      (sorted[1] as MessageEntity & { type: "pre" }).language,
+      "javascript",
+    );
+    assertEquals(
+      (sorted[2] as MessageEntity & { type: "pre" }).language,
+      "python",
+    );
   });
 
   it("comprehensive sorting with mixed entity types", () => {

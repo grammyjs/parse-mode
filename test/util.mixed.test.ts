@@ -1,8 +1,5 @@
 import { assertEquals, describe, it } from "./deps.test.ts";
-import {
-  isEntityEqual,
-  isEntitySimilar,
-} from "../src/util.ts";
+import { isEntityEqual, isEntitySimilar } from "../src/util.ts";
 import type { MessageEntity } from "../src/deps.deno.ts";
 
 describe("Utility method tests", () => {

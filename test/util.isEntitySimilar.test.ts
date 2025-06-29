@@ -159,16 +159,25 @@ describe("isEntitySimilar", () => {
     };
 
     // Pre entities without language should be similar
-    assertEquals(isEntitySimilar(preWithoutLanguage1, preWithoutLanguage2), true);
+    assertEquals(
+      isEntitySimilar(preWithoutLanguage1, preWithoutLanguage2),
+      true,
+    );
 
     // Pre without language vs pre with language should not be similar
     assertEquals(isEntitySimilar(preWithoutLanguage1, preWithLanguage), false);
 
     // Pre with null language vs pre without language should be similar (both undefined)
-    assertEquals(isEntitySimilar(preWithoutLanguage1, preWithNullLanguage), false);
+    assertEquals(
+      isEntitySimilar(preWithoutLanguage1, preWithNullLanguage),
+      false,
+    );
 
     // Pre with undefined language vs pre without language should be similar (both undefined)
-    assertEquals(isEntitySimilar(preWithoutLanguage1, preWithUndefinedLanguage), true);
+    assertEquals(
+      isEntitySimilar(preWithoutLanguage1, preWithUndefinedLanguage),
+      true,
+    );
   });
 
   it("text_link entities without URL property", () => {
@@ -202,16 +211,25 @@ describe("isEntitySimilar", () => {
     };
 
     // text_link entities without URL should be similar
-    assertEquals(isEntitySimilar(textLinkWithoutUrl1, textLinkWithoutUrl2), true);
+    assertEquals(
+      isEntitySimilar(textLinkWithoutUrl1, textLinkWithoutUrl2),
+      true,
+    );
 
     // text_link without URL vs text_link with URL should not be similar
     assertEquals(isEntitySimilar(textLinkWithoutUrl1, textLinkWithUrl), false);
 
     // text_link with null URL vs text_link without URL should not be similar (null != undefined)
-    assertEquals(isEntitySimilar(textLinkWithoutUrl1, textLinkWithNullUrl), false);
+    assertEquals(
+      isEntitySimilar(textLinkWithoutUrl1, textLinkWithNullUrl),
+      false,
+    );
 
     // text_link with undefined URL vs text_link without URL should be similar (both undefined)
-    assertEquals(isEntitySimilar(textLinkWithoutUrl1, textLinkWithUndefinedUrl), true);
+    assertEquals(
+      isEntitySimilar(textLinkWithoutUrl1, textLinkWithUndefinedUrl),
+      true,
+    );
   });
 
   it("custom_emoji entities without custom_emoji_id property", () => {
@@ -245,16 +263,28 @@ describe("isEntitySimilar", () => {
     };
 
     // custom_emoji entities without custom_emoji_id should be similar
-    assertEquals(isEntitySimilar(customEmojiWithoutId1, customEmojiWithoutId2), true);
+    assertEquals(
+      isEntitySimilar(customEmojiWithoutId1, customEmojiWithoutId2),
+      true,
+    );
 
     // custom_emoji without id vs custom_emoji with id should not be similar
-    assertEquals(isEntitySimilar(customEmojiWithoutId1, customEmojiWithId), false);
+    assertEquals(
+      isEntitySimilar(customEmojiWithoutId1, customEmojiWithId),
+      false,
+    );
 
     // custom_emoji with null id vs custom_emoji without id should not be similar (null != undefined)
-    assertEquals(isEntitySimilar(customEmojiWithoutId1, customEmojiWithNullId), false);
+    assertEquals(
+      isEntitySimilar(customEmojiWithoutId1, customEmojiWithNullId),
+      false,
+    );
 
     // custom_emoji with undefined id vs custom_emoji without id should be similar (both undefined)
-    assertEquals(isEntitySimilar(customEmojiWithoutId1, customEmojiWithUndefinedId), true);
+    assertEquals(
+      isEntitySimilar(customEmojiWithoutId1, customEmojiWithUndefinedId),
+      true,
+    );
   });
 
   it("text_mention entities with complex user scenarios", () => {
