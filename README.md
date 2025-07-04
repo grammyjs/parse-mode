@@ -13,15 +13,18 @@ The plugin is compatible with both Deno and Node.js, and is designed to work as 
 
 ```ts
 import { Bot } from "grammy";
-import { fmt, b, u } from "@grammyjs/parse-mode";
+import { b, fmt, u } from "@grammyjs/parse-mode";
 
 const bot = new Bot("");
 
 bot.command("demo", async (ctx) => {
- // Using return values of fmt
- const combined = fmt`${b}bolded${b} ${ctx.msg.text} ${u}underlined${u}`;
- await ctx.reply(combined.text, { entities: combined.entities });
- await ctx.replyWithPhoto(photo, { caption: combined.caption, caption_entities: combined.caption_entities });
+  // Using return values of fmt
+  const combined = fmt`${b}bolded${b} ${ctx.msg.text} ${u}underlined${u}`;
+  await ctx.reply(combined.text, { entities: combined.entities });
+  await ctx.replyWithPhoto(photo, {
+    caption: combined.caption,
+    caption_entities: combined.caption_entities,
+  });
 });
 
 bot.start();
@@ -36,10 +39,15 @@ import { FormattedString } from "@grammyjs/parse-mode";
 const bot = new Bot("");
 
 bot.command("demo", async (ctx) => {
- // Using return values of Fmt
- const combined = FormattedString.b("bolded").plain(ctx.msg.text).u("underlined");
- await ctx.reply(combined.text, { entities: combined.entities });
- await ctx.replyWithPhoto(photo, { caption: combined.caption, caption_entities: combined.caption_entities });
+  // Using return values of Fmt
+  const combined = FormattedString.b("bolded").plain(ctx.msg.text).u(
+    "underlined",
+  );
+  await ctx.reply(combined.text, { entities: combined.entities });
+  await ctx.replyWithPhoto(photo, {
+    caption: combined.caption,
+    caption_entities: combined.caption_entities,
+  });
 });
 
 bot.start();
