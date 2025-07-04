@@ -20,8 +20,8 @@ const bot = new Bot("");
 bot.command("demo", async (ctx) => {
  // Using return values of fmt
  const combined = fmt`${b}bolded${b} ${ctx.msg.text} ${u}underlined${u}`;
- await ctx.reply(combined.text { entities: combined.entities });
- await ctx.replyWithPhoto(photo { caption: combined.caption, caption_entities: combined.caption_entities });
+ await ctx.reply(combined.text, { entities: combined.entities });
+ await ctx.replyWithPhoto(photo, { caption: combined.caption, caption_entities: combined.caption_entities });
 });
 
 bot.start();
@@ -38,8 +38,8 @@ const bot = new Bot("");
 bot.command("demo", async (ctx) => {
  // Using return values of Fmt
  const combined = FormattedString.b("bolded").plain(ctx.msg.text).u("underlined");
- await ctx.reply(combined.text { entities: combined.entities });
- await ctx.replyWithPhoto(photo { caption: combined.caption, caption_entities: combined.caption_entities });
+ await ctx.reply(combined.text, { entities: combined.entities });
+ await ctx.replyWithPhoto(photo, { caption: combined.caption, caption_entities: combined.caption_entities });
 });
 
 bot.start();
