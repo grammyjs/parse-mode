@@ -1287,7 +1287,7 @@ export function linkMessage(
       "linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.",
     );
     return fmt`${stringLike}`;
-  } else if (chatId >= -1997852516352 && chatId <= -1000000000001) {
+  } else if (chatId < -1997852516352 || chatId > -1000000000001) {
     console.warn(
       "linkMessage is not able to link messages whose chatIds are greater than -1000000000000 or less than -1002147483647 at this moment. Refusing to transform into link.",
     );
