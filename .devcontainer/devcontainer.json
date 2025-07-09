@@ -1,0 +1,15 @@
+{
+  "name": "Deno",
+  "image": "ghcr.io/knightniwrem/devcontainer-deno:latest",
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "denoland.vscode-deno",
+        "github.copilot",
+        "github.copilot-chat",
+        "kilocode.kilo-code"
+      ]
+    }
+  }
+}
