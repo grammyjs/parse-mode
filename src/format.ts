@@ -400,6 +400,287 @@ export class FormattedString
   }
 
   /**
+   * Parses an HTML string and converts it into a FormattedString.
+   * Supports basic HTML tags that Telegram's HTML-style formatting supports:
+   * - `<b>` or `<strong>` for bold
+   * - `<i>` or `<em>` for italic
+   * - `<u>` for underline
+   * - `<s>`, `<strike>`, or `<del>` for strikethrough
+   * - `<code>` for inline code
+   * - `<pre>` for code blocks (supports language attribute)
+   * - `<a href="...">` for links
+   * - `<tg-spoiler>` or `<span class="tg-spoiler">` for spoilers
+   * - `<blockquote>` for blockquote (non-expandable)
+   * - `<blockquote expandable>` for expandable blockquote
+   * - `<tg-emoji emoji-id="...">` for custom emoji
+   * 
+   * @param html The HTML string to parse
+   * @returns A new FormattedString with the parsed content and entities
+   */
+  static fromHtml(html: string): FormattedString {
+    let plainText = "";
+    const openTags: Array<{ tag: EntityTag; offset: number }> = [];
+    const entities: MessageEntity[] = [];
+    let i = 0;
+
+    while (i < html.length) {
+      if (html[i] === '<') {
+        const tagStart = i;
+        i++;
+        
+        // Check if it's a closing tag
+        const isClosing = html[i] === '/';
+        if (isClosing) i++;
+
+        // Read tag name
+        let tagName = '';
+        while (i < html.length && html[i] !== '>' && html[i] !== ' ') {
+          tagName += html[i];
+          i++;
+        }
+        tagName = tagName.toLowerCase();
+
+        // Read attributes
+        const attributes: Record<string, string> = {};
+        while (i < html.length && html[i] !== '>') {
+          // Skip whitespace
+          while (i < html.length && (html[i] === ' ' || html[i] === '\n' || html[i] === '\r' || html[i] === '\t')) {
+            i++;
+          }
+          if (i >= html.length || html[i] === '>') break;
+
+          // Read attribute name
+          let attrName = '';
+          while (i < html.length && html[i] !== '=' && html[i] !== '>' && html[i] !== ' ' && html[i] !== '\t' && html[i] !== '\n' && html[i] !== '\r') {
+            attrName += html[i];
+            i++;
+          }
+          attrName = attrName.toLowerCase();
+
+          if (!attrName) {
+            // No attribute name found, skip to end of tag
+            break;
+          }
+
+          // Skip whitespace after attribute name
+          while (i < html.length && (html[i] === ' ' || html[i] === '\t' || html[i] === '\n' || html[i] === '\r')) {
+            i++;
+          }
+
+          if (i >= html.length) break;
+
+          if (html[i] === '=') {
+            i++; // skip '='
+            // Skip whitespace after '='
+            while (i < html.length && (html[i] === ' ' || html[i] === '\t' || html[i] === '\n' || html[i] === '\r')) {
+              i++;
+            }
+            
+            if (i >= html.length) break;
+
+            // Read attribute value
+            let attrValue = '';
+            const quote = html[i];
+            if (quote === '"' || quote === "'") {
+              i++; // skip opening quote
+              while (i < html.length && html[i] !== quote) {
+                attrValue += html[i];
+                i++;
+              }
+              if (i < html.length && html[i] === quote) i++; // skip closing quote
+            } else {
+              // Unquoted attribute value
+              while (i < html.length && html[i] !== '>' && html[i] !== ' ' && html[i] !== '\t' && html[i] !== '\n' && html[i] !== '\r') {
+                attrValue += html[i];
+                i++;
+              }
+            }
+            attributes[attrName] = attrValue;
+          } else {
+            // Boolean attribute (no '=' found)
+            attributes[attrName] = '';
+          }
+        }
+
+        if (html[i] === '>') i++; // skip closing '>'
+
+        // Process the tag
+        if (!isClosing) {
+          // Opening tag
+          let entityTag: EntityTag | null = null;
+
+          if (tagName === 'b' || tagName === 'strong') {
+            entityTag = bold();
+          } else if (tagName === 'i' || tagName === 'em') {
+            entityTag = italic();
+          } else if (tagName === 'u') {
+            entityTag = underline();
+          } else if (tagName === 's' || tagName === 'strike' || tagName === 'del') {
+            entityTag = strikethrough();
+          } else if (tagName === 'code') {
+            entityTag = code();
+          } else if (tagName === 'pre') {
+            entityTag = pre(attributes['language'] || '');
+          } else if (tagName === 'a' && attributes['href']) {
+            entityTag = link(attributes['href']);
+          } else if (tagName === 'tg-spoiler') {
+            entityTag = spoiler();
+          } else if (tagName === 'span' && attributes['class'] === 'tg-spoiler') {
+            entityTag = spoiler();
+          } else if (tagName === 'blockquote') {
+            if ('expandable' in attributes) {
+              entityTag = expandableBlockquote();
+            } else {
+              entityTag = blockquote();
+            }
+          } else if (tagName === 'tg-emoji' && attributes['emoji-id']) {
+            // Custom emoji will be handled specially - we need to track the placeholder text
+            openTags.push({
+              tag: { type: 'custom_emoji', custom_emoji_id: attributes['emoji-id'] } as EntityTag,
+              offset: plainText.length,
+            });
+            continue;
+          } else {
+            // Unknown tag, treat as literal text
+            plainText += html.substring(tagStart, i);
+            continue;
+          }
+
+          if (entityTag) {
+            openTags.push({ tag: entityTag, offset: plainText.length });
+          }
+        } else {
+          // Closing tag
+          // Find matching opening tag
+          let matchIndex = -1;
+          for (let j = openTags.length - 1; j >= 0; j--) {
+            const openTag = openTags[j];
+            const openTagType = openTag.tag.type;
+            
+            let matches = false;
+            if (tagName === 'b' || tagName === 'strong') {
+              matches = openTagType === 'bold';
+            } else if (tagName === 'i' || tagName === 'em') {
+              matches = openTagType === 'italic';
+            } else if (tagName === 'u') {
+              matches = openTagType === 'underline';
+            } else if (tagName === 's' || tagName === 'strike' || tagName === 'del') {
+              matches = openTagType === 'strikethrough';
+            } else if (tagName === 'code') {
+              matches = openTagType === 'code';
+            } else if (tagName === 'pre') {
+              matches = openTagType === 'pre';
+            } else if (tagName === 'a') {
+              matches = openTagType === 'text_link';
+            } else if (tagName === 'tg-spoiler') {
+              matches = openTagType === 'spoiler';
+            } else if (tagName === 'span') {
+              matches = openTagType === 'spoiler';
+            } else if (tagName === 'blockquote') {
+              matches = openTagType === 'blockquote' || openTagType === 'expandable_blockquote';
+            } else if (tagName === 'tg-emoji') {
+              matches = openTagType === 'custom_emoji';
+            }
+
+            if (matches) {
+              matchIndex = j;
+              break;
+            }
+          }
+
+          if (matchIndex !== -1) {
+            const openTag = openTags.splice(matchIndex, 1)[0];
+            const length = plainText.length - openTag.offset;
+            if (length > 0) {
+              entities.push({
+                ...openTag.tag,
+                offset: openTag.offset,
+                length: length,
+              } as MessageEntity);
+            }
+          } else {
+            // No matching opening tag, treat as literal text
+            plainText += html.substring(tagStart, i);
+          }
+        }
+      } else if (html[i] === '&') {
+        // Handle HTML entities
+        const entityStart = i;
+        i++;
+        let entityName = '';
+        while (i < html.length && html[i] !== ';' && entityName.length < 10) {
+          entityName += html[i];
+          i++;
+        }
+        
+        if (html[i] === ';') {
+          i++; // skip semicolon
+          // Decode common HTML entities
+          if (entityName === 'lt') {
+            plainText += '<';
+          } else if (entityName === 'gt') {
+            plainText += '>';
+          } else if (entityName === 'amp') {
+            plainText += '&';
+          } else if (entityName === 'quot') {
+            plainText += '"';
+          } else if (entityName === 'apos' || entityName === '#39') {
+            plainText += "'";
+          } else if (entityName.startsWith('#x')) {
+            // Hex character reference
+            const codePoint = parseInt(entityName.substring(2), 16);
+            if (!isNaN(codePoint)) {
+              plainText += String.fromCodePoint(codePoint);
+            } else {
+              plainText += html.substring(entityStart, i);
+            }
+          } else if (entityName.startsWith('#')) {
+            // Decimal character reference
+            const codePoint = parseInt(entityName.substring(1), 10);
+            if (!isNaN(codePoint)) {
+              plainText += String.fromCodePoint(codePoint);
+            } else {
+              plainText += html.substring(entityStart, i);
+            }
+          } else {
+            // Unknown entity, keep as-is
+            plainText += html.substring(entityStart, i);
+          }
+        } else {
+          // No semicolon found, treat as literal
+          plainText += html.substring(entityStart, i);
+        }
+      } else {
+        plainText += html[i];
+        i++;
+      }
+    }
+
+    // Close any remaining open tags
+    for (const openTag of openTags) {
+      const length = plainText.length - openTag.offset;
+      if (length > 0) {
+        entities.push({
+          ...openTag.tag,
+          offset: openTag.offset,
+          length: length,
+        } as MessageEntity);
+      }
+    }
+
+    return new FormattedString(plainText, entities);
+  }
+
+  /**
+   * Instance method to parse an HTML string and append it to this FormattedString.
+   * @param html The HTML string to parse and append
+   * @returns A new FormattedString combining this instance with the parsed HTML content
+   */
+  fromHtml(html: string): FormattedString {
+    return fmt`${this}${FormattedString.fromHtml(html)}`;
+  }
+
+  /**
    * Joins an array of formatted strings or plain text into a single FormattedString
    * @param items Array of text items to join (can be TextWithEntities, CaptionWithEntities, or string)
    * @param separator Optional separator to insert between items (defaults to empty string)
