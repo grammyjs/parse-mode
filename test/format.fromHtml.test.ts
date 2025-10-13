@@ -1,8 +1,8 @@
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { FormattedString, fmt, b } from "../src/mod.ts";
+import { assertEquals, describe, it } from "./deps.test.ts";
+import { b, fmt, FormattedString } from "../src/format.ts";
 
-Deno.test("FormattedString - fromHtml method", async (t) => {
-  await t.step("Static fromHtml - basic bold", () => {
+describe("FormattedString - fromHtml method", () => {
+  it("Static fromHtml - basic bold", () => {
     const result = FormattedString.fromHtml("<b>Hello</b> World");
     assertEquals(result.rawText, "Hello World");
     assertEquals(result.rawEntities.length, 1);
@@ -11,7 +11,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].length, 5);
   });
 
-  await t.step("Static fromHtml - multiple formats", () => {
+  it("Static fromHtml - multiple formats", () => {
     const result = FormattedString.fromHtml(
       "<b>Bold</b> <i>Italic</i> <u>Underline</u>",
     );
@@ -22,7 +22,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[2].type, "underline");
   });
 
-  await t.step("Static fromHtml - nested formats", () => {
+  it("Static fromHtml - nested formats", () => {
     const result = FormattedString.fromHtml("<b>Bold <i>and italic</i></b>");
     assertEquals(result.rawText, "Bold and italic");
     assertEquals(result.rawEntities.length, 2);
@@ -35,7 +35,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(italicEntity?.length, 10);
   });
 
-  await t.step("Static fromHtml - link with href", () => {
+  it("Static fromHtml - link with href", () => {
     const result = FormattedString.fromHtml(
       '<a href="https://example.com">Click here</a>',
     );
@@ -48,14 +48,14 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     );
   });
 
-  await t.step("Static fromHtml - inline code", () => {
+  it("Static fromHtml - inline code", () => {
     const result = FormattedString.fromHtml("<code>inline code</code>");
     assertEquals(result.rawText, "inline code");
     assertEquals(result.rawEntities.length, 1);
     assertEquals(result.rawEntities[0].type, "code");
   });
 
-  await t.step("Static fromHtml - pre with language", () => {
+  it("Static fromHtml - pre with language", () => {
     const result = FormattedString.fromHtml(
       '<pre language="python">print("hello")</pre>',
     );
@@ -68,7 +68,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     );
   });
 
-  await t.step("Static fromHtml - pre without language", () => {
+  it("Static fromHtml - pre without language", () => {
     const result = FormattedString.fromHtml("<pre>code block</pre>");
     assertEquals(result.rawText, "code block");
     assertEquals(result.rawEntities.length, 1);
@@ -76,19 +76,19 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals((result.rawEntities[0] as { language: string }).language, "");
   });
 
-  await t.step("Static fromHtml - HTML entities", () => {
+  it("Static fromHtml - HTML entities", () => {
     const result = FormattedString.fromHtml(
       "&lt;b&gt; &amp; &quot;test&quot; &apos;",
     );
     assertEquals(result.rawText, '<b> & "test" \'');
   });
 
-  await t.step("Static fromHtml - numeric HTML entities", () => {
+  it("Static fromHtml - numeric HTML entities", () => {
     const result = FormattedString.fromHtml("&#60;&#62; &#x3C;&#x3E;");
     assertEquals(result.rawText, "<> <>");
   });
 
-  await t.step("Static fromHtml - spoiler with tg-spoiler tag", () => {
+  it("Static fromHtml - spoiler with tg-spoiler tag", () => {
     const result = FormattedString.fromHtml(
       "<tg-spoiler>Secret text</tg-spoiler>",
     );
@@ -97,7 +97,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].type, "spoiler");
   });
 
-  await t.step("Static fromHtml - spoiler with span class", () => {
+  it("Static fromHtml - spoiler with span class", () => {
     const result = FormattedString.fromHtml(
       '<span class="tg-spoiler">Hidden</span>',
     );
@@ -106,7 +106,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].type, "spoiler");
   });
 
-  await t.step("Static fromHtml - strikethrough variants", () => {
+  it("Static fromHtml - strikethrough variants", () => {
     const result1 = FormattedString.fromHtml("<s>strike</s>");
     const result2 = FormattedString.fromHtml("<strike>strike</strike>");
     const result3 = FormattedString.fromHtml("<del>strike</del>");
@@ -116,7 +116,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result3.rawEntities[0].type, "strikethrough");
   });
 
-  await t.step("Static fromHtml - strong and em", () => {
+  it("Static fromHtml - strong and em", () => {
     const result = FormattedString.fromHtml(
       "<strong>Strong</strong> <em>Emphasis</em>",
     );
@@ -126,14 +126,14 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[1].type, "italic");
   });
 
-  await t.step("Static fromHtml - blockquote", () => {
+  it("Static fromHtml - blockquote", () => {
     const result = FormattedString.fromHtml("<blockquote>Quote</blockquote>");
     assertEquals(result.rawText, "Quote");
     assertEquals(result.rawEntities.length, 1);
     assertEquals(result.rawEntities[0].type, "blockquote");
   });
 
-  await t.step("Static fromHtml - expandable blockquote", () => {
+  it("Static fromHtml - expandable blockquote", () => {
     const result = FormattedString.fromHtml(
       "<blockquote expandable>Expandable quote</blockquote>",
     );
@@ -142,7 +142,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].type, "expandable_blockquote");
   });
 
-  await t.step("Static fromHtml - custom emoji", () => {
+  it("Static fromHtml - custom emoji", () => {
     const result = FormattedString.fromHtml(
       '<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>',
     );
@@ -155,7 +155,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     );
   });
 
-  await t.step("Static fromHtml - complex mixed formatting", () => {
+  it("Static fromHtml - complex mixed formatting", () => {
     const result = FormattedString.fromHtml(
       '<b>Bold</b> with <a href="https://example.com">link</a> and <code>code</code>',
     );
@@ -174,19 +174,19 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(codeEntity?.length, 4);
   });
 
-  await t.step("Static fromHtml - empty string", () => {
+  it("Static fromHtml - empty string", () => {
     const result = FormattedString.fromHtml("");
     assertEquals(result.rawText, "");
     assertEquals(result.rawEntities.length, 0);
   });
 
-  await t.step("Static fromHtml - plain text without tags", () => {
+  it("Static fromHtml - plain text without tags", () => {
     const result = FormattedString.fromHtml("Just plain text");
     assertEquals(result.rawText, "Just plain text");
     assertEquals(result.rawEntities.length, 0);
   });
 
-  await t.step("Static fromHtml - unclosed tags", () => {
+  it("Static fromHtml - unclosed tags", () => {
     const result = FormattedString.fromHtml("<b>Bold without close");
     assertEquals(result.rawText, "Bold without close");
     assertEquals(result.rawEntities.length, 1);
@@ -194,7 +194,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].length, 18);
   });
 
-  await t.step("Static fromHtml - mismatched closing tags", () => {
+  it("Static fromHtml - mismatched closing tags", () => {
     const result = FormattedString.fromHtml("<b>Bold</i>");
     // Mismatched closing tag </i> is treated as literal text
     assertEquals(result.rawText, "Bold</i>");
@@ -204,12 +204,12 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].length, 8);
   });
 
-  await t.step("Static fromHtml - unknown tags treated as literal", () => {
+  it("Static fromHtml - unknown tags treated as literal", () => {
     const result = FormattedString.fromHtml("<unknown>Text</unknown>");
     assertEquals(result.rawText, "<unknown>Text</unknown>");
   });
 
-  await t.step("Static fromHtml - attributes with single quotes", () => {
+  it("Static fromHtml - attributes with single quotes", () => {
     const result = FormattedString.fromHtml(
       "<a href='https://example.com'>Link</a>",
     );
@@ -220,7 +220,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     );
   });
 
-  await t.step("Static fromHtml - attributes without quotes", () => {
+  it("Static fromHtml - attributes without quotes", () => {
     const result = FormattedString.fromHtml(
       "<blockquote expandable>Text</blockquote>",
     );
@@ -228,7 +228,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].type, "expandable_blockquote");
   });
 
-  await t.step("Instance fromHtml - append to existing", () => {
+  it("Instance fromHtml - append to existing", () => {
     const base = new FormattedString("Prefix: ");
     const result = base.fromHtml("<b>Bold</b>");
     assertEquals(result.rawText, "Prefix: Bold");
@@ -237,7 +237,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(result.rawEntities[0].length, 4);
   });
 
-  await t.step("fromHtml - integration with fmt", () => {
+  it("fromHtml - integration with fmt", () => {
     const htmlPart = FormattedString.fromHtml("<i>italic HTML</i>");
     const combined = fmt`${b}Bold tag${b} and ${htmlPart}`;
     assertEquals(combined.rawText, "Bold tag and italic HTML");
@@ -252,7 +252,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     assertEquals(italicEntity?.length, 11);
   });
 
-  await t.step("fromHtml - with whitespace in attributes", () => {
+  it("fromHtml - with whitespace in attributes", () => {
     const result = FormattedString.fromHtml(
       '<a  href = "https://example.com" >Link</a>',
     );
@@ -263,7 +263,7 @@ Deno.test("FormattedString - fromHtml method", async (t) => {
     );
   });
 
-  await t.step("fromHtml - multiple nested levels", () => {
+  it("fromHtml - multiple nested levels", () => {
     const result = FormattedString.fromHtml(
       "<b><i><u>Deeply nested</u></i></b>",
     );
