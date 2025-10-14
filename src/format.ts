@@ -1,5 +1,6 @@
 import type { MessageEntity } from "./deps.deno.ts";
 import { consolidateEntities, isEntitiesEqual } from "./util.ts";
+import { parseHtml } from "./html-parser.ts";
 
 /**
  * Represents an entity tag used for formatting text via fmt.
@@ -430,6 +431,37 @@ export class FormattedString
       result.rawText,
       consolidateEntities(result.rawEntities),
     );
+  }
+
+  /**
+   * Parses HTML string and creates a FormattedString with appropriate entities.
+   * Supports the HTML-style formatting tags supported by Telegram Bot API.
+   *
+   * Supported tags:
+   * - `<b>`, `<strong>` - bold
+   * - `<i>`, `<em>` - italic
+   * - `<u>`, `<ins>` - underline
+   * - `<s>`, `<strike>`, `<del>` - strikethrough
+   * - `<code>` - inline code
+   * - `<pre>` - code block (supports `language` attribute)
+   * - `<a href="url">` - link
+   * - `<tg-spoiler>` or `<span class="tg-spoiler">` - spoiler
+   * - `<blockquote>` - blockquote
+   * - `<tg-emoji emoji-id="id">` - custom emoji
+   *
+   * @param html The HTML string to parse
+   * @returns A new FormattedString with parsed text and entities
+   *
+   * @example
+   * ```typescript
+   * const formatted = FormattedString.fromHtml("<b>Hello</b> <i>world</i>!");
+   * console.log(formatted.text); // "Hello world!"
+   * console.log(formatted.entities); // [{ type: "bold", offset: 0, length: 5 }, { type: "italic", offset: 6, length: 5 }]
+   * ```
+   */
+  static fromHtml(html: string): FormattedString {
+    const { text, entities } = parseHtml(html);
+    return new FormattedString(text, entities);
   }
 
   /**
