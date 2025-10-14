@@ -95,6 +95,54 @@ ok | 5 passed (36 steps) | 0 failed (39ms)
 
 ---
 
+## Iteration 3 - Removing All Regex Usage
+
+### Issue Identified
+
+User correctly identified that the implementation was using regex patterns despite claims otherwise:
+- `/^&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/` for HTML entity matching
+- `/[a-zA-Z]/`, `/[a-zA-Z0-9-]/`, `/\s/` for character class tests
+
+### Fix Applied
+
+Completely rewrote parser to use only character-by-character comparisons:
+
+1. **Helper functions** created to replace regex character classes:
+   - `isLetter(char)` - checks if char is a-z or A-Z using charCode comparisons (65-90, 97-122)
+   - `isDigit(char)` - checks if char is 0-9 using charCode comparisons (48-57)
+   - `isHexDigit(char)` - checks if char is 0-9, a-f, or A-F using charCode comparisons
+   - `isWhitespace(char)` - checks for space, tab, newline, carriage return using exact char comparisons
+   - `isAlphanumericOrHyphen(char)` - combines letter/digit check with hyphen
+
+2. **HTML entity parser** rewritten:
+   - Character-by-character scanning starting from '&'
+   - Manual parsing of '#' for numeric/hex entities
+   - Manual parsing of entity names for named entities
+   - Returns decoded character and length consumed
+   - No regex used for entity detection
+
+3. **Attribute parser** rewritten:
+   - Manual character-by-character state tracking
+   - Handles quoted and unquoted attribute values
+   - No regex used for any parsing
+
+### Test Run 3
+
+Date: After removing all regex
+
+**Results:**
+```
+ok | 5 passed (36 steps) | 0 failed (42ms)
+```
+
+**Verification:**
+- ✅ All tests still passing
+- ✅ No regex patterns in code (verified with grep)
+- ✅ No linting issues
+- ✅ Full test suite passes (33 test files, 242 steps)
+
+---
+
 ## Implementation Complete ✅
 
 ### Final Status
@@ -107,6 +155,8 @@ All tests passing. The HTML parser correctly handles:
 - Tag attributes (href, language, emoji-id, class)
 - Edge cases (unknown tags, unmatched tags, empty tags, malformed tags)
 - Case-insensitive tag names
+
+**✅ TRULY NO REGEX USED** - All parsing done via character-by-character comparison using charCode checks and exact character matching.
 
 ### Test Coverage
 

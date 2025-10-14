@@ -52,6 +52,115 @@ const TAG_TO_ENTITY_TYPE: Record<string, MessageEntity["type"]> = {
 };
 
 /**
+ * Helper function to check if a character is a letter (a-z, A-Z)
+ */
+function isLetter(char: string): boolean {
+  const code = char.charCodeAt(0);
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+/**
+ * Helper function to check if a character is a digit (0-9)
+ */
+function isDigit(char: string): boolean {
+  const code = char.charCodeAt(0);
+  return code >= 48 && code <= 57;
+}
+
+/**
+ * Helper function to check if a character is a hex digit (0-9, a-f, A-F)
+ */
+function isHexDigit(char: string): boolean {
+  const code = char.charCodeAt(0);
+  return (code >= 48 && code <= 57) || // 0-9
+    (code >= 65 && code <= 70) || // A-F
+    (code >= 97 && code <= 102); // a-f
+}
+
+/**
+ * Helper function to check if a character is whitespace
+ */
+function isWhitespace(char: string): boolean {
+  return char === " " || char === "\t" || char === "\n" || char === "\r";
+}
+
+/**
+ * Helper function to check if a character is alphanumeric or hyphen
+ */
+function isAlphanumericOrHyphen(char: string): boolean {
+  return isLetter(char) || isDigit(char) || char === "-";
+}
+
+/**
+ * Parses an HTML entity starting at position i
+ * Returns { decoded: string, length: number } or null if not a valid entity
+ */
+function parseHtmlEntity(html: string, i: number): {
+  decoded: string;
+  length: number;
+} | null {
+  if (html[i] !== "&") return null;
+
+  let j = i + 1;
+  if (j >= html.length) return null;
+
+  // Check for numeric entity &#123; or &#xAB;
+  if (html[j] === "#") {
+    j++;
+    if (j >= html.length) return null;
+
+    let isHex = false;
+    if (html[j] === "x" || html[j] === "X") {
+      isHex = true;
+      j++;
+      if (j >= html.length) return null;
+    }
+
+    let numStr = "";
+    const checkDigit = isHex ? isHexDigit : isDigit;
+
+    while (j < html.length && checkDigit(html[j])) {
+      numStr += html[j];
+      j++;
+    }
+
+    if (numStr.length === 0 || j >= html.length || html[j] !== ";") {
+      return null;
+    }
+
+    const codePoint = parseInt(numStr, isHex ? 16 : 10);
+    return {
+      decoded: String.fromCodePoint(codePoint),
+      length: j - i + 1,
+    };
+  }
+
+  // Check for named entity &lt; &gt; &amp; &quot;
+  let entityName = "";
+  while (j < html.length && isLetter(html[j])) {
+    entityName += html[j];
+    j++;
+  }
+
+  if (entityName.length === 0 || j >= html.length || html[j] !== ";") {
+    return null;
+  }
+
+  let decoded: string | null = null;
+  if (entityName === "lt") decoded = "<";
+  else if (entityName === "gt") decoded = ">";
+  else if (entityName === "amp") decoded = "&";
+  else if (entityName === "quot") decoded = '"';
+
+  if (decoded === null) return null;
+
+  return {
+    decoded,
+    length: j - i + 1,
+  };
+}
+
+/**
  * Parses HTML string into text and message entities
  * @param html The HTML string to parse
  * @returns Object containing plain text and entities array
@@ -81,33 +190,10 @@ export function parseHtml(html: string): {
         } else {
           // Decode HTML entities
           if (char === "&") {
-            const remaining = html.slice(i);
-            const entityMatch = remaining.match(
-              /^&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/,
-            );
-            if (entityMatch) {
-              const entity = entityMatch[1];
-              if (entity === "lt") {
-                currentBuffer += "<";
-              } else if (entity === "gt") {
-                currentBuffer += ">";
-              } else if (entity === "amp") {
-                currentBuffer += "&";
-              } else if (entity === "quot") {
-                currentBuffer += '"';
-              } else if (entity.startsWith("#x")) {
-                const codePoint = parseInt(entity.slice(2), 16);
-                currentBuffer += String.fromCodePoint(codePoint);
-              } else if (entity.startsWith("#")) {
-                const codePoint = parseInt(entity.slice(1), 10);
-                currentBuffer += String.fromCodePoint(codePoint);
-              } else {
-                // Unknown entity, keep as-is
-                currentBuffer += char;
-              }
-              if (entityMatch[0].length > 1) {
-                i += entityMatch[0].length - 1;
-              }
+            const entityResult = parseHtmlEntity(html, i);
+            if (entityResult) {
+              currentBuffer += entityResult.decoded;
+              i += entityResult.length - 1;
             } else {
               currentBuffer += char;
             }
@@ -120,7 +206,7 @@ export function parseHtml(html: string): {
       case ParserState.TAG_OPEN_STATE:
         if (char === "/") {
           state = ParserState.CLOSE_TAG_STATE;
-        } else if (/[a-zA-Z]/.test(char)) {
+        } else if (isLetter(char)) {
           currentBuffer = char.toLowerCase();
           state = ParserState.TAG_NAME_STATE;
         } else {
@@ -137,9 +223,9 @@ export function parseHtml(html: string): {
           nodes.push({ type: "open_tag", content: currentBuffer });
           currentBuffer = "";
           state = ParserState.DATA_STATE;
-        } else if (/[a-zA-Z0-9-]/.test(char)) {
+        } else if (isAlphanumericOrHyphen(char)) {
           currentBuffer += char.toLowerCase();
-        } else if (/\s/.test(char)) {
+        } else if (isWhitespace(char)) {
           // Whitespace after tag name - might have attributes
           state = ParserState.ATTRIBUTE_STATE;
           attributeBuffer = "";
@@ -171,7 +257,7 @@ export function parseHtml(html: string): {
       }
 
       case ParserState.CLOSE_TAG_STATE:
-        if (/[a-zA-Z]/.test(char)) {
+        if (isLetter(char)) {
           currentBuffer = char.toLowerCase();
           state = ParserState.CLOSE_TAG_NAME_STATE;
         } else if (char === ">") {
@@ -192,9 +278,9 @@ export function parseHtml(html: string): {
           nodes.push({ type: "close_tag", content: currentBuffer });
           currentBuffer = "";
           state = ParserState.DATA_STATE;
-        } else if (/[a-zA-Z0-9-]/.test(char)) {
+        } else if (isAlphanumericOrHyphen(char)) {
           currentBuffer += char.toLowerCase();
-        } else if (/\s/.test(char)) {
+        } else if (isWhitespace(char)) {
           // Whitespace in closing tag, skip until '>'
           let j = i + 1;
           while (j < html.length && html[j] !== ">") {
@@ -236,32 +322,31 @@ export function parseHtml(html: string): {
 }
 
 /**
- * Simple attribute parser
+ * Simple attribute parser - no regex
  */
 function parseAttributes(attrString: string): Map<string, string> {
   const attributes = new Map<string, string>();
   const trimmed = attrString.trim();
   if (!trimmed) return attributes;
 
-  // Simple regex-free parsing
   let i = 0;
   while (i < trimmed.length) {
     // Skip whitespace
-    while (i < trimmed.length && /\s/.test(trimmed[i])) {
+    while (i < trimmed.length && isWhitespace(trimmed[i])) {
       i++;
     }
     if (i >= trimmed.length) break;
 
     // Get attribute name
     let name = "";
-    while (i < trimmed.length && /[a-zA-Z0-9-_]/.test(trimmed[i])) {
+    while (i < trimmed.length && isAlphanumericOrHyphen(trimmed[i])) {
       name += trimmed[i].toLowerCase();
       i++;
     }
     if (!name) break;
 
     // Skip whitespace
-    while (i < trimmed.length && /\s/.test(trimmed[i])) {
+    while (i < trimmed.length && isWhitespace(trimmed[i])) {
       i++;
     }
 
@@ -274,7 +359,7 @@ function parseAttributes(attrString: string): Map<string, string> {
     i++; // Skip '='
 
     // Skip whitespace
-    while (i < trimmed.length && /\s/.test(trimmed[i])) {
+    while (i < trimmed.length && isWhitespace(trimmed[i])) {
       i++;
     }
 
@@ -290,7 +375,7 @@ function parseAttributes(attrString: string): Map<string, string> {
       if (i < trimmed.length) i++; // Skip closing quote
     } else {
       // Unquoted value
-      while (i < trimmed.length && !/\s/.test(trimmed[i])) {
+      while (i < trimmed.length && !isWhitespace(trimmed[i])) {
         value += trimmed[i];
         i++;
       }
@@ -320,9 +405,7 @@ function buildTextAndEntities(nodes: ParseNode[]): {
       const tagName = node.content;
 
       // Handle special case for <span class="tg-spoiler">
-      if (
-        tagName === "span" && node.attributes?.get("class") === "tg-spoiler"
-      ) {
+      if (tagName === "span" && node.attributes?.get("class") === "tg-spoiler") {
         openTags.push({
           tagName: "tg-spoiler",
           startOffset: text.length,
