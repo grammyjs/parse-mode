@@ -7,6 +7,7 @@ import {
   blockquote,
   bold,
   code,
+  emoji,
   expandableBlockquote,
   i,
   italic,
@@ -405,6 +406,16 @@ export class FormattedString
   }
 
   /**
+   * Creates an emoji formatted string using custom emoji
+   * @param text The text content to format with custom emoji
+   * @param customEmojiId The custom emoji ID
+   * @returns A new FormattedString with emoji formatting applied
+   */
+  static emoji(text: Stringable, customEmojiId: string) {
+    return fmt`${emoji(customEmojiId)}${text}${emoji}`;
+  }
+
+  /**
    * Creates a message link formatted string
    * @param text The text content to display for the link
    * @param chatId The chat ID containing the message
@@ -730,6 +741,16 @@ export class FormattedString
    */
   customEmoji(placeholder: Stringable, emoji: string) {
     return fmt`${this}${FormattedString.customEmoji(placeholder, emoji)}`;
+  }
+
+  /**
+   * Combines this FormattedString with an emoji formatted string using custom emoji
+   * @param text The text content to format with custom emoji and append
+   * @param customEmojiId The custom emoji ID
+   * @returns A new FormattedString combining this instance with emoji formatting
+   */
+  emoji(text: Stringable, customEmojiId: string) {
+    return fmt`${this}${FormattedString.emoji(text, customEmojiId)}`;
   }
 
   /**
