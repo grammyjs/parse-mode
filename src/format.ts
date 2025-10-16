@@ -1,11 +1,25 @@
 import type { MessageEntity } from "./deps.deno.ts";
+import type { EntityTag } from "./entity-tag.ts";
+
+import {
+  a,
+  b,
+  blockquote,
+  bold,
+  code,
+  expandableBlockquote,
+  i,
+  italic,
+  link,
+  pre,
+  s,
+  spoiler,
+  strikethrough,
+  u,
+  underline,
+} from "./entity-tag.ts";
 import { consolidateEntities, isEntitiesEqual } from "./util.ts";
 import { parseHtml } from "./html-parser.ts";
-
-/**
- * Represents an entity tag used for formatting text via fmt.
- */
-export type EntityTag = Omit<MessageEntity, "offset" | "length">;
 
 /**
  * Objects that implement this interface implement a `.toString()`
@@ -460,8 +474,8 @@ export class FormattedString
    * ```
    */
   static fromHtml(html: string): FormattedString {
-    const { text, entities } = parseHtml(html);
-    return new FormattedString(text, entities);
+    const { textParts, entityTagParts } = parseHtml(html);
+    return fmt(textParts, ...entityTagParts);
   }
 
   /**
@@ -1057,117 +1071,6 @@ export class FormattedString
   }
 }
 
-function buildFormatter<T extends Array<unknown> = never>(
-  type: MessageEntity["type"],
-  ...formatArgKeys: T
-): (...formatArgs: T) => EntityTag {
-  return (...formatArgs) => {
-    const formatArgObj = Object.fromEntries(
-      formatArgKeys.map((formatArgKey, i) => [formatArgKey, formatArgs[i]]),
-    );
-    return { type, ...formatArgObj };
-  };
-}
-
-// === Native entity functions
-/**
- * Alias for `bold` entity tag. Incompatible with `code` and `pre`.
- */
-export function b() {
-  return buildFormatter("bold")();
-}
-/**
- * `bold` entity tag. Incompatible with `code` and `pre`.
- */
-export function bold() {
-  return buildFormatter("bold")();
-}
-/**
- * Alias for `italic` entity tag. Incompatible with `code` and `pre`.
- */
-export function i() {
-  return buildFormatter("italic")();
-}
-/**
- * `italic` entity tag. Incompatible with `code` and `pre`.
- */
-export function italic() {
-  return buildFormatter("italic")();
-}
-/**
- * Alias for `strikethrough` entity tag. Incompatible with `code` and `pre`.
- */
-export function s() {
-  return buildFormatter("strikethrough")();
-}
-/**
- * `strikethrough` entity tag. Incompatible with `code` and `pre`.
- */
-export function strikethrough() {
-  return buildFormatter("strikethrough")();
-}
-/**
- * Alias for `underline` entity tag. Incompatible with `code` and `pre`.
- */
-export function u() {
-  return buildFormatter("underline")();
-}
-/**
- * `underline` entity tag. Incompatible with `code` and `pre`.
- */
-export function underline() {
-  return buildFormatter("underline")();
-}
-
-/**
- * Alias for `link` entity tag. Incompatible with `code` and `pre`.
- * @param url The URL to link to.
- */
-export function a(url: string) {
-  return buildFormatter<[url: string]>("text_link", "url")(url);
-}
-/**
- * `link` entity tag. Incompatible with `code` and `pre`.
- * @param url The URL to link to.
- */
-export function link(url: string) {
-  return buildFormatter<[url: string]>("text_link", "url")(url);
-}
-
-/**
- * `code` entity tag. Cannot be combined with any other formats.
- */
-export function code() {
-  return buildFormatter("code")();
-}
-/**
- * `pre` entity tag. Cannot be combined with any other formats.
- * @param language The language of the code block.
- */
-export function pre(language: string) {
-  return buildFormatter<[language: string]>("pre", "language")(language);
-}
-
-/**
- * `spoiler` entity tag. Incompatible with `code` and `pre`.
- */
-export function spoiler() {
-  return buildFormatter("spoiler")();
-}
-
-/**
- * `blockquote` entity tag. Cannot be nested.
- */
-export function blockquote() {
-  return buildFormatter("blockquote")();
-}
-/**
- * `expandable_blockquote` entity tag. Cannot be nested.
- */
-export function expandableBlockquote() {
-  return buildFormatter("expandable_blockquote")();
-}
-
 // ===  Format tagged template function
 
 /**
@@ -1196,7 +1099,7 @@ export function expandableBlockquote() {
  * @returns A new FormattedString instance containing the formatted text and entities
  */
 export function fmt(
-  rawStringParts: TemplateStringsArray,
+  rawStringParts: TemplateStringsArray | string[],
   ...entityTagsOrFormattedTextObjects: (
     | Stringable
     | TextWithEntities
@@ -1281,7 +1184,7 @@ export function fmt(
     }) as MessageEntity
   ));
 
-  return new FormattedString(rawText, rawEntities);
+  return new FormattedString(rawText, consolidateEntities(rawEntities));
 }
 
 // Utility functions
@@ -1295,6 +1198,7 @@ export function mentionUser(stringLike: Stringable, userId: number) {
 }
 
 /**
+ * @deprecated Use `emoji` EntityTag instead
  * Inserts a custom emoji.
  * @param placeholder A placeholder emoji
  * @param emoji The custom emoji identifier

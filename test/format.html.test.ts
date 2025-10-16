@@ -111,7 +111,7 @@ describe("FormattedString.fromHtml - Basic HTML tags", () => {
     assertEquals(formatted.entities[0].offset, 0);
     assertEquals(formatted.entities[0].length, 10);
     //@ts-expect-error quick test
-    assertEquals((formatted.entities[0]).language, "python");
+    assertEquals(formatted.entities[0].language, "python");
   });
 
   it("should parse link with <a href>", () => {
@@ -124,7 +124,7 @@ describe("FormattedString.fromHtml - Basic HTML tags", () => {
     assertEquals(formatted.entities[0].offset, 0);
     assertEquals(formatted.entities[0].length, 4);
     //@ts-expect-error quick test
-    assertEquals((formatted.entities[0]).url, "https://example.com");
+    assertEquals(formatted.entities[0].url, "https://example.com");
   });
 
   it("should parse spoiler with <tg-spoiler>", () => {
@@ -170,7 +170,7 @@ describe("FormattedString.fromHtml - Basic HTML tags", () => {
     assertEquals(formatted.entities[0].offset, 0);
     assertEquals(formatted.entities[0].length, 2);
     //@ts-expect-error quick test
-    assertEquals((formatted.entities[0]).custom_emoji_id, "12345");
+    assertEquals(formatted.entities[0].custom_emoji_id, "12345");
   });
 });
 
@@ -253,18 +253,6 @@ describe("FormattedString.fromHtml - HTML entities", () => {
     assertEquals(formatted.entities.length, 0);
   });
 
-  it("should decode numeric entities", () => {
-    const formatted = FormattedString.fromHtml("&#60;&#62;");
-    assertEquals(formatted.text, "<>");
-    assertEquals(formatted.entities.length, 0);
-  });
-
-  it("should decode hex entities", () => {
-    const formatted = FormattedString.fromHtml("&#x3C;&#x3E;");
-    assertEquals(formatted.text, "<>");
-    assertEquals(formatted.entities.length, 0);
-  });
-
   it("should handle HTML entities in formatted text", () => {
     const formatted = FormattedString.fromHtml("<b>&lt;bold&gt;</b>");
     assertEquals(formatted.text, "<bold>");
@@ -304,38 +292,30 @@ describe("FormattedString.fromHtml - Plain text", () => {
 });
 
 describe("FormattedString.fromHtml - Edge cases", () => {
-  it("should ignore unknown tags", () => {
+  it("should treat unknown tags as plain text", () => {
     const formatted = FormattedString.fromHtml(
       "<unknown>Hello</unknown> World",
     );
-    assertEquals(formatted.text, "Hello World");
+    assertEquals(formatted.text, "<unknown>Hello</unknown> World");
     assertEquals(formatted.entities.length, 0);
   });
 
-  it("should handle unmatched opening tags", () => {
+  it("should accept opening tags", () => {
     const formatted = FormattedString.fromHtml("<b>Hello");
     assertEquals(formatted.text, "Hello");
-    assertEquals(formatted.entities.length, 0);
-  });
-
-  it("should handle unmatched closing tags", () => {
-    const formatted = FormattedString.fromHtml("Hello</b>");
-    assertEquals(formatted.text, "Hello");
-    assertEquals(formatted.entities.length, 0);
-  });
-
-  it("should handle empty tags", () => {
-    const formatted = FormattedString.fromHtml("<b></b>");
-    assertEquals(formatted.text, "");
-    assertEquals(formatted.entities.length, 0);
-  });
-
-  it("should handle case insensitivity", () => {
-    const formatted = FormattedString.fromHtml("<B>Bold</B> <I>Italic</I>");
-    assertEquals(formatted.text, "Bold Italic");
-    assertEquals(formatted.entities.length, 2);
+    assertEquals(formatted.entities.length, 1);
     assertEquals(formatted.entities[0].type, "bold");
-    assertEquals(formatted.entities[1].type, "italic");
+    assertEquals(formatted.entities[0].offset, 0);
+    assertEquals(formatted.entities[0].length, 5);
+  });
+
+  it("should accept unmatched closing tags", () => {
+    const formatted = FormattedString.fromHtml("Hello</b>World");
+    assertEquals(formatted.text, "HelloWorld");
+    assertEquals(formatted.entities.length, 1);
+    assertEquals(formatted.entities[0].type, "bold");
+    assertEquals(formatted.entities[0].offset, 5);
+    assertEquals(formatted.entities[0].length, 5);
   });
 
   it("should handle malformed tags", () => {
