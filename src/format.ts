@@ -394,6 +394,7 @@ export class FormattedString
   }
 
   /**
+   * @deprecated Use `emoji` instead
    * Creates a custom emoji formatted string
    * @param placeholder The placeholder emoji text to display
    * @param emoji The custom emoji identifier
@@ -721,6 +722,7 @@ export class FormattedString
   }
 
   /**
+   * @deprecated Use `emoji` instead
    * Combines this FormattedString with a custom emoji formatted string
    * @param placeholder The placeholder emoji text to display and append
    * @param emoji The custom emoji identifier
@@ -748,6 +750,37 @@ export class FormattedString
    */
   plain(text: string) {
     return fmt`${this}${text}`;
+  }
+
+  /**
+   * Parses HTML string and combines it with this FormattedString.
+   * Supports the HTML-style formatting tags supported by Telegram Bot API.
+   *
+   * Supported tags:
+   * - `<b>`, `<strong>` - bold
+   * - `<i>`, `<em>` - italic
+   * - `<u>`, `<ins>` - underline
+   * - `<s>`, `<strike>`, `<del>` - strikethrough
+   * - `<code>` - inline code
+   * - `<pre>` - code block (supports `language` attribute)
+   * - `<a href="url">` - link
+   * - `<tg-spoiler>` or `<span class="tg-spoiler">` - spoiler
+   * - `<blockquote>` - blockquote
+   * - `<tg-emoji emoji-id="id">` - custom emoji
+   *
+   * @param html The HTML string to parse and append
+   * @returns A new FormattedString combining this instance with the parsed HTML
+   *
+   * @example
+   * ```typescript
+   * const initial = new FormattedString("Hello ");
+   * const combined = initial.fromHtml("<b>world</b>!");
+   * console.log(combined.text); // "Hello world!"
+   * console.log(combined.entities); // [{ type: "bold", offset: 6, length: 5 }]
+   * ```
+   */
+  fromHtml(html: string): FormattedString {
+    return fmt`${this}${FormattedString.fromHtml(html)}`;
   }
 
   /**

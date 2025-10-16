@@ -324,3 +324,106 @@ describe("FormattedString.fromHtml - Edge cases", () => {
     assertEquals(formatted.entities.length, 0);
   });
 });
+
+describe("FormattedString - fromHtml instance method", () => {
+  it("should combine existing FormattedString with parsed HTML", () => {
+    const initial = new FormattedString("Hello ");
+    const combined = initial.fromHtml("<b>world</b>!");
+
+    assertEquals(combined.text, "Hello world!");
+    assertEquals(combined.entities.length, 1);
+    assertEquals(combined.entities[0].type, "bold");
+    assertEquals(combined.entities[0].offset, 6);
+    assertEquals(combined.entities[0].length, 5);
+  });
+
+  it("should preserve existing entities when appending HTML", () => {
+    const initial = FormattedString.bold("Hello");
+    const combined = initial.fromHtml(" <i>world</i>");
+
+    assertEquals(combined.text, "Hello world");
+    assertEquals(combined.entities.length, 2);
+    assertEquals(combined.entities[0].type, "bold");
+    assertEquals(combined.entities[0].offset, 0);
+    assertEquals(combined.entities[0].length, 5);
+    assertEquals(combined.entities[1].type, "italic");
+    assertEquals(combined.entities[1].offset, 6);
+    assertEquals(combined.entities[1].length, 5);
+  });
+
+  it("should handle multiple HTML appends", () => {
+    const initial = new FormattedString("Start ");
+    const step1 = initial.fromHtml("<b>bold</b> ");
+    const step2 = step1.fromHtml("<i>italic</i>");
+
+    assertEquals(step2.text, "Start bold italic");
+    assertEquals(step2.entities.length, 2);
+    assertEquals(step2.entities[0].type, "bold");
+    assertEquals(step2.entities[0].offset, 6);
+    assertEquals(step2.entities[0].length, 4);
+    assertEquals(step2.entities[1].type, "italic");
+    assertEquals(step2.entities[1].offset, 11);
+    assertEquals(step2.entities[1].length, 6);
+  });
+
+  it("should work with complex HTML", () => {
+    const initial = new FormattedString("Prefix: ");
+    const combined = initial.fromHtml(
+      '<a href="https://example.com">Link</a> with <code>code</code>',
+    );
+
+    assertEquals(combined.text, "Prefix: Link with code");
+    assertEquals(combined.entities.length, 2);
+    assertEquals(combined.entities[0].type, "text_link");
+    assertEquals(combined.entities[0].offset, 8);
+    assertEquals(combined.entities[0].length, 4);
+    assertEquals(combined.entities[1].type, "code");
+    assertEquals(combined.entities[1].offset, 18);
+    assertEquals(combined.entities[1].length, 4);
+  });
+
+  it("should handle empty HTML string", () => {
+    const initial = new FormattedString("Hello");
+    const combined = initial.fromHtml("");
+
+    assertEquals(combined.text, "Hello");
+    assertEquals(combined.entities.length, 0);
+  });
+
+  it("should handle plain text HTML", () => {
+    const initial = new FormattedString("Hello ");
+    const combined = initial.fromHtml("world");
+
+    assertEquals(combined.text, "Hello world");
+    assertEquals(combined.entities.length, 0);
+  });
+
+  it("should work with nested HTML tags", () => {
+    const initial = new FormattedString("Text: ");
+    const combined = initial.fromHtml("<b>Bold <i>and italic</i></b>");
+
+    assertEquals(combined.text, "Text: Bold and italic");
+    assertEquals(combined.entities.length, 2);
+    assertEquals(combined.entities[0].type, "bold");
+    assertEquals(combined.entities[0].offset, 6);
+    assertEquals(combined.entities[0].length, 15);
+    assertEquals(combined.entities[1].type, "italic");
+    assertEquals(combined.entities[1].offset, 11);
+    assertEquals(combined.entities[1].length, 10);
+  });
+
+  it("should chain with other instance methods", () => {
+    const result = new FormattedString("Start ")
+      .fromHtml("<b>bold</b> ")
+      .italic("italic");
+
+    assertEquals(result.text, "Start bold italic");
+    assertEquals(result.entities.length, 2);
+    assertEquals(result.entities[0].type, "bold");
+    assertEquals(result.entities[0].offset, 6);
+    assertEquals(result.entities[0].length, 4);
+    assertEquals(result.entities[1].type, "italic");
+    assertEquals(result.entities[1].offset, 11);
+    assertEquals(result.entities[1].length, 6);
+  });
+});
