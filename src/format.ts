@@ -18,35 +18,6 @@ export interface Stringable {
 }
 
 /**
- * Represents text object with optional formatting entities.
- *
- * This interface is used to store plain text along with its associated
- * formatting information (such as bold, italic, links, etc.) as message entities.
- *
- * @example
- * ```typescript
- * const formattedText: TextWithEntities = {
- *   text: "Hello world!",
- *   entities: [
- *     { type: "bold", offset: 0, length: 5 },
- *     { type: "italic", offset: 6, length: 5 }
- *   ]
- * };
- * ```
- */
-export interface TextWithEntities {
-  /**
-   * Plain text value for this `FormattedString`
-   */
-  text: string;
-
-  /**
-   * Format entities for this `FormattedString`
-   */
-  entities?: MessageEntity[];
-}
-
-/**
  * Represents caption object with optional formatting entities.
  *
  * This interface is used to store plain caption along with its associated
@@ -76,12 +47,102 @@ export interface CaptionWithEntities {
 }
 
 /**
+ * Represents text object with optional formatting entities.
+ *
+ * This interface is used to store plain text along with its associated
+ * formatting information (such as bold, italic, links, etc.) as message entities.
+ *
+ * @example
+ * ```typescript
+ * const formattedText: TextWithEntities = {
+ *   text: "Hello world!",
+ *   entities: [
+ *     { type: "bold", offset: 0, length: 5 },
+ *     { type: "italic", offset: 6, length: 5 }
+ *   ]
+ * };
+ * ```
+ */
+export interface TextWithEntities {
+  /**
+   * Plain text value for this `FormattedString`
+   */
+  text: string;
+
+  /**
+   * Format entities for this `FormattedString`
+   */
+  entities?: MessageEntity[];
+}
+
+/**
+ * Represents text object with optional formatting entities.
+ *
+ * This interface is used to store plain text along with its associated
+ * formatting information (such as bold, italic, links, etc.) as message entities.
+ *
+ * @example
+ * ```typescript
+ * const formattedText: TextWithTextEntities = {
+ *   text: "Hello world!",
+ *   text_entities: [
+ *     { type: "bold", offset: 0, length: 5 },
+ *     { type: "italic", offset: 6, length: 5 }
+ *   ]
+ * };
+ * ```
+ */
+export interface TextWithTextEntities {
+  /**
+   * Plain text value for this `FormattedString`
+   */
+  text: string;
+  /**
+   * Format entities for this `FormattedString`
+   */
+  text_entities?: MessageEntity[];
+}
+
+/**
+ * Represents title object with optional formatting entities.
+ *
+ * This interface is used to store plain title along with its associated
+ * formatting information (such as bold, italic, links, etc.) as message entities.
+ *
+ * @example
+ * ```typescript
+ * const formattedTitle: TitleWithTitleEntities = {
+ *   title: "Hello world!",
+ *   title_entities: [
+ *     { type: "bold", offset: 0, length: 5 },
+ *     { type: "italic", offset: 6, length: 5 }
+ *   ]
+ * };
+ * ```
+ */
+export interface TitleWithTitleEntities {
+  /**
+   * Plain text value for this `FormattedString`
+   */
+  title: string;
+  /**
+   * Format entities for this `FormattedString`
+   */
+  title_entities?: MessageEntity[];
+}
+
+/**
  * Represents the formatted string after parsing. This class provides a unified
  * interface for working with formatted text that can be used as both message text
  * and caption content in Telegram Bot API calls.
  */
 export class FormattedString
-  implements TextWithEntities, CaptionWithEntities, Stringable {
+  implements
+    CaptionWithEntities,
+    TextWithEntities,
+    TextWithTextEntities,
+    TitleWithTitleEntities,
+    Stringable {
   /**
    * The entities backing this FormattedString.
    */
@@ -119,6 +180,30 @@ export class FormattedString
    */
   get text() {
     return this.rawText;
+  }
+
+  /**
+   * Gets the title. Alias for rawText.
+   * Used when this FormattedString is used as title.
+   */
+  get title() {
+    return this.rawText;
+  }
+
+  /**
+   * Gets the text_entities. Alias for rawEntities.
+   * Used when this FormattedString is used as text with text_entities.
+   */
+  get text_entities() {
+    return this.rawEntities;
+  }
+
+  /**
+   * Gets the title_entities. Alias for rawEntities.
+   * Used when this FormattedString is used as title_entities.
+   */
+  get title_entities() {
+    return this.rawEntities;
   }
 
   /**
@@ -1202,7 +1287,7 @@ export function linkMessage(
       "linkMessage can only be used for supergroups and channel messages. Refusing to transform into link.",
     );
     return fmt`${stringLike}`;
-  } else if (chatId < -1002147483647 || chatId > -1000000000000) {
+  } else if (chatId < -1997852516352 || chatId > -1000000000001) {
     console.warn(
       "linkMessage is not able to link messages whose chatIds are greater than -1000000000000 or less than -1002147483647 at this moment. Refusing to transform into link.",
     );
