@@ -1,10 +1,26 @@
 import type { MessageEntity } from "./deps.deno.ts";
-import { consolidateEntities, isEntitiesEqual } from "./util.ts";
+import type { EntityTag } from "./entity-tag.ts";
 
-/**
- * Represents an entity tag used for formatting text via fmt.
- */
-export type EntityTag = Omit<MessageEntity, "offset" | "length">;
+import {
+  a,
+  b,
+  blockquote,
+  bold,
+  code,
+  emoji,
+  expandableBlockquote,
+  i,
+  italic,
+  link,
+  pre,
+  s,
+  spoiler,
+  strikethrough,
+  u,
+  underline,
+} from "./entity-tag.ts";
+import { consolidateEntities, isEntitiesEqual } from "./util.ts";
+import { parseHtml } from "./html-parser.ts";
 
 /**
  * Objects that implement this interface implement a `.toString()`
@@ -379,6 +395,7 @@ export class FormattedString
   }
 
   /**
+   * @deprecated Use `emoji` instead
    * Creates a custom emoji formatted string
    * @param placeholder The placeholder emoji text to display
    * @param emoji The custom emoji identifier
@@ -386,6 +403,16 @@ export class FormattedString
    */
   static customEmoji(placeholder: Stringable, emoji: string) {
     return customEmoji(placeholder, emoji);
+  }
+
+  /**
+   * Creates an emoji formatted string using custom emoji
+   * @param text The text content to format with custom emoji
+   * @param customEmojiId The custom emoji ID
+   * @returns A new FormattedString with emoji formatting applied
+   */
+  static emoji(text: Stringable, customEmojiId: string) {
+    return fmt`${emoji(customEmojiId)}${text}${emoji}`;
   }
 
   /**
@@ -430,6 +457,37 @@ export class FormattedString
       result.rawText,
       consolidateEntities(result.rawEntities),
     );
+  }
+
+  /**
+   * Parses HTML string and creates a FormattedString with appropriate entities.
+   * Supports the HTML-style formatting tags supported by Telegram Bot API.
+   *
+   * Supported tags:
+   * - `<b>`, `<strong>` - bold
+   * - `<i>`, `<em>` - italic
+   * - `<u>`, `<ins>` - underline
+   * - `<s>`, `<strike>`, `<del>` - strikethrough
+   * - `<code>` - inline code
+   * - `<pre>` - code block (supports `language` attribute)
+   * - `<a href="url">` - link
+   * - `<tg-spoiler>` or `<span class="tg-spoiler">` - spoiler
+   * - `<blockquote>` - blockquote
+   * - `<tg-emoji emoji-id="id">` - custom emoji
+   *
+   * @param html The HTML string to parse
+   * @returns A new FormattedString with parsed text and entities
+   *
+   * @example
+   * ```typescript
+   * const formatted = FormattedString.fromHtml("<b>Hello</b> <i>world</i>!");
+   * console.log(formatted.text); // "Hello world!"
+   * console.log(formatted.entities); // [{ type: "bold", offset: 0, length: 5 }, { type: "italic", offset: 6, length: 5 }]
+   * ```
+   */
+  static fromHtml(html: string): FormattedString {
+    const { textParts, entityTagParts } = parseHtml(html);
+    return fmt(textParts, ...entityTagParts);
   }
 
   /**
@@ -675,6 +733,7 @@ export class FormattedString
   }
 
   /**
+   * @deprecated Use `emoji` instead
    * Combines this FormattedString with a custom emoji formatted string
    * @param placeholder The placeholder emoji text to display and append
    * @param emoji The custom emoji identifier
@@ -682,6 +741,16 @@ export class FormattedString
    */
   customEmoji(placeholder: Stringable, emoji: string) {
     return fmt`${this}${FormattedString.customEmoji(placeholder, emoji)}`;
+  }
+
+  /**
+   * Combines this FormattedString with an emoji formatted string using custom emoji
+   * @param text The text content to format with custom emoji and append
+   * @param customEmojiId The custom emoji ID
+   * @returns A new FormattedString combining this instance with emoji formatting
+   */
+  emoji(text: Stringable, customEmojiId: string) {
+    return fmt`${this}${FormattedString.emoji(text, customEmojiId)}`;
   }
 
   /**
@@ -702,6 +771,37 @@ export class FormattedString
    */
   plain(text: string) {
     return fmt`${this}${text}`;
+  }
+
+  /**
+   * Parses HTML string and combines it with this FormattedString.
+   * Supports the HTML-style formatting tags supported by Telegram Bot API.
+   *
+   * Supported tags:
+   * - `<b>`, `<strong>` - bold
+   * - `<i>`, `<em>` - italic
+   * - `<u>`, `<ins>` - underline
+   * - `<s>`, `<strike>`, `<del>` - strikethrough
+   * - `<code>` - inline code
+   * - `<pre>` - code block (supports `language` attribute)
+   * - `<a href="url">` - link
+   * - `<tg-spoiler>` or `<span class="tg-spoiler">` - spoiler
+   * - `<blockquote>` - blockquote
+   * - `<tg-emoji emoji-id="id">` - custom emoji
+   *
+   * @param html The HTML string to parse and append
+   * @returns A new FormattedString combining this instance with the parsed HTML
+   *
+   * @example
+   * ```typescript
+   * const initial = new FormattedString("Hello ");
+   * const combined = initial.fromHtml("<b>world</b>!");
+   * console.log(combined.text); // "Hello world!"
+   * console.log(combined.entities); // [{ type: "bold", offset: 6, length: 5 }]
+   * ```
+   */
+  fromHtml(html: string): FormattedString {
+    return fmt`${this}${FormattedString.fromHtml(html)}`;
   }
 
   /**
@@ -1025,117 +1125,6 @@ export class FormattedString
   }
 }
 
-function buildFormatter<T extends Array<unknown> = never>(
-  type: MessageEntity["type"],
-  ...formatArgKeys: T
-): (...formatArgs: T) => EntityTag {
-  return (...formatArgs) => {
-    const formatArgObj = Object.fromEntries(
-      formatArgKeys.map((formatArgKey, i) => [formatArgKey, formatArgs[i]]),
-    );
-    return { type, ...formatArgObj };
-  };
-}
-
-// === Native entity functions
-/**
- * Alias for `bold` entity tag. Incompatible with `code` and `pre`.
- */
-export function b() {
-  return buildFormatter("bold")();
-}
-/**
- * `bold` entity tag. Incompatible with `code` and `pre`.
- */
-export function bold() {
-  return buildFormatter("bold")();
-}
-/**
- * Alias for `italic` entity tag. Incompatible with `code` and `pre`.
- */
-export function i() {
-  return buildFormatter("italic")();
-}
-/**
- * `italic` entity tag. Incompatible with `code` and `pre`.
- */
-export function italic() {
-  return buildFormatter("italic")();
-}
-/**
- * Alias for `strikethrough` entity tag. Incompatible with `code` and `pre`.
- */
-export function s() {
-  return buildFormatter("strikethrough")();
-}
-/**
- * `strikethrough` entity tag. Incompatible with `code` and `pre`.
- */
-export function strikethrough() {
-  return buildFormatter("strikethrough")();
-}
-/**
- * Alias for `underline` entity tag. Incompatible with `code` and `pre`.
- */
-export function u() {
-  return buildFormatter("underline")();
-}
-/**
- * `underline` entity tag. Incompatible with `code` and `pre`.
- */
-export function underline() {
-  return buildFormatter("underline")();
-}
-
-/**
- * Alias for `link` entity tag. Incompatible with `code` and `pre`.
- * @param url The URL to link to.
- */
-export function a(url: string) {
-  return buildFormatter<[url: string]>("text_link", "url")(url);
-}
-/**
- * `link` entity tag. Incompatible with `code` and `pre`.
- * @param url The URL to link to.
- */
-export function link(url: string) {
-  return buildFormatter<[url: string]>("text_link", "url")(url);
-}
-
-/**
- * `code` entity tag. Cannot be combined with any other formats.
- */
-export function code() {
-  return buildFormatter("code")();
-}
-/**
- * `pre` entity tag. Cannot be combined with any other formats.
- * @param language The language of the code block.
- */
-export function pre(language: string) {
-  return buildFormatter<[language: string]>("pre", "language")(language);
-}
-
-/**
- * `spoiler` entity tag. Incompatible with `code` and `pre`.
- */
-export function spoiler() {
-  return buildFormatter("spoiler")();
-}
-
-/**
- * `blockquote` entity tag. Cannot be nested.
- */
-export function blockquote() {
-  return buildFormatter("blockquote")();
-}
-/**
- * `expandable_blockquote` entity tag. Cannot be nested.
- */
-export function expandableBlockquote() {
-  return buildFormatter("expandable_blockquote")();
-}
-
 // ===  Format tagged template function
 
 /**
@@ -1164,7 +1153,7 @@ export function expandableBlockquote() {
  * @returns A new FormattedString instance containing the formatted text and entities
  */
 export function fmt(
-  rawStringParts: TemplateStringsArray,
+  rawStringParts: TemplateStringsArray | string[],
   ...entityTagsOrFormattedTextObjects: (
     | Stringable
     | TextWithEntities
@@ -1249,7 +1238,7 @@ export function fmt(
     }) as MessageEntity
   ));
 
-  return new FormattedString(rawText, rawEntities);
+  return new FormattedString(rawText, consolidateEntities(rawEntities));
 }
 
 // Utility functions
@@ -1263,6 +1252,7 @@ export function mentionUser(stringLike: Stringable, userId: number) {
 }
 
 /**
+ * @deprecated Use `emoji` EntityTag instead
  * Inserts a custom emoji.
  * @param placeholder A placeholder emoji
  * @param emoji The custom emoji identifier
