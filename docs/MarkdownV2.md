@@ -21,21 +21,21 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 
 ## Entity Reference
 
-| Syntax | MessageEntity Type | FormattedString Method |
-|--------|-------------------|----------------------|
-| `*bold*` | `bold` | `FormattedString.bold()` |
-| `_italic_` | `italic` | `FormattedString.italic()` |
-| `__underline__` | `underline` | `FormattedString.underline()` |
-| `~strikethrough~` | `strikethrough` | `FormattedString.strikethrough()` |
-| `\|\|spoiler\|\|` | `spoiler` | `FormattedString.spoiler()` |
-| `` `code` `` | `code` | `FormattedString.code()` |
-| ` ```pre``` ` | `pre` | `FormattedString.pre()` |
-| ` ```language\ncode``` ` | `pre` (with `language`) | `FormattedString.pre(text, "language")` |
-| `[text](url)` | `text_link` | `FormattedString.link(text, url)` |
-| `[text](tg://user?id=123)` | `text_link` | `FormattedString.mentionUser(text, userId)` |
-| `![emoji](tg://emoji?id=123)` | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
-| `>blockquote` | `blockquote` | `FormattedString.blockquote()` |
-| `**>expandable...\|\|` | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
+| Syntax                        | MessageEntity Type      | FormattedString Method                      |
+| ----------------------------- | ----------------------- | ------------------------------------------- |
+| `*bold*`                      | `bold`                  | `FormattedString.bold()`                    |
+| `_italic_`                    | `italic`                | `FormattedString.italic()`                  |
+| `__underline__`               | `underline`             | `FormattedString.underline()`               |
+| `~strikethrough~`             | `strikethrough`         | `FormattedString.strikethrough()`           |
+| `\|\|spoiler\|\|`             | `spoiler`               | `FormattedString.spoiler()`                 |
+| `` `code` ``                  | `code`                  | `FormattedString.code()`                    |
+| `` ```pre``` ``               | `pre`                   | `FormattedString.pre()`                     |
+| `` ```language\ncode``` ``    | `pre` (with `language`) | `FormattedString.pre(text, "language")`     |
+| `[text](url)`                 | `text_link`             | `FormattedString.link(text, url)`           |
+| `[text](tg://user?id=123)`    | `text_link`             | `FormattedString.mentionUser(text, userId)` |
+| `![emoji](tg://emoji?id=123)` | `custom_emoji`          | `FormattedString.emoji(text, emojiId)`      |
+| `>blockquote`                 | `blockquote`            | `FormattedString.blockquote()`              |
+| `**>expandable...\|\|`        | `expandable_blockquote` | `FormattedString.expandableBlockquote()`    |
 
 ---
 
@@ -46,13 +46,15 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 **Syntax:** `*bold text*`
 
 **MessageEntity:**
+
 ```json
 { "type": "bold", "offset": 0, "length": 9 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, bold, FormattedString } from "@grammyjs/parse-mode";
+import { bold, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 // Using entity tag
 const fromFmt = fmt`${bold}bold text${bold}`;
@@ -71,13 +73,15 @@ const fromInstance = new FormattedString("").bold("bold text");
 **Syntax:** `_italic text_`
 
 **MessageEntity:**
+
 ```json
 { "type": "italic", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, italic, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, italic } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${italic}italic text${italic}`;
 const fromStatic = FormattedString.italic("italic text");
@@ -90,13 +94,15 @@ const fromStatic = FormattedString.italic("italic text");
 **Syntax:** `__underline text__`
 
 **MessageEntity:**
+
 ```json
 { "type": "underline", "offset": 0, "length": 14 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, underline, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, underline } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${underline}underline text${underline}`;
 const fromStatic = FormattedString.underline("underline text");
@@ -109,13 +115,15 @@ const fromStatic = FormattedString.underline("underline text");
 **Syntax:** `~strikethrough text~`
 
 **MessageEntity:**
+
 ```json
 { "type": "strikethrough", "offset": 0, "length": 18 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, strikethrough, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, strikethrough } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${strikethrough}strikethrough text${strikethrough}`;
 const fromStatic = FormattedString.strikethrough("strikethrough text");
@@ -128,13 +136,15 @@ const fromStatic = FormattedString.strikethrough("strikethrough text");
 **Syntax:** `||spoiler text||`
 
 **MessageEntity:**
+
 ```json
 { "type": "spoiler", "offset": 0, "length": 12 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, spoiler, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, spoiler } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${spoiler}spoiler text${spoiler}`;
 const fromStatic = FormattedString.spoiler("spoiler text");
@@ -147,13 +157,15 @@ const fromStatic = FormattedString.spoiler("spoiler text");
 **Syntax:** `` `inline code` ``
 
 **MessageEntity:**
+
 ```json
 { "type": "code", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, code, FormattedString } from "@grammyjs/parse-mode";
+import { code, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${code}inline code${code}`;
 const fromStatic = FormattedString.code("inline code");
@@ -166,6 +178,7 @@ const fromStatic = FormattedString.code("inline code");
 ### Pre-formatted Code Block
 
 **Syntax:**
+
 ````
 ```
 pre-formatted code
@@ -173,6 +186,7 @@ pre-formatted code
 ````
 
 **With language:**
+
 ````
 ```python
 print("Hello")
@@ -180,14 +194,16 @@ print("Hello")
 ````
 
 **MessageEntity:**
+
 ```json
 { "type": "pre", "offset": 0, "length": 18 }
 { "type": "pre", "offset": 0, "length": 14, "language": "python" }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, pre, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, pre } from "@grammyjs/parse-mode";
 
 // Without language
 const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
@@ -206,13 +222,15 @@ const fromStatic = FormattedString.pre('print("Hello")', "python");
 **Syntax:** `[link text](https://example.com)`
 
 **MessageEntity:**
+
 ```json
 { "type": "text_link", "offset": 0, "length": 9, "url": "https://example.com" }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, link, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, link } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${link("https://example.com")}link text${link}`;
 const fromStatic = FormattedString.link("link text", "https://example.com");
@@ -225,11 +243,18 @@ const fromStatic = FormattedString.link("link text", "https://example.com");
 **Syntax:** `[user name](tg://user?id=123456789)`
 
 **MessageEntity:**
+
 ```json
-{ "type": "text_link", "offset": 0, "length": 9, "url": "tg://user?id=123456789" }
+{
+  "type": "text_link",
+  "offset": 0,
+  "length": 9,
+  "url": "tg://user?id=123456789"
+}
 ```
 
 **FormattedString Usage:**
+
 ```typescript
 import { FormattedString, mentionUser } from "@grammyjs/parse-mode";
 
@@ -244,13 +269,20 @@ const fromStatic = FormattedString.mentionUser("user name", 123456789);
 **Syntax:** `![👍](tg://emoji?id=5368324170671202286)`
 
 **MessageEntity:**
+
 ```json
-{ "type": "custom_emoji", "offset": 0, "length": 2, "custom_emoji_id": "5368324170671202286" }
+{
+  "type": "custom_emoji",
+  "offset": 0,
+  "length": 2,
+  "custom_emoji_id": "5368324170671202286"
+}
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, emoji, FormattedString } from "@grammyjs/parse-mode";
+import { emoji, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${emoji("5368324170671202286")}👍${emoji}`;
 const fromStatic = FormattedString.emoji("👍", "5368324170671202286");
@@ -261,19 +293,22 @@ const fromStatic = FormattedString.emoji("👍", "5368324170671202286");
 ### Blockquote
 
 **Syntax:**
+
 ```
 >Block quotation started
 >Block quotation continued
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "blockquote", "offset": 0, "length": 52 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, blockquote, FormattedString } from "@grammyjs/parse-mode";
+import { blockquote, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${blockquote}Block quotation text${blockquote}`;
 const fromStatic = FormattedString.blockquote("Block quotation text");
@@ -284,6 +319,7 @@ const fromStatic = FormattedString.blockquote("Block quotation text");
 ### Expandable Blockquote
 
 **Syntax:**
+
 ```
 **>Expandable block quotation started
 >Expandable block quotation continued
@@ -291,15 +327,22 @@ const fromStatic = FormattedString.blockquote("Block quotation text");
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "expandable_blockquote", "offset": 0, "length": 108 }
 ```
 
 **FormattedString Usage:**
-```typescript
-import { fmt, expandableBlockquote, FormattedString } from "@grammyjs/parse-mode";
 
-const fromFmt = fmt`${expandableBlockquote}Expandable quotation${expandableBlockquote}`;
+```typescript
+import {
+  expandableBlockquote,
+  fmt,
+  FormattedString,
+} from "@grammyjs/parse-mode";
+
+const fromFmt =
+  fmt`${expandableBlockquote}Expandable quotation${expandableBlockquote}`;
 const fromStatic = FormattedString.expandableBlockquote("Expandable quotation");
 ```
 
@@ -316,7 +359,7 @@ MarkdownV2 supports limited nesting of entities:
 ### Example: Nested Formatting
 
 ```typescript
-import { fmt, bold, italic } from "@grammyjs/parse-mode";
+import { bold, fmt, italic } from "@grammyjs/parse-mode";
 
 // Bold italic text
 const boldItalic = fmt`${bold}${italic}bold and italic${italic}${bold}`;

@@ -11,10 +11,10 @@ HTML is a flexible formatting mode that uses familiar HTML tags. It's often easi
 The following characters must be replaced with HTML entities:
 
 | Character | HTML Entity |
-|-----------|-------------|
-| `<` | `&lt;` |
-| `>` | `&gt;` |
-| `&` | `&amp;` |
+| --------- | ----------- |
+| `<`       | `&lt;`      |
+| `>`       | `&gt;`      |
+| `&`       | `&amp;`     |
 
 All other HTML entities (numeric or named) are supported.
 
@@ -22,21 +22,21 @@ All other HTML entities (numeric or named) are supported.
 
 ## Entity Reference
 
-| HTML Tag | MessageEntity Type | FormattedString Method |
-|----------|-------------------|----------------------|
-| `<b>`, `<strong>` | `bold` | `FormattedString.bold()` |
-| `<i>`, `<em>` | `italic` | `FormattedString.italic()` |
-| `<u>`, `<ins>` | `underline` | `FormattedString.underline()` |
-| `<s>`, `<strike>`, `<del>` | `strikethrough` | `FormattedString.strikethrough()` |
-| `<span class="tg-spoiler">`, `<tg-spoiler>` | `spoiler` | `FormattedString.spoiler()` |
-| `<code>` | `code` | `FormattedString.code()` |
-| `<pre>` | `pre` | `FormattedString.pre()` |
-| `<pre><code class="language-xxx">` | `pre` (with `language`) | `FormattedString.pre(text, "xxx")` |
-| `<a href="url">` | `text_link` | `FormattedString.link(text, url)` |
-| `<a href="tg://user?id=123">` | `text_link` | `FormattedString.mentionUser(text, userId)` |
-| `<tg-emoji emoji-id="123">` | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
-| `<blockquote>` | `blockquote` | `FormattedString.blockquote()` |
-| `<blockquote expandable>` | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
+| HTML Tag                                    | MessageEntity Type      | FormattedString Method                      |
+| ------------------------------------------- | ----------------------- | ------------------------------------------- |
+| `<b>`, `<strong>`                           | `bold`                  | `FormattedString.bold()`                    |
+| `<i>`, `<em>`                               | `italic`                | `FormattedString.italic()`                  |
+| `<u>`, `<ins>`                              | `underline`             | `FormattedString.underline()`               |
+| `<s>`, `<strike>`, `<del>`                  | `strikethrough`         | `FormattedString.strikethrough()`           |
+| `<span class="tg-spoiler">`, `<tg-spoiler>` | `spoiler`               | `FormattedString.spoiler()`                 |
+| `<code>`                                    | `code`                  | `FormattedString.code()`                    |
+| `<pre>`                                     | `pre`                   | `FormattedString.pre()`                     |
+| `<pre><code class="language-xxx">`          | `pre` (with `language`) | `FormattedString.pre(text, "xxx")`          |
+| `<a href="url">`                            | `text_link`             | `FormattedString.link(text, url)`           |
+| `<a href="tg://user?id=123">`               | `text_link`             | `FormattedString.mentionUser(text, userId)` |
+| `<tg-emoji emoji-id="123">`                 | `custom_emoji`          | `FormattedString.emoji(text, emojiId)`      |
+| `<blockquote>`                              | `blockquote`            | `FormattedString.blockquote()`              |
+| `<blockquote expandable>`                   | `expandable_blockquote` | `FormattedString.expandableBlockquote()`    |
 
 ---
 
@@ -45,19 +45,22 @@ All other HTML entities (numeric or named) are supported.
 ### Bold
 
 **HTML Syntax:**
+
 ```html
 <b>bold text</b>
 <strong>bold text</strong>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "bold", "offset": 0, "length": 9 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, bold, FormattedString } from "@grammyjs/parse-mode";
+import { bold, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 // Using entity tag
 const fromFmt = fmt`${bold}bold text${bold}`;
@@ -74,19 +77,22 @@ const fromAlias = FormattedString.b("bold text");
 ### Italic
 
 **HTML Syntax:**
+
 ```html
 <i>italic text</i>
 <em>italic text</em>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "italic", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, italic, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, italic } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${italic}italic text${italic}`;
 const fromStatic = FormattedString.italic("italic text");
@@ -98,19 +104,22 @@ const fromAlias = FormattedString.i("italic text"); // alias
 ### Underline
 
 **HTML Syntax:**
+
 ```html
 <u>underline text</u>
 <ins>underline text</ins>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "underline", "offset": 0, "length": 14 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, underline, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, underline } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${underline}underline text${underline}`;
 const fromStatic = FormattedString.underline("underline text");
@@ -122,6 +131,7 @@ const fromAlias = FormattedString.u("underline text"); // alias
 ### Strikethrough
 
 **HTML Syntax:**
+
 ```html
 <s>strikethrough text</s>
 <strike>strikethrough text</strike>
@@ -129,13 +139,15 @@ const fromAlias = FormattedString.u("underline text"); // alias
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "strikethrough", "offset": 0, "length": 18 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, strikethrough, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, strikethrough } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${strikethrough}strikethrough text${strikethrough}`;
 const fromStatic = FormattedString.strikethrough("strikethrough text");
@@ -147,19 +159,22 @@ const fromAlias = FormattedString.s("strikethrough text"); // alias
 ### Spoiler
 
 **HTML Syntax:**
+
 ```html
 <span class="tg-spoiler">spoiler text</span>
 <tg-spoiler>spoiler text</tg-spoiler>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "spoiler", "offset": 0, "length": 12 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, spoiler, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, spoiler } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${spoiler}spoiler text${spoiler}`;
 const fromStatic = FormattedString.spoiler("spoiler text");
@@ -170,18 +185,21 @@ const fromStatic = FormattedString.spoiler("spoiler text");
 ### Inline Code
 
 **HTML Syntax:**
+
 ```html
 <code>inline code</code>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "code", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, code, FormattedString } from "@grammyjs/parse-mode";
+import { code, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${code}inline code${code}`;
 const fromStatic = FormattedString.code("inline code");
@@ -194,24 +212,28 @@ const fromStatic = FormattedString.code("inline code");
 ### Pre-formatted Code Block
 
 **HTML Syntax (without language):**
+
 ```html
 <pre>pre-formatted code</pre>
 ```
 
 **HTML Syntax (with language):**
+
 ```html
 <pre><code class="language-python">print("Hello")</code></pre>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "pre", "offset": 0, "length": 18 }
 { "type": "pre", "offset": 0, "length": 14, "language": "python" }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, pre, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, pre } from "@grammyjs/parse-mode";
 
 // Without language
 const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
@@ -228,18 +250,21 @@ const fromStatic = FormattedString.pre('print("Hello")', "python");
 ### Text Link
 
 **HTML Syntax:**
+
 ```html
 <a href="https://example.com">link text</a>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "text_link", "offset": 0, "length": 9, "url": "https://example.com" }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, link, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, link } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${link("https://example.com")}link text${link}`;
 const fromStatic = FormattedString.link("link text", "https://example.com");
@@ -251,16 +276,24 @@ const fromAlias = FormattedString.a("link text", "https://example.com"); // alia
 ### User Mention (Text Mention)
 
 **HTML Syntax:**
+
 ```html
 <a href="tg://user?id=123456789">user name</a>
 ```
 
 **MessageEntity:**
+
 ```json
-{ "type": "text_link", "offset": 0, "length": 9, "url": "tg://user?id=123456789" }
+{
+  "type": "text_link",
+  "offset": 0,
+  "length": 9,
+  "url": "tg://user?id=123456789"
+}
 ```
 
 **FormattedString Usage:**
+
 ```typescript
 import { FormattedString, mentionUser } from "@grammyjs/parse-mode";
 
@@ -273,18 +306,26 @@ const fromStatic = FormattedString.mentionUser("user name", 123456789);
 ### Custom Emoji
 
 **HTML Syntax:**
+
 ```html
 <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>
 ```
 
 **MessageEntity:**
+
 ```json
-{ "type": "custom_emoji", "offset": 0, "length": 2, "custom_emoji_id": "5368324170671202286" }
+{
+  "type": "custom_emoji",
+  "offset": 0,
+  "length": 2,
+  "custom_emoji_id": "5368324170671202286"
+}
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, emoji, FormattedString } from "@grammyjs/parse-mode";
+import { emoji, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${emoji("5368324170671202286")}👍${emoji}`;
 const fromStatic = FormattedString.emoji("👍", "5368324170671202286");
@@ -295,18 +336,21 @@ const fromStatic = FormattedString.emoji("👍", "5368324170671202286");
 ### Blockquote
 
 **HTML Syntax:**
+
 ```html
 <blockquote>Block quotation text</blockquote>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "blockquote", "offset": 0, "length": 20 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, blockquote, FormattedString } from "@grammyjs/parse-mode";
+import { blockquote, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${blockquote}Block quotation text${blockquote}`;
 const fromStatic = FormattedString.blockquote("Block quotation text");
@@ -317,21 +361,31 @@ const fromStatic = FormattedString.blockquote("Block quotation text");
 ### Expandable Blockquote
 
 **HTML Syntax:**
+
 ```html
 <blockquote expandable>Expandable quotation text</blockquote>
 ```
 
 **MessageEntity:**
+
 ```json
 { "type": "expandable_blockquote", "offset": 0, "length": 25 }
 ```
 
 **FormattedString Usage:**
-```typescript
-import { fmt, expandableBlockquote, FormattedString } from "@grammyjs/parse-mode";
 
-const fromFmt = fmt`${expandableBlockquote}Expandable quotation text${expandableBlockquote}`;
-const fromStatic = FormattedString.expandableBlockquote("Expandable quotation text");
+```typescript
+import {
+  expandableBlockquote,
+  fmt,
+  FormattedString,
+} from "@grammyjs/parse-mode";
+
+const fromFmt =
+  fmt`${expandableBlockquote}Expandable quotation text${expandableBlockquote}`;
+const fromStatic = FormattedString.expandableBlockquote(
+  "Expandable quotation text",
+);
 ```
 
 ---
@@ -352,13 +406,14 @@ HTML supports rich nesting of formatting elements:
 ```
 
 ```typescript
-import { fmt, bold, italic, underline } from "@grammyjs/parse-mode";
+import { bold, fmt, italic, underline } from "@grammyjs/parse-mode";
 
 // Bold italic text
 const boldItalic = fmt`${bold}${italic}bold and italic${italic}${bold}`;
 
 // Underlined bold text
-const underlinedBold = fmt`${underline}${bold}underlined bold${bold}${underline}`;
+const underlinedBold =
+  fmt`${underline}${bold}underlined bold${bold}${underline}`;
 ```
 
 ---

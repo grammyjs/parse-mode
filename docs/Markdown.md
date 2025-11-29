@@ -15,6 +15,7 @@ The legacy Markdown mode provides basic text formatting with a simplified syntax
 ### Special Characters
 
 The following characters have special meaning and may need escaping:
+
 - `_` (underscore) - italic
 - `*` (asterisk) - bold
 - `` ` `` (backtick) - code
@@ -26,28 +27,28 @@ Use `\` to escape these characters when you want them as literal text.
 
 ## Entity Reference
 
-| Syntax | MessageEntity Type | FormattedString Method |
-|--------|-------------------|----------------------|
-| `*bold*` | `bold` | `FormattedString.bold()` |
-| `_italic_` | `italic` | `FormattedString.italic()` |
-| `` `code` `` | `code` | `FormattedString.code()` |
-| ` ```pre``` ` | `pre` | `FormattedString.pre()` |
-| `[text](url)` | `text_link` | `FormattedString.link(text, url)` |
-| `[text](tg://user?id=123)` | `text_link` | `FormattedString.mentionUser(text, userId)` |
+| Syntax                     | MessageEntity Type | FormattedString Method                      |
+| -------------------------- | ------------------ | ------------------------------------------- |
+| `*bold*`                   | `bold`             | `FormattedString.bold()`                    |
+| `_italic_`                 | `italic`           | `FormattedString.italic()`                  |
+| `` `code` ``               | `code`             | `FormattedString.code()`                    |
+| `` ```pre``` ``            | `pre`              | `FormattedString.pre()`                     |
+| `[text](url)`              | `text_link`        | `FormattedString.link(text, url)`           |
+| `[text](tg://user?id=123)` | `text_link`        | `FormattedString.mentionUser(text, userId)` |
 
 ### Not Supported in Legacy Markdown
 
 The following formatting options are **NOT available** in legacy Markdown mode:
 
-| Feature | MessageEntity Type | Available in |
-|---------|-------------------|--------------|
-| Underline | `underline` | MarkdownV2, HTML |
-| Strikethrough | `strikethrough` | MarkdownV2, HTML |
-| Spoiler | `spoiler` | MarkdownV2, HTML |
-| Custom Emoji | `custom_emoji` | MarkdownV2, HTML |
-| Blockquote | `blockquote` | MarkdownV2, HTML |
+| Feature               | MessageEntity Type      | Available in     |
+| --------------------- | ----------------------- | ---------------- |
+| Underline             | `underline`             | MarkdownV2, HTML |
+| Strikethrough         | `strikethrough`         | MarkdownV2, HTML |
+| Spoiler               | `spoiler`               | MarkdownV2, HTML |
+| Custom Emoji          | `custom_emoji`          | MarkdownV2, HTML |
+| Blockquote            | `blockquote`            | MarkdownV2, HTML |
 | Expandable Blockquote | `expandable_blockquote` | MarkdownV2, HTML |
-| Code with Language | `pre` with `language` | MarkdownV2, HTML |
+| Code with Language    | `pre` with `language`   | MarkdownV2, HTML |
 
 ---
 
@@ -58,13 +59,15 @@ The following formatting options are **NOT available** in legacy Markdown mode:
 **Syntax:** `*bold text*`
 
 **MessageEntity:**
+
 ```json
 { "type": "bold", "offset": 0, "length": 9 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, bold, FormattedString } from "@grammyjs/parse-mode";
+import { bold, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 // Using entity tag
 const fromFmt = fmt`${bold}bold text${bold}`;
@@ -83,13 +86,15 @@ const fromAlias = FormattedString.b("bold text");
 **Syntax:** `_italic text_`
 
 **MessageEntity:**
+
 ```json
 { "type": "italic", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, italic, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, italic } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${italic}italic text${italic}`;
 const fromStatic = FormattedString.italic("italic text");
@@ -103,13 +108,15 @@ const fromAlias = FormattedString.i("italic text"); // alias
 **Syntax:** `` `inline code` ``
 
 **MessageEntity:**
+
 ```json
 { "type": "code", "offset": 0, "length": 11 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, code, FormattedString } from "@grammyjs/parse-mode";
+import { code, fmt, FormattedString } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${code}inline code${code}`;
 const fromStatic = FormattedString.code("inline code");
@@ -122,6 +129,7 @@ const fromStatic = FormattedString.code("inline code");
 ### Pre-formatted Code Block
 
 **Syntax:**
+
 ````
 ```
 pre-formatted code
@@ -129,13 +137,15 @@ pre-formatted code
 ````
 
 **MessageEntity:**
+
 ```json
 { "type": "pre", "offset": 0, "length": 18 }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, pre, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, pre } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
 ```
@@ -149,13 +159,15 @@ const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
 **Syntax:** `[link text](https://example.com)`
 
 **MessageEntity:**
+
 ```json
 { "type": "text_link", "offset": 0, "length": 9, "url": "https://example.com" }
 ```
 
 **FormattedString Usage:**
+
 ```typescript
-import { fmt, link, FormattedString } from "@grammyjs/parse-mode";
+import { fmt, FormattedString, link } from "@grammyjs/parse-mode";
 
 const fromFmt = fmt`${link("https://example.com")}link text${link}`;
 const fromStatic = FormattedString.link("link text", "https://example.com");
@@ -169,11 +181,18 @@ const fromAlias = FormattedString.a("link text", "https://example.com"); // alia
 **Syntax:** `[user name](tg://user?id=123456789)`
 
 **MessageEntity:**
+
 ```json
-{ "type": "text_link", "offset": 0, "length": 9, "url": "tg://user?id=123456789" }
+{
+  "type": "text_link",
+  "offset": 0,
+  "length": 9,
+  "url": "tg://user?id=123456789"
+}
 ```
 
 **FormattedString Usage:**
+
 ```typescript
 import { FormattedString, mentionUser } from "@grammyjs/parse-mode";
 
@@ -193,6 +212,7 @@ Legacy Markdown has **very limited nesting support**:
 - Combining `*` and `_` in complex ways often leads to parsing errors
 
 **Example of problematic syntax:**
+
 ```
 *_bold italic_* ← May not parse correctly
 ```
@@ -219,18 +239,19 @@ The legacy parser can be finicky about special characters:
 
 If you're using legacy Markdown, here's how to migrate:
 
-| Legacy Markdown | MarkdownV2 | Notes |
-|-----------------|------------|-------|
-| `*bold*` | `*bold*` | Same syntax |
-| `_italic_` | `_italic_` | Same syntax |
-| `` `code` `` | `` `code` `` | Same syntax |
-| ` ```pre``` ` | ` ```pre``` ` | Same syntax |
-| `[text](url)` | `[text](url)` | Same syntax |
-| N/A | `__underline__` | New in MarkdownV2 |
-| N/A | `~strikethrough~` | New in MarkdownV2 |
-| N/A | `\|\|spoiler\|\|` | New in MarkdownV2 |
+| Legacy Markdown | MarkdownV2        | Notes             |
+| --------------- | ----------------- | ----------------- |
+| `*bold*`        | `*bold*`          | Same syntax       |
+| `_italic_`      | `_italic_`        | Same syntax       |
+| `` `code` ``    | `` `code` ``      | Same syntax       |
+| `` ```pre``` `` | `` ```pre``` ``   | Same syntax       |
+| `[text](url)`   | `[text](url)`     | Same syntax       |
+| N/A             | `__underline__`   | New in MarkdownV2 |
+| N/A             | `~strikethrough~` | New in MarkdownV2 |
+| N/A             | `\|\|spoiler\|\|` | New in MarkdownV2 |
 
 **Key difference:** MarkdownV2 requires escaping more special characters:
+
 ```
 _ * [ ] ( ) ~ ` > # + - = | { } . ! \
 ```
@@ -242,7 +263,7 @@ _ * [ ] ( ) ~ ` > # + - = | { } . ! \
 The best approach is to use `FormattedString` and entity tags from this library. This completely avoids parsing issues because you're working with `MessageEntity` objects directly:
 
 ```typescript
-import { fmt, bold, italic, code, link } from "@grammyjs/parse-mode";
+import { bold, code, fmt, italic, link } from "@grammyjs/parse-mode";
 
 // Build formatted text using entity tags
 const message = fmt`
@@ -256,6 +277,7 @@ await ctx.reply(message.text, { entities: message.entities });
 ```
 
 This approach:
+
 - Works consistently regardless of special characters in your text
 - Supports all formatting types (including those not in legacy Markdown)
 - Eliminates escaping headaches
