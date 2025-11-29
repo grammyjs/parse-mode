@@ -10,9 +10,6 @@ function buildFormatter<T extends Array<unknown> = never>(
   ...formatArgKeys: T
 ): (...formatArgs: T) => EntityTag {
   return (...formatArgs) => {
-    if (type === "pre") {
-      console.log(formatArgs);
-    }
     const formatArgObj = Object.fromEntries(
       formatArgKeys.map((formatArgKey, i) => [formatArgKey, formatArgs[i]]),
     );
