@@ -23,18 +23,18 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 
 | Syntax | MessageEntity Type | FormattedString Method |
 |--------|-------------------|----------------------|
-| `*bold*` | `bold` | `FormattedString.bold()` or `fmt\`${bold}...\`` |
-| `_italic_` | `italic` | `FormattedString.italic()` or `fmt\`${italic}...\`` |
-| `__underline__` | `underline` | `FormattedString.underline()` or `fmt\`${underline}...\`` |
-| `~strikethrough~` | `strikethrough` | `FormattedString.strikethrough()` or `fmt\`${strikethrough}...\`` |
-| `\|\|spoiler\|\|` | `spoiler` | `FormattedString.spoiler()` or `fmt\`${spoiler}...\`` |
-| `` `code` `` | `code` | `FormattedString.code()` or `fmt\`${code}...\`` |
-| ` ```pre``` ` | `pre` | `FormattedString.pre()` or `fmt\`${pre()}...\`` |
+| `*bold*` | `bold` | `FormattedString.bold()` |
+| `_italic_` | `italic` | `FormattedString.italic()` |
+| `__underline__` | `underline` | `FormattedString.underline()` |
+| `~strikethrough~` | `strikethrough` | `FormattedString.strikethrough()` |
+| `\|\|spoiler\|\|` | `spoiler` | `FormattedString.spoiler()` |
+| `` `code` `` | `code` | `FormattedString.code()` |
+| ` ```pre``` ` | `pre` | `FormattedString.pre()` |
 | ` ```language\ncode``` ` | `pre` (with `language`) | `FormattedString.pre(text, "language")` |
-| `[text](url)` | `text_link` | `FormattedString.link(text, url)` or `fmt\`${link(url)}...\`` |
+| `[text](url)` | `text_link` | `FormattedString.link(text, url)` |
 | `[text](tg://user?id=123)` | `text_link` | `FormattedString.mentionUser(text, userId)` |
 | `![emoji](tg://emoji?id=123)` | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
-| `>blockquote` | `blockquote` | `FormattedString.blockquote()` or `fmt\`${blockquote}...\`` |
+| `>blockquote` | `blockquote` | `FormattedString.blockquote()` |
 | `**>expandable...\|\|` | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
 
 ---
