@@ -26,14 +26,14 @@ Use `\` to escape these characters when you want them as literal text.
 
 ## Entity Reference
 
-| Syntax | Example | MessageEntity Type | FormattedString Method |
-|--------|---------|-------------------|----------------------|
-| `*bold*` | *bold* | `bold` | `FormattedString.bold()` or `fmt\`${bold}...\`` |
-| `_italic_` | _italic_ | `italic` | `FormattedString.italic()` or `fmt\`${italic}...\`` |
-| `` `code` `` | `code` | `code` | `FormattedString.code()` or `fmt\`${code}...\`` |
-| ` ```pre``` ` | pre block | `pre` | `FormattedString.pre()` or `fmt\`${pre()}...\`` |
-| `[text](url)` | [link](url) | `text_link` | `FormattedString.link(text, url)` |
-| `[text](tg://user?id=123)` | user mention | `text_link` | `FormattedString.mentionUser(text, userId)` |
+| Syntax | MessageEntity Type | FormattedString Method |
+|--------|-------------------|----------------------|
+| `*bold*` | `bold` | `FormattedString.bold()` |
+| `_italic_` | `italic` | `FormattedString.italic()` |
+| `` `code` `` | `code` | `FormattedString.code()` |
+| ` ```pre``` ` | `pre` | `FormattedString.pre()` |
+| `[text](url)` | `text_link` | `FormattedString.link(text, url)` |
+| `[text](tg://user?id=123)` | `text_link` | `FormattedString.mentionUser(text, userId)` |
 
 ### Not Supported in Legacy Markdown
 

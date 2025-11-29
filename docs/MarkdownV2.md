@@ -21,21 +21,21 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 
 ## Entity Reference
 
-| Syntax | Example | MessageEntity Type | FormattedString Method |
-|--------|---------|-------------------|----------------------|
-| `*bold*` | *bold* | `bold` | `FormattedString.bold()` or `fmt\`${bold}...\`` |
-| `_italic_` | _italic_ | `italic` | `FormattedString.italic()` or `fmt\`${italic}...\`` |
-| `__underline__` | underline | `underline` | `FormattedString.underline()` or `fmt\`${underline}...\`` |
-| `~strikethrough~` | ~~strikethrough~~ | `strikethrough` | `FormattedString.strikethrough()` or `fmt\`${strikethrough}...\`` |
-| `\|\|spoiler\|\|` | spoiler | `spoiler` | `FormattedString.spoiler()` or `fmt\`${spoiler}...\`` |
-| `` `code` `` | `code` | `code` | `FormattedString.code()` or `fmt\`${code}...\`` |
-| ` ```pre``` ` | pre block | `pre` | `FormattedString.pre()` or `fmt\`${pre()}...\`` |
-| ` ```language\ncode``` ` | code block | `pre` (with `language`) | `FormattedString.pre(text, "language")` |
-| `[text](url)` | [link](url) | `text_link` | `FormattedString.link(text, url)` or `fmt\`${link(url)}...\`` |
-| `[text](tg://user?id=123)` | user mention | `text_link` | `FormattedString.mentionUser(text, userId)` |
-| `![emoji](tg://emoji?id=123)` | custom emoji | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
-| `>blockquote` | blockquote | `blockquote` | `FormattedString.blockquote()` or `fmt\`${blockquote}...\`` |
-| `**>expandable...||` | expandable blockquote | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
+| Syntax | MessageEntity Type | FormattedString Method |
+|--------|-------------------|----------------------|
+| `*bold*` | `bold` | `FormattedString.bold()` |
+| `_italic_` | `italic` | `FormattedString.italic()` |
+| `__underline__` | `underline` | `FormattedString.underline()` |
+| `~strikethrough~` | `strikethrough` | `FormattedString.strikethrough()` |
+| `\|\|spoiler\|\|` | `spoiler` | `FormattedString.spoiler()` |
+| `` `code` `` | `code` | `FormattedString.code()` |
+| ` ```pre``` ` | `pre` | `FormattedString.pre()` |
+| ` ```language\ncode``` ` | `pre` (with `language`) | `FormattedString.pre(text, "language")` |
+| `[text](url)` | `text_link` | `FormattedString.link(text, url)` |
+| `[text](tg://user?id=123)` | `text_link` | `FormattedString.mentionUser(text, userId)` |
+| `![emoji](tg://emoji?id=123)` | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
+| `>blockquote` | `blockquote` | `FormattedString.blockquote()` |
+| `**>expandable...\|\|` | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
 
 ---
 
