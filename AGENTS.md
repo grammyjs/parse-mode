@@ -169,6 +169,7 @@ GitHub Actions runs these checks on all PRs:
 ```yaml
 - deno lint # Linting
 - deno fmt --check # Formatting
+- deno task check # Type-checking
 - deno test --allow-import test # Tests
 ```
 

@@ -163,7 +163,7 @@ GitHub Actions validates all PRs:
 
 ```yaml
 matrix:
-  testType: ["lint", "fmt", "test"]
+  testType: ["lint", "fmt", "check", "test"]
 ```
 
 Match CI locally with `deno task ok`.
