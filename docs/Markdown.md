@@ -67,13 +67,13 @@ The following formatting options are **NOT available** in legacy Markdown mode:
 import { fmt, bold, FormattedString } from "@grammyjs/parse-mode";
 
 // Using entity tag
-const result = fmt`${bold}bold text${bold}`;
+const fromFmt = fmt`${bold}bold text${bold}`;
 
 // Using static method
-const result = FormattedString.bold("bold text");
+const fromStatic = FormattedString.bold("bold text");
 
-// Using instance method
-const result = FormattedString.b("bold text"); // alias
+// Using static method (alias)
+const fromAlias = FormattedString.b("bold text");
 ```
 
 ---
@@ -91,9 +91,9 @@ const result = FormattedString.b("bold text"); // alias
 ```typescript
 import { fmt, italic, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${italic}italic text${italic}`;
-const result = FormattedString.italic("italic text");
-const result = FormattedString.i("italic text"); // alias
+const fromFmt = fmt`${italic}italic text${italic}`;
+const fromStatic = FormattedString.italic("italic text");
+const fromAlias = FormattedString.i("italic text"); // alias
 ```
 
 ---
@@ -111,8 +111,8 @@ const result = FormattedString.i("italic text"); // alias
 ```typescript
 import { fmt, code, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${code}inline code${code}`;
-const result = FormattedString.code("inline code");
+const fromFmt = fmt`${code}inline code${code}`;
+const fromStatic = FormattedString.code("inline code");
 ```
 
 > **Note:** Code entities cannot be combined with other formatting.
@@ -137,7 +137,7 @@ pre-formatted code
 ```typescript
 import { fmt, pre, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${pre()}pre-formatted code${pre}`;
+const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
 ```
 
 > **Note:** Legacy Markdown does **not** support language specification in code blocks. Use MarkdownV2 or HTML if you need syntax highlighting.
@@ -157,9 +157,9 @@ const result = fmt`${pre()}pre-formatted code${pre}`;
 ```typescript
 import { fmt, link, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${link("https://example.com")}link text${link}`;
-const result = FormattedString.link("link text", "https://example.com");
-const result = FormattedString.a("link text", "https://example.com"); // alias
+const fromFmt = fmt`${link("https://example.com")}link text${link}`;
+const fromStatic = FormattedString.link("link text", "https://example.com");
+const fromAlias = FormattedString.a("link text", "https://example.com"); // alias
 ```
 
 ---
@@ -177,8 +177,8 @@ const result = FormattedString.a("link text", "https://example.com"); // alias
 ```typescript
 import { FormattedString, mentionUser } from "@grammyjs/parse-mode";
 
-const result = mentionUser("user name", 123456789);
-const result = FormattedString.mentionUser("user name", 123456789);
+const fromFunc = mentionUser("user name", 123456789);
+const fromStatic = FormattedString.mentionUser("user name", 123456789);
 ```
 
 ---

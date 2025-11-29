@@ -35,7 +35,7 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 | `[text](tg://user?id=123)` | user mention | `text_link` | `FormattedString.mentionUser(text, userId)` |
 | `![emoji](tg://emoji?id=123)` | custom emoji | `custom_emoji` | `FormattedString.emoji(text, emojiId)` |
 | `>blockquote` | blockquote | `blockquote` | `FormattedString.blockquote()` or `fmt\`${blockquote}...\`` |
-| `**>expandable` | expandable blockquote | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
+| `**>expandable...||` | expandable blockquote | `expandable_blockquote` | `FormattedString.expandableBlockquote()` |
 
 ---
 
@@ -55,13 +55,13 @@ Inside inline link URLs `(...)`, only `)` and `\` need escaping.
 import { fmt, bold, FormattedString } from "@grammyjs/parse-mode";
 
 // Using entity tag
-const result = fmt`${bold}bold text${bold}`;
+const fromFmt = fmt`${bold}bold text${bold}`;
 
 // Using static method
-const result = FormattedString.bold("bold text");
+const fromStatic = FormattedString.bold("bold text");
 
 // Using instance method
-const result = new FormattedString("").bold("bold text");
+const fromInstance = new FormattedString("").bold("bold text");
 ```
 
 ---
@@ -79,8 +79,8 @@ const result = new FormattedString("").bold("bold text");
 ```typescript
 import { fmt, italic, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${italic}italic text${italic}`;
-const result = FormattedString.italic("italic text");
+const fromFmt = fmt`${italic}italic text${italic}`;
+const fromStatic = FormattedString.italic("italic text");
 ```
 
 ---
@@ -98,8 +98,8 @@ const result = FormattedString.italic("italic text");
 ```typescript
 import { fmt, underline, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${underline}underline text${underline}`;
-const result = FormattedString.underline("underline text");
+const fromFmt = fmt`${underline}underline text${underline}`;
+const fromStatic = FormattedString.underline("underline text");
 ```
 
 ---
@@ -117,8 +117,8 @@ const result = FormattedString.underline("underline text");
 ```typescript
 import { fmt, strikethrough, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${strikethrough}strikethrough text${strikethrough}`;
-const result = FormattedString.strikethrough("strikethrough text");
+const fromFmt = fmt`${strikethrough}strikethrough text${strikethrough}`;
+const fromStatic = FormattedString.strikethrough("strikethrough text");
 ```
 
 ---
@@ -136,8 +136,8 @@ const result = FormattedString.strikethrough("strikethrough text");
 ```typescript
 import { fmt, spoiler, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${spoiler}spoiler text${spoiler}`;
-const result = FormattedString.spoiler("spoiler text");
+const fromFmt = fmt`${spoiler}spoiler text${spoiler}`;
+const fromStatic = FormattedString.spoiler("spoiler text");
 ```
 
 ---
@@ -155,8 +155,8 @@ const result = FormattedString.spoiler("spoiler text");
 ```typescript
 import { fmt, code, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${code}inline code${code}`;
-const result = FormattedString.code("inline code");
+const fromFmt = fmt`${code}inline code${code}`;
+const fromStatic = FormattedString.code("inline code");
 ```
 
 > **Note:** Code entities cannot be combined with other formatting (bold, italic, etc.).
@@ -190,11 +190,11 @@ print("Hello")
 import { fmt, pre, FormattedString } from "@grammyjs/parse-mode";
 
 // Without language
-const result = fmt`${pre()}pre-formatted code${pre}`;
+const fromFmt = fmt`${pre()}pre-formatted code${pre}`;
 
 // With language
-const result = fmt`${pre("python")}print("Hello")${pre}`;
-const result = FormattedString.pre('print("Hello")', "python");
+const fromFmtLang = fmt`${pre("python")}print("Hello")${pre}`;
+const fromStatic = FormattedString.pre('print("Hello")', "python");
 ```
 
 > **Note:** Pre entities cannot be combined with other formatting.
@@ -214,8 +214,8 @@ const result = FormattedString.pre('print("Hello")', "python");
 ```typescript
 import { fmt, link, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${link("https://example.com")}link text${link}`;
-const result = FormattedString.link("link text", "https://example.com");
+const fromFmt = fmt`${link("https://example.com")}link text${link}`;
+const fromStatic = FormattedString.link("link text", "https://example.com");
 ```
 
 ---
@@ -233,8 +233,8 @@ const result = FormattedString.link("link text", "https://example.com");
 ```typescript
 import { FormattedString, mentionUser } from "@grammyjs/parse-mode";
 
-const result = mentionUser("user name", 123456789);
-const result = FormattedString.mentionUser("user name", 123456789);
+const fromFunc = mentionUser("user name", 123456789);
+const fromStatic = FormattedString.mentionUser("user name", 123456789);
 ```
 
 ---
@@ -252,8 +252,8 @@ const result = FormattedString.mentionUser("user name", 123456789);
 ```typescript
 import { fmt, emoji, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${emoji("5368324170671202286")}👍${emoji}`;
-const result = FormattedString.emoji("👍", "5368324170671202286");
+const fromFmt = fmt`${emoji("5368324170671202286")}👍${emoji}`;
+const fromStatic = FormattedString.emoji("👍", "5368324170671202286");
 ```
 
 ---
@@ -275,8 +275,8 @@ const result = FormattedString.emoji("👍", "5368324170671202286");
 ```typescript
 import { fmt, blockquote, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${blockquote}Block quotation text${blockquote}`;
-const result = FormattedString.blockquote("Block quotation text");
+const fromFmt = fmt`${blockquote}Block quotation text${blockquote}`;
+const fromStatic = FormattedString.blockquote("Block quotation text");
 ```
 
 ---
@@ -292,15 +292,15 @@ const result = FormattedString.blockquote("Block quotation text");
 
 **MessageEntity:**
 ```json
-{ "type": "expandable_blockquote", "offset": 0, "length": 80 }
+{ "type": "expandable_blockquote", "offset": 0, "length": 108 }
 ```
 
 **FormattedString Usage:**
 ```typescript
 import { fmt, expandableBlockquote, FormattedString } from "@grammyjs/parse-mode";
 
-const result = fmt`${expandableBlockquote}Expandable quotation${expandableBlockquote}`;
-const result = FormattedString.expandableBlockquote("Expandable quotation");
+const fromFmt = fmt`${expandableBlockquote}Expandable quotation${expandableBlockquote}`;
+const fromStatic = FormattedString.expandableBlockquote("Expandable quotation");
 ```
 
 ---
@@ -319,7 +319,7 @@ MarkdownV2 supports limited nesting of entities:
 import { fmt, bold, italic } from "@grammyjs/parse-mode";
 
 // Bold italic text
-const result = fmt`${bold}${italic}bold and italic${italic}${bold}`;
+const boldItalic = fmt`${bold}${italic}bold and italic${italic}${bold}`;
 ```
 
 **MarkdownV2 equivalent:** `*_bold and italic_*`
