@@ -24,13 +24,13 @@ All other HTML entities (numeric or named) are supported.
 
 | HTML Tag | MessageEntity Type | FormattedString Method |
 |----------|-------------------|----------------------|
-| `<b>`, `<strong>` | `bold` | `FormattedString.bold()` or `fmt\`${bold}...\`` |
-| `<i>`, `<em>` | `italic` | `FormattedString.italic()` or `fmt\`${italic}...\`` |
-| `<u>`, `<ins>` | `underline` | `FormattedString.underline()` or `fmt\`${underline}...\`` |
-| `<s>`, `<strike>`, `<del>` | `strikethrough` | `FormattedString.strikethrough()` or `fmt\`${strikethrough}...\`` |
-| `<span class="tg-spoiler">`, `<tg-spoiler>` | `spoiler` | `FormattedString.spoiler()` or `fmt\`${spoiler}...\`` |
-| `<code>` | `code` | `FormattedString.code()` or `fmt\`${code}...\`` |
-| `<pre>` | `pre` | `FormattedString.pre()` or `fmt\`${pre()}...\`` |
+| `<b>`, `<strong>` | `bold` | `FormattedString.bold()` |
+| `<i>`, `<em>` | `italic` | `FormattedString.italic()` |
+| `<u>`, `<ins>` | `underline` | `FormattedString.underline()` |
+| `<s>`, `<strike>`, `<del>` | `strikethrough` | `FormattedString.strikethrough()` |
+| `<span class="tg-spoiler">`, `<tg-spoiler>` | `spoiler` | `FormattedString.spoiler()` |
+| `<code>` | `code` | `FormattedString.code()` |
+| `<pre>` | `pre` | `FormattedString.pre()` |
 | `<pre><code class="language-xxx">` | `pre` (with `language`) | `FormattedString.pre(text, "xxx")` |
 | `<a href="url">` | `text_link` | `FormattedString.link(text, url)` |
 | `<a href="tg://user?id=123">` | `text_link` | `FormattedString.mentionUser(text, userId)` |
