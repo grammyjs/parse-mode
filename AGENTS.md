@@ -1,53 +1,192 @@
 # Agent Guide for @grammyjs/parse-mode
 
-This guide defines expectations for automation and maintainers contributing to this repository while respecting Deno-centric workflows and the grammY ecosystem.
+This guide defines expectations for AI agents (Codex, Copilot, etc.) and maintainers contributing to this repository while respecting Deno-centric workflows and the grammY ecosystem.
 
 ## Quick Facts
 
-- Target runtimes: Deno (primary) and Node.js via [deno.jsonc](deno.jsonc:4) tasks and CommonJS output configured in [tsconfig.json](tsconfig.json:12).
-- Primary entry point: [src/mod.ts](src/mod.ts:1) re-exports the formatting surface from [src/format.ts](src/format.ts:1).
-- Types originate from [src/deps.deno.ts](src/deps.deno.ts:1) and mirror Node bindings via [src/deps.node.ts](src/deps.node.ts:1).
-- TypeScript compiler settings enforce strict mode and consistent casing through [tsconfig.json](tsconfig.json:3).
-- Canonical workflows are encapsulated in [deno.jsonc](deno.jsonc:4); run tasks instead of ad-hoc commands to preserve parity between Deno and Node artifacts.
+| Aspect                | Details                                               |
+| --------------------- | ----------------------------------------------------- |
+| **Primary runtime**   | Deno (write code for Deno first)                      |
+| **Secondary runtime** | Node.js (via deno2node transpilation)                 |
+| **Entry point**       | `src/mod.ts` → re-exports from `src/format.ts`        |
+| **Dependencies**      | `src/deps.deno.ts` (Deno) / `src/deps.node.ts` (Node) |
+| **Build tool**        | [deno2node](https://github.com/wojpawlik/deno2node)   |
+| **Output directory**  | `dist/` (CommonJS for npm)                            |
+| **Task runner**       | `deno task` commands in `deno.jsonc`                  |
+
+## Project Structure
+
+```
+src/
+├── mod.ts          # Public entry point (re-exports format.ts)
+├── format.ts       # Core formatting logic, FormattedString class
+├── util.ts         # Internal utilities (entity consolidation, etc.)
+├── deps.deno.ts    # Deno dependencies (grammy types from deno.land)
+└── deps.node.ts    # Node dependencies (grammy types from npm)
+test/
+├── deps.test.ts    # Test dependencies
+├── format.*.test.ts # Format function tests
+└── util.*.test.ts   # Utility function tests
+```
+
+## deno2node Compatibility Patterns
+
+This project uses **deno2node** to transpile Deno code for Node.js. Follow these patterns used across grammY plugins:
+
+### Dependency Files Pattern
+
+```typescript
+// src/deps.deno.ts - Deno imports (URL-based)
+export type {
+  MessageEntity,
+  User,
+} from "https://lib.deno.dev/x/grammy@^1.36/types.ts";
+
+// src/deps.node.ts - Node imports (npm package)
+export type { MessageEntity, User } from "grammy/types";
+```
+
+**Key rules:**
+
+- Always import from `./deps.deno.ts` in source files (deno2node rewrites to `.node.ts`)
+- Keep both files in sync with identical exports
+- Use `type` imports when only importing types
+
+### Runtime-Specific Code Pattern
+
+When you need different implementations for Deno vs Node:
+
+```typescript
+// feature.deno.ts - Deno-specific implementation
+export function doSomething() {/* uses Deno APIs */}
+
+// feature.node.ts - Node-specific implementation
+export function doSomething() {/* uses Node APIs */}
+
+// consumer.ts - imports the Deno version
+import { doSomething } from "./feature.deno.ts";
+// deno2node rewrites this to "./feature.node.ts" for Node builds
+```
+
+### Avoiding Deno-Only Globals
+
+- ❌ Do NOT use `Deno.*` APIs in shared code
+- ❌ Do NOT use `import.meta.url` for file paths without shimming
+- ✅ Use web-standard APIs (`fetch`, `crypto`, `URL`, etc.)
+- ✅ Use `node:` prefix for Node built-ins if absolutely needed
+
+## Development Commands
+
+Always use `deno task` commands instead of raw Deno commands:
+
+```bash
+deno task ok      # Format + lint + test + type-check (CI equivalent)
+deno task test    # Run tests only
+deno task check   # Type-check only
+deno task build   # Generate Node.js artifacts in dist/
+deno task clean   # Remove generated files
+```
 
 ## Agent Workflow
 
-1. Review high-level usage examples in [README.md](README.md:12) and [src/README.md](src/README.md:12) before modifying public APIs so samples remain accurate.
-2. Use `deno task check`, `deno task test`, and `deno task ok` defined in [deno.jsonc](deno.jsonc:4) to validate code instead of invoking Deno subcommands manually.
-3. Prefer incremental edits within `src/` to maintain shared exports in [src/mod.ts](src/mod.ts:1); never bypass helper factories in [src/format.ts](src/format.ts:943).
-4. Synchronize documentation after behavior changes by updating both READMEs and relevant JSDoc in [src/format.ts](src/format.ts:147).
-5. When adjusting distribution settings or introducing new exports, regenerate Node artifacts via `deno task build` as scripted in [deno.jsonc](deno.jsonc:5) and confirm `npm run build` delegates to the same pipeline in [package.json](package.json:22).
+1. **Before modifying APIs**: Review examples in `README.md` and `src/README.md`
+2. **Validate changes**: Run `deno task ok` before committing
+3. **Maintain exports**: Update `src/mod.ts` if adding new public APIs
+4. **Sync documentation**: Update both README files and JSDoc together
+5. **Test Node build**: Run `deno task build` for API changes
 
-## Deno Runtime Practices
+## Testing Conventions
 
-- Execute linting, formatting, testing, and cache validation through `deno task ok` in [deno.jsonc](deno.jsonc:7) to match CI expectations.
-- Use the repository-wide formatting configuration (`proseWrap`) from [deno.jsonc](deno.jsonc:18) when editing Markdown or documentation snippets.
-- Avoid committing generated artifacts (`dist/`, coverage output) excluded in [deno.jsonc](deno.jsonc:12); regenerate them locally when verification is required.
+### Test File Organization
 
-## Testing Strategy
+```typescript
+// test/format.featurename.test.ts
+import { assertEquals, describe, it } from "./deps.test.ts";
+import { FormattedString } from "../src/format.ts";
+import type { MessageEntity } from "../src/deps.deno.ts";
 
-1. Group new specs under descriptive `describe` blocks following patterns in [test/format.utility.test.ts](test/format.utility.test.ts:5) and [test/util.consolidateEntities.test.ts](test/util.consolidateEntities.test.ts:5).
-2. Extend chaining coverage using fluent combinations similar to those in [test/format.utility.test.ts](test/format.utility.test.ts:40) when introducing new helpers or modifier interactions.
-3. Update entity-focused scenarios in [test/util.consolidateEntities.test.ts](test/util.consolidateEntities.test.ts:147) whenever consolidation logic evolves, ensuring ordering remains stable.
-4. Run `deno task test` from [deno.jsonc](deno.jsonc:6) before submission; add regression cases that assert both text and entity offsets wherever bugs previously occurred.
+describe("FormattedString - Feature Name", () => {
+  describe("Subfeature", () => {
+    it("should do something specific", () => {
+      // Arrange
+      const input = new FormattedString("text", []);
+
+      // Act
+      const result = input.someMethod();
+
+      // Assert
+      assertEquals(result.rawText, "expected");
+      assertEquals(result.rawEntities.length, 1);
+    });
+  });
+});
+```
+
+### Test Naming Patterns
+
+- Group by feature: `format.bold.test.ts`, `format.italic.test.ts`
+- Use `describe` blocks for logical grouping
+- Test entity offsets and lengths explicitly (critical for this library)
+- Include edge cases: empty strings, overlapping entities, boundary conditions
 
 ## Documentation Expectations
 
-1. Mirror API documentation and examples between [README.md](README.md:12) and [src/README.md](src/README.md:12); maintain consistent import signatures and sample outputs.
-2. Extend inline JSDoc alongside definitions in [src/format.ts](src/format.ts:147) and supporting utilities in [src/util.ts](src/util.ts:1) whenever behavior changes or new helpers are added.
-3. Provide additional guidance or caveats surfaced by warnings (for example, channel ID validation) directly in user-facing docs to reduce reliance on runtime console messages.
-4. Preserve the prose formatting conventions defined in [deno.jsonc](deno.jsonc:18) so automated `deno fmt` runs remain noise-free.
+1. **README.md** and **src/README.md** must stay synchronized
+2. Add JSDoc to all public exports in `src/format.ts`
+3. Include usage examples in JSDoc for complex APIs
+4. Run `deno fmt` to maintain consistent prose formatting
 
 ## Distribution and Release
 
-- The Node build path relies on `deno task build` in [deno.jsonc](deno.jsonc:5) and the CommonJS configuration in [tsconfig.json](tsconfig.json:12); avoid Deno-only globals in exported code.
-- `npm run build` bridges to the same pipeline via `deno2node` in [package.json](package.json:22); execute it when exported APIs change to confirm TypeScript declaration output.
-- Do not commit `dist/` artifacts or coverage reports; ensure `.gitignore` and clean tasks in [deno.jsonc](deno.jsonc:8) stay untouched unless the distribution strategy changes.
-- Coordinate version bumps with documentation updates and changelog notes (if introduced) so publishable metadata in [package.json](package.json:3) matches Deno usage guidance.
+### Build Process
+
+```bash
+# Transpile Deno → Node.js CommonJS
+deno task build
+
+# Equivalent npm command (delegates to deno2node)
+npm run build
+```
+
+### Generated Files (Do NOT Commit)
+
+- `dist/` - Node.js build output
+- `coverage.lcov` - Coverage reports
+- `test/cov_profile/` - Coverage data
+
+### Version Updates
+
+Coordinate changes across:
+
+- `package.json` version field
+- README documentation
+- JSDoc version annotations (if any)
+
+## CI/CD Expectations
+
+GitHub Actions runs these checks on all PRs:
+
+```yaml
+- deno lint # Linting
+- deno fmt --check # Formatting
+- deno test --allow-import test # Tests
+```
+
+Always run `deno task ok` locally before pushing.
+
+## Common Pitfalls
+
+| Issue                           | Solution                                                  |
+| ------------------------------- | --------------------------------------------------------- |
+| Import not found in Node build  | Ensure `deps.node.ts` exports the same symbols            |
+| Test fails only on CI           | Check `--allow-import` flag; run `deno task test` locally |
+| Format changes on commit        | Run `deno fmt` before committing                          |
+| Type errors after grammy update | Update both `deps.deno.ts` and `deps.node.ts`             |
 
 ## Automation Checklist
 
-- [ ] Run `deno task ok` to cover formatting, linting, tests, and type-checking per [deno.jsonc](deno.jsonc:7).
-- [ ] Execute `deno task build` for API or distribution changes to validate Node artifacts in [package.json](package.json:22).
-- [ ] Update both READMEs and relevant JSDoc comments whenever surface APIs or examples shift ([README.md](README.md:12), [src/README.md](src/README.md:12), [src/format.ts](src/format.ts:147)).
-- [ ] Confirm no unintended files are generated under excluded paths listed in [deno.jsonc](deno.jsonc:12).
+- [ ] Run `deno task ok` (format + lint + test + check)
+- [ ] Run `deno task build` if changing public APIs
+- [ ] Update `README.md` and `src/README.md` for API changes
+- [ ] Add/update JSDoc for new or modified exports
+- [ ] Ensure both `deps.deno.ts` and `deps.node.ts` stay in sync
