@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        testType: ["lint", "fmt", "test"]
+        testType: ["lint", "fmt", "check", "test"]
 
     steps:
       - name: Checkout code
@@ -29,6 +29,10 @@ jobs:
       - name: Check formatting
         run: deno fmt --check
         if: matrix.testType == 'fmt'
+
+      - name: Type check
+        run: deno task check
+        if: matrix.testType == 'check'
 
       - name: Run tests
         run: deno test --allow-import test
