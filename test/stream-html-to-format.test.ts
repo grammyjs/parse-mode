@@ -131,6 +131,86 @@ describe("HTMLStreamParser", () => {
     assertEquals(formatted.rawEntities[0]?.length, "spoiler & text".length);
   });
 
+  it("evaluates contiguous opening brackets as plain text", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<<b");
+    parser.add(">bold</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<bold");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 1);
+    assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
+  it("flushes partial open tag and restarts on <: <b<b>bold</b>", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<b<b>bold</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<bbold");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 2);
+    assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
+  it("flushes partial open tag across stream boundary: <b then <b>bold</b>", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<b");
+    parser.add("<b>bold</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<bbold");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 2);
+    assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
+  it("flushes partial open tag for different tags: <i<b>bold</b>", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<i<b>bold</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<ibold");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 2);
+    assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
+  it("flushes partial close tag and restarts on <: <b>bold</</b>", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<b>bold</</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "bold</");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 0);
+    assertEquals(formatted.rawEntities[0]?.length, 6);
+  });
+
+  it("flushes partial close tag mid-name: <b>bold</b<b>more</b>", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<b>bold</b<b>more</b>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "bold</bmore");
+    assertEquals(formatted.rawEntities.length, 1);
+    assertEquals(formatted.rawEntities[0]?.type, "bold");
+    assertEquals(formatted.rawEntities[0]?.offset, 7);
+    assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
   it("toFormattedString is idempotent for unchanged parser state", () => {
     const parser = new HTMLStreamParser();
     parser.add("<i>ok</i>");

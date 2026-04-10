@@ -467,6 +467,17 @@ export class HTMLStreamParser {
   }
 
   private addCharInCloseTagNameMode(char: string): void {
+    // If we encounter another `<`, the current partial close tag was plain text.
+    // Flush it and restart tag detection with this new `<`.
+    if (char === "<") {
+      this.text += this.fullTagOrEntityBufferText;
+      this.fullTagOrEntityBufferText = char;
+      this.workingBufferText = "";
+      this.mode =
+        HTML_STREAM_PARSER_MODE.DECISION_OPEN_TAG_NAME_OR_CLOSE_TAG_NAME;
+      return;
+    }
+
     this.fullTagOrEntityBufferText += char;
 
     const isWhitespaceChar = isWhitespace(char);
@@ -550,6 +561,17 @@ export class HTMLStreamParser {
   }
 
   private addCharInOpenTagNameMode(char: string): void {
+    // If we encounter another `<`, the current partial open tag was plain text.
+    // Flush it and restart tag detection with this new `<`.
+    if (char === "<") {
+      this.text += this.fullTagOrEntityBufferText;
+      this.fullTagOrEntityBufferText = char;
+      this.workingBufferText = "";
+      this.mode =
+        HTML_STREAM_PARSER_MODE.DECISION_OPEN_TAG_NAME_OR_CLOSE_TAG_NAME;
+      return;
+    }
+
     this.fullTagOrEntityBufferText += char;
 
     const isWhitespaceChar = isWhitespace(char);
@@ -705,6 +727,15 @@ export class HTMLStreamParser {
   }
 
   private addCharInDecisionOpenTagNameOrCloseTagNameMode(char: string): void {
+    // If we encounter another `<`, the previous `<` was plain text.
+    // Flush it and restart tag detection with this new `<`.
+    if (char === "<") {
+      this.text += this.fullTagOrEntityBufferText;
+      this.fullTagOrEntityBufferText = char;
+      this.workingBufferText = "";
+      return;
+    }
+
     this.fullTagOrEntityBufferText += char;
 
     if (char === "/") {
