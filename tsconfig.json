@@ -15,7 +15,8 @@
     "target": "es2019"
   },
   "exclude": [
-    "test"
+    "test",
+    "dist"
   ],
   "deno2node": {}
 }

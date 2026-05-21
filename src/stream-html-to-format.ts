@@ -20,12 +20,19 @@ export const supportedTags = [
   "code",
   "pre",
   "blockquote",
+  "tg-time",
 ];
 export const supportedTagsSet: Set<string> = new Set(supportedTags);
 
 export const supportedBareAttributes = ["expandable"];
 export const supportedBareAttributesSet = new Set(supportedBareAttributes);
-export const supportedValuedAttributes = ["class", "href", "emoji-id"];
+export const supportedValuedAttributes = [
+  "class",
+  "href",
+  "emoji-id",
+  "unix",
+  "format",
+];
 export const supportedValuedAttributesSet = new Set(supportedValuedAttributes);
 export const supportedAttributes = [
   ...supportedBareAttributes,
@@ -36,6 +43,7 @@ export const tagsToRequiredAttributes = new Map<string, string[]>([
   ["a", ["href"]],
   ["span", ["class"]],
   ["tg-emoji", ["emoji-id"]],
+  ["tg-time", ["unix"]],
 ]);
 
 export const languageClassPrefix = "language-";
@@ -249,6 +257,13 @@ export class HTMLStreamParser {
       }
     }
 
+    if (workingTag.name === "tg-time") {
+      const unixAttr = workingTag.attrs.get("unix");
+      if (!unixAttr || isNaN(parseInt(unixAttr, 10))) {
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -329,6 +344,26 @@ export class HTMLStreamParser {
           };
         }
         return { type: "blockquote", offset: openTag.offset, length };
+      case "tg-time": {
+        const unixAttr = openTag.attrs.get("unix");
+        if (!unixAttr) {
+          return undefined;
+        }
+        const unixTime = parseInt(unixAttr, 10);
+        if (isNaN(unixTime)) {
+          return undefined;
+        }
+        const formatAttr = openTag.attrs.get("format");
+        const date_time_format = (formatAttr ??
+          "") as MessageEntity.DateTimeMessageEntity["date_time_format"];
+        return {
+          type: "date_time",
+          offset: openTag.offset,
+          length,
+          unix_time: unixTime,
+          date_time_format,
+        };
+      }
       default:
         return undefined;
     }

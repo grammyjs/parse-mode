@@ -211,6 +211,64 @@ describe("HTMLStreamParser", () => {
     assertEquals(formatted.rawEntities[0]?.length, 4);
   });
 
+  it("maps tg-time to date_time with unix attribute", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1773412200">2026-05-21</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "2026-05-21");
+    assertEquals(formatted.rawEntities.length, 1);
+    const entity = formatted.rawEntities[0];
+    if (!entity || entity.type !== "date_time") {
+      throw new Error("Expected a date_time entity");
+    }
+    assertEquals(entity.offset, 0);
+    assertEquals(entity.length, "2026-05-21".length);
+    assertEquals(entity.unix_time, 1773412200);
+    assertEquals(entity.date_time_format, "");
+  });
+
+  it("maps tg-time to date_time with unix and format attributes", () => {
+    const parser = new HTMLStreamParser();
+    parser.add(
+      '<tg-time unix="1773412200" format="yyyy-MM-dd">2026-05-21</tg-time>',
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "2026-05-21");
+    assertEquals(formatted.rawEntities.length, 1);
+    const entity = formatted.rawEntities[0];
+    if (!entity || entity.type !== "date_time") {
+      throw new Error("Expected a date_time entity");
+    }
+    assertEquals(entity.offset, 0);
+    assertEquals(entity.length, "2026-05-21".length);
+    assertEquals(entity.unix_time, 1773412200);
+    assertEquals(entity.date_time_format, "yyyy-MM-dd");
+  });
+
+  it("does not map invalid tg-time (missing unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<tg-time>invalid</tg-time>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<tg-time>invalid</tg-time>");
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (non-numeric unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="abc">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, '<tg-time unix="abc">invalid</tg-time>');
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
   it("toFormattedString is idempotent for unchanged parser state", () => {
     const parser = new HTMLStreamParser();
     parser.add("<i>ok</i>");
