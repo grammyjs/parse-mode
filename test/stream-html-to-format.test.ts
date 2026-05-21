@@ -233,7 +233,7 @@ describe("HTMLStreamParser", () => {
   it("maps tg-time to date_time with unix and format attributes", () => {
     const parser = new HTMLStreamParser();
     parser.add(
-      '<tg-time unix="1773412200" format="yyyy-MM-dd">2026-05-21</tg-time>',
+      '<tg-time unix="1773412200" format="d">2026-05-21</tg-time>',
     );
 
     const formatted = parser.toFormattedString();
@@ -247,7 +247,7 @@ describe("HTMLStreamParser", () => {
     assertEquals(entity?.offset, 0);
     assertEquals(entity?.length, "2026-05-21".length);
     assertEquals(entity?.unix_time, 1773412200);
-    assertEquals(entity?.date_time_format, "yyyy-MM-dd");
+    assertEquals(entity?.date_time_format, "d");
   });
 
   it("does not map invalid tg-time (missing unix attribute)", () => {
@@ -290,6 +290,35 @@ describe("HTMLStreamParser", () => {
     const formatted = parser.toFormattedString();
 
     assertEquals(formatted.rawText, '<tg-time unix="1e6">invalid</tg-time>');
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (invalid format grammar)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add(
+      '<tg-time unix="1773412200" format="yyyy-MM-dd">invalid</tg-time>',
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      '<tg-time unix="1773412200" format="yyyy-MM-dd">invalid</tg-time>',
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (extremely large non-finite unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    const largeUnix = "9".repeat(310);
+    parser.add(`<tg-time unix="${largeUnix}">invalid</tg-time>`);
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      `<tg-time unix="${largeUnix}">invalid</tg-time>`,
+    );
     assertEquals(formatted.rawEntities.length, 0);
   });
 

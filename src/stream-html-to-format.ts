@@ -262,6 +262,16 @@ export class HTMLStreamParser {
       if (!unixAttr || !/^-?\d+$/.test(unixAttr)) {
         return false;
       }
+      const unixTime = parseInt(unixAttr, 10);
+      if (!Number.isFinite(unixTime)) {
+        return false;
+      }
+      const formatAttr = workingTag.attrs.get("format");
+      if (
+        formatAttr !== undefined && !/^(?:r|w?[dD]?[tT]?)$/.test(formatAttr)
+      ) {
+        return false;
+      }
     }
 
     return true;
@@ -350,7 +360,15 @@ export class HTMLStreamParser {
           return undefined;
         }
         const unixTime = parseInt(unixAttr, 10);
+        if (!Number.isFinite(unixTime)) {
+          return undefined;
+        }
         const formatAttr = openTag.attrs.get("format");
+        if (
+          formatAttr !== undefined && !/^(?:r|w?[dD]?[tT]?)$/.test(formatAttr)
+        ) {
+          return undefined;
+        }
         const date_time_format = (formatAttr ??
           "") as MessageEntity.DateTimeMessageEntity["date_time_format"];
         return {
