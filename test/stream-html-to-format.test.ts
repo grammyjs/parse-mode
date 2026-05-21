@@ -1,4 +1,5 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
+import type { MessageEntity } from "../src/deps.deno.ts";
 import { FormattedString } from "../src/format.ts";
 import { HTMLStreamParser } from "../src/stream-html-to-format.ts";
 
@@ -219,14 +220,14 @@ describe("HTMLStreamParser", () => {
 
     assertEquals(formatted.rawText, "2026-05-21");
     assertEquals(formatted.rawEntities.length, 1);
-    const entity = formatted.rawEntities[0];
-    if (!entity || entity.type !== "date_time") {
-      throw new Error("Expected a date_time entity");
-    }
-    assertEquals(entity.offset, 0);
-    assertEquals(entity.length, "2026-05-21".length);
-    assertEquals(entity.unix_time, 1773412200);
-    assertEquals(entity.date_time_format, "");
+    const entity = formatted.rawEntities[0] as
+      | MessageEntity.DateTimeMessageEntity
+      | undefined;
+    assertEquals(entity?.type, "date_time");
+    assertEquals(entity?.offset, 0);
+    assertEquals(entity?.length, "2026-05-21".length);
+    assertEquals(entity?.unix_time, 1773412200);
+    assertEquals(entity?.date_time_format, "");
   });
 
   it("maps tg-time to date_time with unix and format attributes", () => {
@@ -239,14 +240,14 @@ describe("HTMLStreamParser", () => {
 
     assertEquals(formatted.rawText, "2026-05-21");
     assertEquals(formatted.rawEntities.length, 1);
-    const entity = formatted.rawEntities[0];
-    if (!entity || entity.type !== "date_time") {
-      throw new Error("Expected a date_time entity");
-    }
-    assertEquals(entity.offset, 0);
-    assertEquals(entity.length, "2026-05-21".length);
-    assertEquals(entity.unix_time, 1773412200);
-    assertEquals(entity.date_time_format, "yyyy-MM-dd");
+    const entity = formatted.rawEntities[0] as
+      | MessageEntity.DateTimeMessageEntity
+      | undefined;
+    assertEquals(entity?.type, "date_time");
+    assertEquals(entity?.offset, 0);
+    assertEquals(entity?.length, "2026-05-21".length);
+    assertEquals(entity?.unix_time, 1773412200);
+    assertEquals(entity?.date_time_format, "yyyy-MM-dd");
   });
 
   it("does not map invalid tg-time (missing unix attribute)", () => {
