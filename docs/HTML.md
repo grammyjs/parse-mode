@@ -37,6 +37,7 @@ All other HTML entities (numeric or named) are supported.
 | `<tg-emoji emoji-id="123">`                 | `custom_emoji`          | `FormattedString.emoji(text, emojiId)`      |
 | `<blockquote>`                              | `blockquote`            | `FormattedString.blockquote()`              |
 | `<blockquote expandable>`                   | `expandable_blockquote` | `FormattedString.expandableBlockquote()`    |
+| `<tg-time unix="123" format="d">`           | `date_time`             | `FormattedString.time(text, unix, format)`  |
 
 ---
 
@@ -386,6 +387,41 @@ const fromFmt =
 const fromStatic = FormattedString.expandableBlockquote(
   "Expandable quotation text",
 );
+```
+
+---
+
+### Date Time
+
+**HTML Syntax:**
+
+```html
+<tg-time unix="1773412200">2026-05-21</tg-time>
+<tg-time unix="1773412200" format="d">2026-05-21</tg-time>
+```
+
+**MessageEntity:**
+
+```json
+{
+  "type": "date_time",
+  "offset": 0,
+  "length": 10,
+  "unix_time": 1773412200,
+  "date_time_format": "d"
+}
+```
+
+**FormattedString Usage:**
+
+```typescript
+import { fmt, FormattedString, time } from "@grammyjs/parse-mode";
+
+// Using entity tag
+const fromFmt = fmt`${time(1773412200, "d")}2026-05-21${time}`;
+
+// Using static method
+const fromStatic = FormattedString.time("2026-05-21", 1773412200, "d");
 ```
 
 ---

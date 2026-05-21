@@ -20,12 +20,19 @@ export const supportedTags = [
   "code",
   "pre",
   "blockquote",
+  "tg-time",
 ];
 export const supportedTagsSet: Set<string> = new Set(supportedTags);
 
 export const supportedBareAttributes = ["expandable"];
 export const supportedBareAttributesSet = new Set(supportedBareAttributes);
-export const supportedValuedAttributes = ["class", "href", "emoji-id"];
+export const supportedValuedAttributes = [
+  "class",
+  "href",
+  "emoji-id",
+  "unix",
+  "format",
+];
 export const supportedValuedAttributesSet = new Set(supportedValuedAttributes);
 export const supportedAttributes = [
   ...supportedBareAttributes,
@@ -36,6 +43,7 @@ export const tagsToRequiredAttributes = new Map<string, string[]>([
   ["a", ["href"]],
   ["span", ["class"]],
   ["tg-emoji", ["emoji-id"]],
+  ["tg-time", ["unix"]],
 ]);
 
 export const languageClassPrefix = "language-";
@@ -249,6 +257,23 @@ export class HTMLStreamParser {
       }
     }
 
+    if (workingTag.name === "tg-time") {
+      const unixAttr = workingTag.attrs.get("unix");
+      if (!unixAttr || !/^-?\d+$/.test(unixAttr)) {
+        return false;
+      }
+      const unixTime = parseInt(unixAttr, 10);
+      if (!Number.isFinite(unixTime)) {
+        return false;
+      }
+      const formatAttr = workingTag.attrs.get("format");
+      if (
+        formatAttr !== undefined && !/^(?:r|w?[dD]?[tT]?)$/.test(formatAttr)
+      ) {
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -329,6 +354,31 @@ export class HTMLStreamParser {
           };
         }
         return { type: "blockquote", offset: openTag.offset, length };
+      case "tg-time": {
+        const unixAttr = openTag.attrs.get("unix");
+        if (!unixAttr || !/^-?\d+$/.test(unixAttr)) {
+          return undefined;
+        }
+        const unixTime = parseInt(unixAttr, 10);
+        if (!Number.isFinite(unixTime)) {
+          return undefined;
+        }
+        const formatAttr = openTag.attrs.get("format");
+        if (
+          formatAttr !== undefined && !/^(?:r|w?[dD]?[tT]?)$/.test(formatAttr)
+        ) {
+          return undefined;
+        }
+        const date_time_format = (formatAttr ??
+          "") as MessageEntity.DateTimeMessageEntity["date_time_format"];
+        return {
+          type: "date_time",
+          offset: openTag.offset,
+          length,
+          unix_time: unixTime,
+          date_time_format,
+        };
+      }
       default:
         return undefined;
     }

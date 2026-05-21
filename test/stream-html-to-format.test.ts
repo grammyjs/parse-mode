@@ -1,4 +1,5 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
+import type { MessageEntity } from "../src/deps.deno.ts";
 import { FormattedString } from "../src/format.ts";
 import { HTMLStreamParser } from "../src/stream-html-to-format.ts";
 
@@ -209,6 +210,116 @@ describe("HTMLStreamParser", () => {
     assertEquals(formatted.rawEntities[0]?.type, "bold");
     assertEquals(formatted.rawEntities[0]?.offset, 7);
     assertEquals(formatted.rawEntities[0]?.length, 4);
+  });
+
+  it("maps tg-time to date_time with unix attribute", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1773412200">2026-05-21</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "2026-05-21");
+    assertEquals(formatted.rawEntities.length, 1);
+    const entity = formatted.rawEntities[0] as
+      | MessageEntity.DateTimeMessageEntity
+      | undefined;
+    assertEquals(entity?.type, "date_time");
+    assertEquals(entity?.offset, 0);
+    assertEquals(entity?.length, "2026-05-21".length);
+    assertEquals(entity?.unix_time, 1773412200);
+    assertEquals(entity?.date_time_format, "");
+  });
+
+  it("maps tg-time to date_time with unix and format attributes", () => {
+    const parser = new HTMLStreamParser();
+    parser.add(
+      '<tg-time unix="1773412200" format="d">2026-05-21</tg-time>',
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "2026-05-21");
+    assertEquals(formatted.rawEntities.length, 1);
+    const entity = formatted.rawEntities[0] as
+      | MessageEntity.DateTimeMessageEntity
+      | undefined;
+    assertEquals(entity?.type, "date_time");
+    assertEquals(entity?.offset, 0);
+    assertEquals(entity?.length, "2026-05-21".length);
+    assertEquals(entity?.unix_time, 1773412200);
+    assertEquals(entity?.date_time_format, "d");
+  });
+
+  it("does not map invalid tg-time (missing unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<tg-time>invalid</tg-time>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "<tg-time>invalid</tg-time>");
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (non-numeric unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="abc">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, '<tg-time unix="abc">invalid</tg-time>');
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (partially numeric unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1773412200abc">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      '<tg-time unix="1773412200abc">invalid</tg-time>',
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (scientific notation unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1e6">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, '<tg-time unix="1e6">invalid</tg-time>');
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (invalid format grammar)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add(
+      '<tg-time unix="1773412200" format="yyyy-MM-dd">invalid</tg-time>',
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      '<tg-time unix="1773412200" format="yyyy-MM-dd">invalid</tg-time>',
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (extremely large non-finite unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    const largeUnix = "9".repeat(310);
+    parser.add(`<tg-time unix="${largeUnix}">invalid</tg-time>`);
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      `<tg-time unix="${largeUnix}">invalid</tg-time>`,
+    );
+    assertEquals(formatted.rawEntities.length, 0);
   });
 
   it("toFormattedString is idempotent for unchanged parser state", () => {

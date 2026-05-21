@@ -6,3 +6,6 @@ yarn-error.log
 
 # For libs
 yarn.lock
+
+.antigravitycli
+
