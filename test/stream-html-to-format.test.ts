@@ -270,6 +270,29 @@ describe("HTMLStreamParser", () => {
     assertEquals(formatted.rawEntities.length, 0);
   });
 
+  it("does not map invalid tg-time (partially numeric unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1773412200abc">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      '<tg-time unix="1773412200abc">invalid</tg-time>',
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("does not map invalid tg-time (scientific notation unix attribute)", () => {
+    const parser = new HTMLStreamParser();
+    parser.add('<tg-time unix="1e6">invalid</tg-time>');
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, '<tg-time unix="1e6">invalid</tg-time>');
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
   it("toFormattedString is idempotent for unchanged parser state", () => {
     const parser = new HTMLStreamParser();
     parser.add("<i>ok</i>");

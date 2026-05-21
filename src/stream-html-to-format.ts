@@ -259,7 +259,7 @@ export class HTMLStreamParser {
 
     if (workingTag.name === "tg-time") {
       const unixAttr = workingTag.attrs.get("unix");
-      if (!unixAttr || isNaN(parseInt(unixAttr, 10))) {
+      if (!unixAttr || !/^-?\d+$/.test(unixAttr)) {
         return false;
       }
     }
@@ -346,13 +346,10 @@ export class HTMLStreamParser {
         return { type: "blockquote", offset: openTag.offset, length };
       case "tg-time": {
         const unixAttr = openTag.attrs.get("unix");
-        if (!unixAttr) {
+        if (!unixAttr || !/^-?\d+$/.test(unixAttr)) {
           return undefined;
         }
         const unixTime = parseInt(unixAttr, 10);
-        if (isNaN(unixTime)) {
-          return undefined;
-        }
         const formatAttr = openTag.attrs.get("format");
         const date_time_format = (formatAttr ??
           "") as MessageEntity.DateTimeMessageEntity["date_time_format"];
