@@ -798,14 +798,18 @@ export class FormattedString
    * @returns A new FormattedString containing the sliced text and properly adjusted entities
    */
   slice(start?: number, end?: number): FormattedString {
-    const textLength = this.rawText.length;
+    // Normalize start: negative values and NaN are treated as 0
+    const sliceStart = Math.max(
+      0,
+      Number.isNaN(start) ? 0 : Math.trunc(start ?? 0),
+    );
 
-    // Normalize start: negative values should be treated as 0
-    const sliceStart = Math.max(0, start ?? 0);
-    const sliceEnd = end ?? textLength;
-
-    // Get the sliced text
-    const slicedText = this.rawText.slice(sliceStart, sliceEnd);
+    // Let String.prototype.slice resolve end semantics (e.g., negative indices, clamping)
+    const slicedText = this.rawText.slice(sliceStart, end);
+    if (slicedText.length === 0) {
+      return new FormattedString("", []);
+    }
+    const sliceEnd = sliceStart + slicedText.length;
 
     // Filter and adjust entities that intersect with the slice range
     const slicedEntities: MessageEntity[] = [];
