@@ -1,7 +1,11 @@
 import { assertEquals, assertInstanceOf, describe, it } from "./deps.test.ts";
 import type { MessageEntity } from "../src/deps.deno.ts";
 import { FormattedString } from "../src/format.ts";
-import { HTMLStreamParser } from "../src/stream-html-to-format.ts";
+import {
+  HTMLStreamParser,
+  isValidCodePoint,
+  maxCodePoint,
+} from "../src/stream-html-to-format.ts";
 
 describe("HTMLStreamParser", () => {
   it("maps pre/code language class to pre.language", () => {
@@ -331,5 +335,78 @@ describe("HTMLStreamParser", () => {
 
     assertEquals(second.rawText, first.rawText);
     assertEquals(second.rawEntities, first.rawEntities);
+  });
+
+  it("decodes decimal and hexadecimal numeric entities including astral code points", () => {
+    const parser = new HTMLStreamParser();
+    parser.add(
+      "&#65; &#x3a; &#X3A; &#128512; &#x1f600; &#X1F600; &#x10FFFF;",
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      `A : : 😀 😀 😀 ${String.fromCodePoint(maxCodePoint)}`,
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("preserves UTF-16 entity offsets and lengths for astral numeric entities", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("<b>&#128512;</b><i>&#x1F600;ok</i>");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "😀😀ok");
+    assertEquals(formatted.rawEntities, [
+      { type: "bold", offset: 0, length: 2 },
+      { type: "italic", offset: 2, length: 4 },
+    ]);
+  });
+
+  it("supports streamed chunk boundaries across astral numeric entities", () => {
+    const parser = new HTMLStreamParser();
+    parser.add("&");
+    parser.add("#128");
+    parser.add("512; &#");
+    parser.add("x1F");
+    parser.add("600;");
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(formatted.rawText, "😀 😀");
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("falls back to plaintext for out-of-range, surrogate, and empty numeric entities", () => {
+    const parser = new HTMLStreamParser();
+    const hugeDecimal = "9".repeat(400);
+    parser.add(
+      `&#1114112; &#x110000; &#${hugeDecimal}; &#55296; &#xD800; &#xDFFF; &#; &#x; &#X;`,
+    );
+
+    const formatted = parser.toFormattedString();
+
+    assertEquals(
+      formatted.rawText,
+      `&#1114112; &#x110000; &#${hugeDecimal}; &#55296; &#xD800; &#xDFFF; &#; &#x; &#X;`,
+    );
+    assertEquals(formatted.rawEntities.length, 0);
+  });
+
+  it("validates Unicode scalar code points via isValidCodePoint", () => {
+    assertEquals(isValidCodePoint(0), true);
+    assertEquals(isValidCodePoint(0xd7ff), true);
+    assertEquals(isValidCodePoint(0xd800), false);
+    assertEquals(isValidCodePoint(0xdfff), false);
+    assertEquals(isValidCodePoint(0xe000), true);
+    assertEquals(isValidCodePoint(0x1f600), true);
+    assertEquals(isValidCodePoint(maxCodePoint), true);
+    assertEquals(isValidCodePoint(maxCodePoint + 1), false);
+    assertEquals(isValidCodePoint(-1), false);
+    assertEquals(isValidCodePoint(1.5), false);
+    assertEquals(isValidCodePoint(NaN), false);
+    assertEquals(isValidCodePoint(Infinity), false);
   });
 });
