@@ -1,4 +1,4 @@
 export type {
   MessageEntity,
   User,
-} from "https://lib.deno.dev/x/grammy@^1.41/types.ts";
+} from "https://cdn.jsdelivr.net/gh/grammyjs/grammY@^1.46.0/src/types.ts";
