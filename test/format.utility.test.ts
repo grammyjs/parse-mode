@@ -431,6 +431,34 @@ describe("FormattedString - Utility Methods", () => {
       assertEquals(negativeStart.rawEntities[0]?.type, "bold");
       assertEquals(negativeStart.rawEntities[0]?.offset, 1);
       assertEquals(negativeStart.rawEntities[0]?.length, 2); // "bc"
+
+      // Test slice with negative end
+      const negativeEnd = FormattedString.b("hello").slice(0, -1);
+      assertEquals(negativeEnd.rawText, "hell");
+      assertEquals(negativeEnd.rawEntities, [
+        { type: "bold", offset: 0, length: 4 },
+      ]);
+
+      // Test slice with positive start and negative end spanning partial entity
+      const midNegativeEnd = original.slice(2, -1);
+      assertEquals(midNegativeEnd.rawText, "cde");
+      assertEquals(midNegativeEnd.rawEntities, [
+        { type: "bold", offset: 0, length: 3 },
+      ]);
+
+      // Test slice with negative end beyond text length
+      const negativeEndBeyond = original.slice(0, -100);
+      assertEquals(negativeEndBeyond.rawText, "");
+      assertEquals(negativeEndBeyond.rawEntities, []);
+
+      // Test slice where start >= normalized end (both positive and negative end)
+      const invertedPositive = original.slice(4, 2);
+      assertEquals(invertedPositive.rawText, "");
+      assertEquals(invertedPositive.rawEntities, []);
+
+      const invertedNegative = original.slice(4, -3);
+      assertEquals(invertedNegative.rawText, "");
+      assertEquals(invertedNegative.rawEntities, []);
     });
 
     it("slice method creates deep copy", () => {
