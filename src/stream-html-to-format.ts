@@ -48,7 +48,7 @@ export const tagsToRequiredAttributes = new Map<string, string[]>([
 
 export const languageClassPrefix = "language-";
 export const spoilerClassName = "tg-spoiler";
-export const maxCharCode = 65535;
+export const maxCodePoint = 0x10ffff;
 
 export function isWhitespace(char: string): boolean {
   return char.trim() === "";
@@ -81,8 +81,13 @@ export function isHexDigit(char: string): boolean {
     (char >= "A" && char <= "F");
 }
 
-export function isValidCharCode(charCode: number): boolean {
-  return !isNaN(charCode) && charCode >= 0 && charCode <= maxCharCode;
+export function isValidCodePoint(codePoint: number): boolean {
+  return (
+    Number.isInteger(codePoint) &&
+    codePoint >= 0 &&
+    codePoint <= maxCodePoint &&
+    !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+  );
 }
 
 const HTML_STREAM_PARSER_MODE = {
@@ -726,18 +731,20 @@ export class HTMLStreamParser {
     }
   }
 
+  private flushCodePointEntity(codePoint: number): void {
+    if (isValidCodePoint(codePoint)) {
+      this.text += String.fromCodePoint(codePoint);
+    } else {
+      this.text += this.fullTagOrEntityBufferText;
+    }
+    this.resetWorkState();
+  }
+
   private addCharInNumericEntityMode(char: string): void {
     this.fullTagOrEntityBufferText += char;
 
     if (char === ";") {
-      const charCode = Number(this.workingBufferText);
-      if (isValidCharCode(charCode)) {
-        this.text += String.fromCharCode(charCode);
-      } else {
-        this.text += this.fullTagOrEntityBufferText;
-      }
-      this.resetWorkState();
-      this.mode = HTML_STREAM_PARSER_MODE.TEXT;
+      this.flushCodePointEntity(Number(this.workingBufferText));
       return;
     }
 
@@ -755,14 +762,7 @@ export class HTMLStreamParser {
     this.fullTagOrEntityBufferText += char;
 
     if (char === ";") {
-      const charCode = Number(`0x${this.workingBufferText}`);
-      if (isValidCharCode(charCode)) {
-        this.text += String.fromCharCode(charCode);
-      } else {
-        this.text += this.fullTagOrEntityBufferText;
-      }
-      this.resetWorkState();
-      this.mode = HTML_STREAM_PARSER_MODE.TEXT;
+      this.flushCodePointEntity(Number(`0x${this.workingBufferText}`));
       return;
     }
 
